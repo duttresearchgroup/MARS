@@ -1,0 +1,110 @@
+\hypertarget{heart__rate__monitor-file_8c}{
+\section{src/heart\_\-rate\_\-monitor-file.c File Reference}
+\label{heart__rate__monitor-file_8c}\index{src/heart\_\-rate\_\-monitor-file.c@{src/heart\_\-rate\_\-monitor-file.c}}
+}
+{\tt \#include \char`\"{}heart\_\-rate\_\-monitor.h\char`\"{}}\par
+{\tt \#include $<$stdlib.h$>$}\par
+{\tt \#include $<$string.h$>$}\par
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+int \hyperlink{heart__rate__monitor-file_8c_d49db9e81266e365b06d5c818d7e5b63}{heart\_\-rate\_\-monitor\_\-init} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} $\ast$\hyperlink{lat_8c_f6999b2aa30c479bbb16f354ff38c1e5}{hrm}, int pid)
+\item 
+void \hyperlink{heart__rate__monitor-file_8c_070d042cdc3717897098cc6ac9682427}{heart\_\-rate\_\-monitor\_\-finish} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} $\ast$\hyperlink{tp_8c_6f3bbe24b9b561560ce8bf9208aeb8a7}{heart})
+\item 
+int \hyperlink{heart__rate__monitor-file_8c_333f4dfca799e511a797559107dea290}{hrm\_\-get\_\-current} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb, \hyperlink{structheartbeat__record__t}{heartbeat\_\-record\_\-t} volatile $\ast$record)
+\item 
+int \hyperlink{heart__rate__monitor-file_8c_9e7614bee97e7db3cb4e7e4b78c94337}{hrm\_\-get\_\-history} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb, \hyperlink{structheartbeat__record__t}{heartbeat\_\-record\_\-t} volatile $\ast$record, int n)
+\item 
+double \hyperlink{heart__rate__monitor-file_8c_ddc73b92ee482b42aa7a91ea5fc3672c}{hrm\_\-get\_\-global\_\-rate} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb)
+\item 
+double \hyperlink{heart__rate__monitor-file_8c_4fb2684671956dfa63ea54ce58ac8748}{hrm\_\-get\_\-windowed\_\-rate} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb)
+\item 
+double \hyperlink{heart__rate__monitor-file_8c_d0ea463faa51e1bf20b3f5efbc4c91c3}{hrm\_\-get\_\-min\_\-rate} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb)
+\item 
+double \hyperlink{heart__rate__monitor-file_8c_f7f779cd6a79780479064da8b6eb05e7}{hrm\_\-get\_\-max\_\-rate} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb)
+\item 
+int64\_\-t \hyperlink{heart__rate__monitor-file_8c_1249c1ba65c775d2701de15b4415fded}{hrm\_\-get\_\-window\_\-size} (\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} volatile $\ast$hb)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{Desc}
+\item[Author:]Hank Hoffmann \end{Desc}
+\begin{Desc}
+\item[Version:]1.0 \end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{heart__rate__monitor-file_8c_070d042cdc3717897098cc6ac9682427}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!heart\_\-rate\_\-monitor\_\-finish@{heart\_\-rate\_\-monitor\_\-finish}}
+\index{heart\_\-rate\_\-monitor\_\-finish@{heart\_\-rate\_\-monitor\_\-finish}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[heart\_\-rate\_\-monitor\_\-finish]{\setlength{\rightskip}{0pt plus 5cm}void heart\_\-rate\_\-monitor\_\-finish ({\bf heart\_\-rate\_\-monitor\_\-t} $\ast$ {\em heart})}}
+\label{heart__rate__monitor-file_8c_070d042cdc3717897098cc6ac9682427}
+
+
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{system_8c-example}{system.c}.\end{Desc}
+\hypertarget{heart__rate__monitor-file_8c_d49db9e81266e365b06d5c818d7e5b63}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!heart\_\-rate\_\-monitor\_\-init@{heart\_\-rate\_\-monitor\_\-init}}
+\index{heart\_\-rate\_\-monitor\_\-init@{heart\_\-rate\_\-monitor\_\-init}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[heart\_\-rate\_\-monitor\_\-init]{\setlength{\rightskip}{0pt plus 5cm}int heart\_\-rate\_\-monitor\_\-init ({\bf heart\_\-rate\_\-monitor\_\-t} $\ast$ {\em hrm}, \/  int {\em pid})}}
+\label{heart__rate__monitor-file_8c_d49db9e81266e365b06d5c818d7e5b63}
+
+
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{lat_8c-example}{lat.c}, and \hyperlink{system_8c-example}{system.c}.\end{Desc}
+\hypertarget{heart__rate__monitor-file_8c_333f4dfca799e511a797559107dea290}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-current@{hrm\_\-get\_\-current}}
+\index{hrm\_\-get\_\-current@{hrm\_\-get\_\-current}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-current]{\setlength{\rightskip}{0pt plus 5cm}int hrm\_\-get\_\-current ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb}, \/  {\bf heartbeat\_\-record\_\-t} volatile $\ast$ {\em record})}}
+\label{heart__rate__monitor-file_8c_333f4dfca799e511a797559107dea290}
+
+
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{lat_8c-example}{lat.c}, and \hyperlink{system_8c-example}{system.c}.\end{Desc}
+\hypertarget{heart__rate__monitor-file_8c_ddc73b92ee482b42aa7a91ea5fc3672c}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-global\_\-rate@{hrm\_\-get\_\-global\_\-rate}}
+\index{hrm\_\-get\_\-global\_\-rate@{hrm\_\-get\_\-global\_\-rate}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-global\_\-rate]{\setlength{\rightskip}{0pt plus 5cm}double hrm\_\-get\_\-global\_\-rate ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb})}}
+\label{heart__rate__monitor-file_8c_ddc73b92ee482b42aa7a91ea5fc3672c}
+
+
+\hypertarget{heart__rate__monitor-file_8c_9e7614bee97e7db3cb4e7e4b78c94337}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-history@{hrm\_\-get\_\-history}}
+\index{hrm\_\-get\_\-history@{hrm\_\-get\_\-history}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-history]{\setlength{\rightskip}{0pt plus 5cm}int hrm\_\-get\_\-history ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb}, \/  {\bf heartbeat\_\-record\_\-t} volatile $\ast$ {\em record}, \/  int {\em n})}}
+\label{heart__rate__monitor-file_8c_9e7614bee97e7db3cb4e7e4b78c94337}
+
+
+\hypertarget{heart__rate__monitor-file_8c_f7f779cd6a79780479064da8b6eb05e7}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-max\_\-rate@{hrm\_\-get\_\-max\_\-rate}}
+\index{hrm\_\-get\_\-max\_\-rate@{hrm\_\-get\_\-max\_\-rate}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-max\_\-rate]{\setlength{\rightskip}{0pt plus 5cm}double hrm\_\-get\_\-max\_\-rate ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb})}}
+\label{heart__rate__monitor-file_8c_f7f779cd6a79780479064da8b6eb05e7}
+
+
+\hypertarget{heart__rate__monitor-file_8c_d0ea463faa51e1bf20b3f5efbc4c91c3}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-min\_\-rate@{hrm\_\-get\_\-min\_\-rate}}
+\index{hrm\_\-get\_\-min\_\-rate@{hrm\_\-get\_\-min\_\-rate}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-min\_\-rate]{\setlength{\rightskip}{0pt plus 5cm}double hrm\_\-get\_\-min\_\-rate ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb})}}
+\label{heart__rate__monitor-file_8c_d0ea463faa51e1bf20b3f5efbc4c91c3}
+
+
+\hypertarget{heart__rate__monitor-file_8c_1249c1ba65c775d2701de15b4415fded}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-window\_\-size@{hrm\_\-get\_\-window\_\-size}}
+\index{hrm\_\-get\_\-window\_\-size@{hrm\_\-get\_\-window\_\-size}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-window\_\-size]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t hrm\_\-get\_\-window\_\-size ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb})}}
+\label{heart__rate__monitor-file_8c_1249c1ba65c775d2701de15b4415fded}
+
+
+\hypertarget{heart__rate__monitor-file_8c_4fb2684671956dfa63ea54ce58ac8748}{
+\index{heart\_\-rate\_\-monitor-file.c@{heart\_\-rate\_\-monitor-file.c}!hrm\_\-get\_\-windowed\_\-rate@{hrm\_\-get\_\-windowed\_\-rate}}
+\index{hrm\_\-get\_\-windowed\_\-rate@{hrm\_\-get\_\-windowed\_\-rate}!heart_rate_monitor-file.c@{heart\_\-rate\_\-monitor-file.c}}
+\subsubsection[hrm\_\-get\_\-windowed\_\-rate]{\setlength{\rightskip}{0pt plus 5cm}double hrm\_\-get\_\-windowed\_\-rate ({\bf heart\_\-rate\_\-monitor\_\-t} volatile $\ast$ {\em hb})}}
+\label{heart__rate__monitor-file_8c_4fb2684671956dfa63ea54ce58ac8748}
+
+

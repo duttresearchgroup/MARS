@@ -1,0 +1,119 @@
+\hypertarget{lat_8c}{
+\section{src/lat.c File Reference}
+\label{lat_8c}\index{src/lat.c@{src/lat.c}}
+}
+Example: Latency. 
+
+{\tt \#include $<$stdio.h$>$}\par
+{\tt \#include $<$stdlib.h$>$}\par
+{\tt \#include $<$string.h$>$}\par
+{\tt \#include $<$unistd.h$>$}\par
+{\tt \#include $<$sys/wait.h$>$}\par
+{\tt \#include \char`\"{}heartbeat.h\char`\"{}}\par
+{\tt \#include \char`\"{}heart\_\-rate\_\-monitor.h\char`\"{}}\par
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+int \hyperlink{lat_8c_718ec6ec56d322c1c0c70fdc0e4bde73}{get\_\-heartbeat\_\-apps} (int $\ast$apps)
+\item 
+void \hyperlink{lat_8c_cda850128deec11e104b408bae870f3c}{app} (char $\ast$logname, int iters)
+\item 
+void \hyperlink{lat_8c_826197580f9363339f3b25e47c74976e}{sys} (char $\ast$logname, int iters)
+\item 
+int \hyperlink{lat_8c_3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$argv)
+\end{CompactItemize}
+\subsection*{Variables}
+\begin{CompactItemize}
+\item 
+\hyperlink{structheartbeat__t}{heartbeat\_\-t} \hyperlink{lat_8c_6f3bbe24b9b561560ce8bf9208aeb8a7}{heart}
+\item 
+\hyperlink{structheart__rate__monitor__t}{heart\_\-rate\_\-monitor\_\-t} \hyperlink{lat_8c_f6999b2aa30c479bbb16f354ff38c1e5}{hrm}
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Example: Latency. 
+
+\begin{Desc}
+\item[Author:]Hank Hoffmann \end{Desc}
+\begin{Desc}
+\item[Version:]1.0 \end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{lat_8c_cda850128deec11e104b408bae870f3c}{
+\index{lat.c@{lat.c}!app@{app}}
+\index{app@{app}!lat.c@{lat.c}}
+\subsubsection[app]{\setlength{\rightskip}{0pt plus 5cm}void app (char $\ast$ {\em logname}, \/  int {\em iters})}}
+\label{lat_8c_cda850128deec11e104b408bae870f3c}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em logname}]char pointer \item[{\em iters}]integer \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{lat_8c-example}{lat.c}.\end{Desc}
+\hypertarget{lat_8c_718ec6ec56d322c1c0c70fdc0e4bde73}{
+\index{lat.c@{lat.c}!get\_\-heartbeat\_\-apps@{get\_\-heartbeat\_\-apps}}
+\index{get\_\-heartbeat\_\-apps@{get\_\-heartbeat\_\-apps}!lat.c@{lat.c}}
+\subsubsection[get\_\-heartbeat\_\-apps]{\setlength{\rightskip}{0pt plus 5cm}int get\_\-heartbeat\_\-apps (int $\ast$ {\em apps})}}
+\label{lat_8c_718ec6ec56d322c1c0c70fdc0e4bde73}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em apps}]\end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]count integer: number of heartbeats \end{Desc}
+\hypertarget{lat_8c_3c04138a5bfe5d72780bb7e82a18e627}{
+\index{lat.c@{lat.c}!main@{main}}
+\index{main@{main}!lat.c@{lat.c}}
+\subsubsection[main]{\setlength{\rightskip}{0pt plus 5cm}int main (int {\em argc}, \/  char $\ast$$\ast$ {\em argv})}}
+\label{lat_8c_3c04138a5bfe5d72780bb7e82a18e627}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em argv\mbox{[}1\mbox{]},:}]total number of heartbeats to issue \item[{\em argv\mbox{[}2\mbox{]},:}]name of log file \end{description}
+\end{Desc}
+\hypertarget{lat_8c_826197580f9363339f3b25e47c74976e}{
+\index{lat.c@{lat.c}!sys@{sys}}
+\index{sys@{sys}!lat.c@{lat.c}}
+\subsubsection[sys]{\setlength{\rightskip}{0pt plus 5cm}void sys (char $\ast$ {\em logname}, \/  int {\em iters})}}
+\label{lat_8c_826197580f9363339f3b25e47c74976e}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em logname}]char pointer \item[{\em iters}]integer \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{lat_8c-example}{lat.c}.\end{Desc}
+
+
+\subsection{Variable Documentation}
+\hypertarget{lat_8c_6f3bbe24b9b561560ce8bf9208aeb8a7}{
+\index{lat.c@{lat.c}!heart@{heart}}
+\index{heart@{heart}!lat.c@{lat.c}}
+\subsubsection[heart]{\setlength{\rightskip}{0pt plus 5cm}{\bf heartbeat\_\-t} {\bf heart}}}
+\label{lat_8c_6f3bbe24b9b561560ce8bf9208aeb8a7}
+
+
+\hypertarget{lat_8c_f6999b2aa30c479bbb16f354ff38c1e5}{
+\index{lat.c@{lat.c}!hrm@{hrm}}
+\index{hrm@{hrm}!lat.c@{lat.c}}
+\subsubsection[hrm]{\setlength{\rightskip}{0pt plus 5cm}{\bf heart\_\-rate\_\-monitor\_\-t} {\bf hrm}}}
+\label{lat_8c_f6999b2aa30c479bbb16f354ff38c1e5}
+
+
+\begin{Desc}
+\item[Examples: ]\par
+\hyperlink{lat_8c-example}{lat.c}.\end{Desc}

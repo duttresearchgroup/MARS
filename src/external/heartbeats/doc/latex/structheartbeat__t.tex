@@ -1,0 +1,133 @@
+\hypertarget{structheartbeat__t}{
+\section{heartbeat\_\-t Struct Reference}
+\label{structheartbeat__t}\index{heartbeat\_\-t@{heartbeat\_\-t}}
+}
+{\tt \#include $<$heartbeat.h$>$}
+
+\subsection*{Data Fields}
+\begin{CompactItemize}
+\item 
+int64\_\-t \hyperlink{structheartbeat__t_0018269550d1d5a137ba5579d644009b}{first\_\-timestamp}
+\item 
+int64\_\-t \hyperlink{structheartbeat__t_e33b8c00263802864fb57130bf82168e}{last\_\-timestamp}
+\item 
+int64\_\-t $\ast$ \hyperlink{structheartbeat__t_fcf870fb9ada6e376eb17f96873dc2ae}{window}
+\item 
+int64\_\-t \hyperlink{structheartbeat__t_52653a3a4ad59660512c45aa99a23be0}{current\_\-index}
+\item 
+int \hyperlink{structheartbeat__t_6b8b47d5c5b225cced11e926bafd9df1}{steady\_\-state}
+\item 
+double \hyperlink{structheartbeat__t_452e7674cc72de7790228db64702c7cc}{last\_\-average\_\-time}
+\item 
+\hyperlink{structheartbeat__record__t}{heartbeat\_\-record\_\-t} $\ast$ \hyperlink{structheartbeat__t_6ccb40c314765bd197705a82db075585}{log}
+\item 
+FILE $\ast$ \hyperlink{structheartbeat__t_c5388843ff08991de5029e55915e0044}{binary\_\-file}
+\item 
+FILE $\ast$ \hyperlink{structheartbeat__t_e85b03466429ced3ca7912ad0e2223bc}{text\_\-file}
+\item 
+char \hyperlink{structheartbeat__t_8d24bb23d79044e36f9bf98eb4e75dc6}{filename} \mbox{[}256\mbox{]}
+\item 
+pthread\_\-mutex\_\-t \hyperlink{structheartbeat__t_db9333d409eb60db5e3e63d9b3d193a3}{mutex}
+\item 
+\hyperlink{structHB__global__state__t}{HB\_\-global\_\-state\_\-t} $\ast$ \hyperlink{structheartbeat__t_a7c199aeb3f806c107e64cd8aa0a0c92}{state}
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{Desc}
+\item[Examples: ]\par
+
+
+\hyperlink{application_8c-example}{application.c}, \hyperlink{lat_8c-example}{lat.c}, and \hyperlink{tp_8c-example}{tp.c}.\end{Desc}
+
+
+\subsection{Field Documentation}
+\hypertarget{structheartbeat__t_0018269550d1d5a137ba5579d644009b}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!first\_\-timestamp@{first\_\-timestamp}}
+\index{first\_\-timestamp@{first\_\-timestamp}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[first\_\-timestamp]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t {\bf heartbeat\_\-t::first\_\-timestamp}}}
+\label{structheartbeat__t_0018269550d1d5a137ba5579d644009b}
+
+
+\hypertarget{structheartbeat__t_e33b8c00263802864fb57130bf82168e}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!last\_\-timestamp@{last\_\-timestamp}}
+\index{last\_\-timestamp@{last\_\-timestamp}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[last\_\-timestamp]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t {\bf heartbeat\_\-t::last\_\-timestamp}}}
+\label{structheartbeat__t_e33b8c00263802864fb57130bf82168e}
+
+
+\hypertarget{structheartbeat__t_fcf870fb9ada6e376eb17f96873dc2ae}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!window@{window}}
+\index{window@{window}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[window]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t$\ast$ {\bf heartbeat\_\-t::window}}}
+\label{structheartbeat__t_fcf870fb9ada6e376eb17f96873dc2ae}
+
+
+\hypertarget{structheartbeat__t_52653a3a4ad59660512c45aa99a23be0}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!current\_\-index@{current\_\-index}}
+\index{current\_\-index@{current\_\-index}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[current\_\-index]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t {\bf heartbeat\_\-t::current\_\-index}}}
+\label{structheartbeat__t_52653a3a4ad59660512c45aa99a23be0}
+
+
+\hypertarget{structheartbeat__t_6b8b47d5c5b225cced11e926bafd9df1}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!steady\_\-state@{steady\_\-state}}
+\index{steady\_\-state@{steady\_\-state}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[steady\_\-state]{\setlength{\rightskip}{0pt plus 5cm}int {\bf heartbeat\_\-t::steady\_\-state}}}
+\label{structheartbeat__t_6b8b47d5c5b225cced11e926bafd9df1}
+
+
+\hypertarget{structheartbeat__t_452e7674cc72de7790228db64702c7cc}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!last\_\-average\_\-time@{last\_\-average\_\-time}}
+\index{last\_\-average\_\-time@{last\_\-average\_\-time}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[last\_\-average\_\-time]{\setlength{\rightskip}{0pt plus 5cm}double {\bf heartbeat\_\-t::last\_\-average\_\-time}}}
+\label{structheartbeat__t_452e7674cc72de7790228db64702c7cc}
+
+
+\hypertarget{structheartbeat__t_6ccb40c314765bd197705a82db075585}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!log@{log}}
+\index{log@{log}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[log]{\setlength{\rightskip}{0pt plus 5cm}{\bf heartbeat\_\-record\_\-t}$\ast$ {\bf heartbeat\_\-t::log}}}
+\label{structheartbeat__t_6ccb40c314765bd197705a82db075585}
+
+
+\hypertarget{structheartbeat__t_c5388843ff08991de5029e55915e0044}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!binary\_\-file@{binary\_\-file}}
+\index{binary\_\-file@{binary\_\-file}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[binary\_\-file]{\setlength{\rightskip}{0pt plus 5cm}FILE$\ast$ {\bf heartbeat\_\-t::binary\_\-file}}}
+\label{structheartbeat__t_c5388843ff08991de5029e55915e0044}
+
+
+\hypertarget{structheartbeat__t_e85b03466429ced3ca7912ad0e2223bc}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!text\_\-file@{text\_\-file}}
+\index{text\_\-file@{text\_\-file}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[text\_\-file]{\setlength{\rightskip}{0pt plus 5cm}FILE$\ast$ {\bf heartbeat\_\-t::text\_\-file}}}
+\label{structheartbeat__t_e85b03466429ced3ca7912ad0e2223bc}
+
+
+\hypertarget{structheartbeat__t_8d24bb23d79044e36f9bf98eb4e75dc6}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!filename@{filename}}
+\index{filename@{filename}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[filename]{\setlength{\rightskip}{0pt plus 5cm}char {\bf heartbeat\_\-t::filename}\mbox{[}256\mbox{]}}}
+\label{structheartbeat__t_8d24bb23d79044e36f9bf98eb4e75dc6}
+
+
+\hypertarget{structheartbeat__t_db9333d409eb60db5e3e63d9b3d193a3}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!mutex@{mutex}}
+\index{mutex@{mutex}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[mutex]{\setlength{\rightskip}{0pt plus 5cm}pthread\_\-mutex\_\-t {\bf heartbeat\_\-t::mutex}}}
+\label{structheartbeat__t_db9333d409eb60db5e3e63d9b3d193a3}
+
+
+\hypertarget{structheartbeat__t_a7c199aeb3f806c107e64cd8aa0a0c92}{
+\index{heartbeat\_\-t@{heartbeat\_\-t}!state@{state}}
+\index{state@{state}!heartbeat_t@{heartbeat\_\-t}}
+\subsubsection[state]{\setlength{\rightskip}{0pt plus 5cm}{\bf HB\_\-global\_\-state\_\-t}$\ast$ {\bf heartbeat\_\-t::state}}}
+\label{structheartbeat__t_a7c199aeb3f806c107e64cd8aa0a0c92}
+
+
+
+
+The documentation for this struct was generated from the following file:\begin{CompactItemize}
+\item 
+inc/\hyperlink{heartbeat_8h}{heartbeat.h}\end{CompactItemize}

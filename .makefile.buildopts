@@ -1,0 +1,35 @@
+###################################
+#Makefile options default values. #
+###################################
+#default for ARCH
+ARCH_DEFAULT=host
+
+#defaults for PLAT #all user-level code is compiled with plat='offline'
+PLAT_DEFAULT_host=offline
+PLAT_DEFAULT_alpha=offline
+PLAT_DEFAULT_arm=exynos5422
+
+#defaults for CROSS_COMPILE
+#note that different defaults are used for arm when PLAT is defined
+CROSS_COMPILE_usr_DEFAULT_host_offline=
+CROSS_COMPILE_krn_DEFAULT_host_offline=
+
+CROSS_COMPILE_usr_DEFAULT_alpha_offline=alphaev67-unknown-linux-gnu-
+CROSS_COMPILE_krn_DEFAULT_alpha_offline=alphaev67-unknown-linux-gnu-
+
+CROSS_COMPILE_usr_DEFAULT_arm_offline=arm-linux-gnueabihf-
+CROSS_COMPILE_krn_DEFAULT_arm_offline=arm-none-eabi-
+
+CROSS_COMPILE_usr_DEFAULT_arm_exynos5422=arm-linux-gnueabihf-
+CROSS_COMPILE_krn_DEFAULT_arm_exynos5422=arm-none-eabi-
+
+#defaults for EXTRAFLAGS
+EXTRAFLAGS_DEFAULT_host=
+EXTRAFLAGS_DEFAULT_alpha="-mcpu=ev67 -mtune=ev67"
+EXTRAFLAGS_DEFAULT_arm=
+
+#defaults for KERNEL_SRC
+KERNEL_SRC_DEFAULT_host=/home/tiago/export/drg_repos/linux-3.13.0
+KERNEL_SRC_DEFAULT_alpha=
+KERNEL_SRC_DEFAULT_arm=/home/tiago/export/drg_repos/linux-odroidxu3-android-drg
+

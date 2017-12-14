@@ -1,0 +1,197 @@
+###############################################################################
+#
+# This .tcshrc file is used for the tcsh shell. 
+#
+###############################################################################
+
+# Quit now on non-interactive shells
+if ( ! $?prompt ) exit
+
+source /opt/Modules/init/tcsh
+###############################################################################
+#
+# Specific module account settings:
+#
+###############################################################################
+
+module load ics-default
+
+###############################################################################
+#
+# Variables
+#
+###############################################################################
+
+# Don't beep please
+set nobeep
+set noding
+
+# Set it so that account refuses to log you out using ^D
+set ignoreeof
+
+# Notify me when background jobs end
+set notify
+set noclobber
+
+# tab completions
+set autolist
+set color
+set colorcat
+
+# Set to insert mode vs overwrite
+set inputmode=insert
+
+# Don't want to get auto logged out
+unset autologout
+
+# Limit core dumps to a reasonable size
+limit coredumpsize 1m
+
+# Default umask to only owner
+umask 077
+
+# editor and pagers
+setenv EDITOR vi
+setenv PAGER less
+
+# history options
+set HISTSIZE=1000
+set SAVEHIST=1000
+set HISTFILE=~/.history
+
+set RUID=`/usr/[ub][ci][bn]/whoami`
+# The prompt options
+# %~ current working directory with ~ shorthand for home
+# %m hostname
+# %P precise time of day in 24 format
+# %n username
+set NORMAL   = '%{^[[00m%}'
+set BLACK     = '%{^[[00;30m%}'
+set RED = '%{^[[00;31m%}'
+set RED1       = '%{^[[01;31m%}'
+set DGREEN    = '%{^[[00;32m%}'
+set GREEN     = '%{^[[01;32m%}'
+set BROWN     = '%{^[[00;33m%}'
+set YELLOW    = '%{^[[01;33m%}'
+set NAVY      = '%{^[[00;34m%}'
+set BLUE      = '%{^[[01;34m%}'
+set PURPLE    = '%{^[[00;35m%}'
+set CYAN      = '%{^[[01;36m%}'
+set GREY      = '%{^[[00;37m%}'
+set WHITE     = '%{^[[01;37m%}'
+# Use following example for color!
+#set prompt="${CYAN}${RUID}@%m ${BLUE}%P ${RED}%~\n${NORMAL} $ "
+
+set prompt="${RUID}@%m %P %~\n$ "
+
+set THEOS=`uname`
+set THEREV=`uname -r`
+###############################################################################
+#
+# Specific alias account settings:
+# These aliases are for all Operating Systems
+#
+###############################################################################
+
+# Old DOS command
+alias dir "ls -la" 
+
+#navigation
+alias up "cd .."
+
+#graphical
+alias xterm "xterm -rv -sb &"
+
+# 
+alias s "suspend"
+alias 1 "fg %1"
+alias 2 "fg %2"
+
+#
+alias pg "ps -ef |grep "
+
+#ph alias'
+alias pha "ph alias=\!* return all"
+alias phn "ph name=\!* return all"
+alias phe "ph ext=\!* return all"
+alias phi "ph id=\!*"
+
+#search
+alias fh "find . -name "
+
+#typos
+alias exi 'exit'
+alias xit 'exit'
+
+# CPLEX
+#####setenv ILOG_LICENSE_FILE /home/hkooti/AMPL/access.ilm
+setenv ILOG_LICENSE_FILE /var/export/disk00/cplex11/ilm/access.ilm
+# setenv ILOG_LICENSE_FILE /export/disk00/cplex/ilm/access.ilm  
+# setenv ILOG_LICENSE_FILE /export/disk00/packages/cplex/ilm/access.ilm
+set path = (/var/export/disk00/cplex11/ampl20081120.cplex112 $path)
+set path = (/var/export/disk00/cplex11/ilm $path)
+set path = (/usr/ccs/bin /usr/ucb $path)
+#set path = (/home/hkooti/AMPL/final/cplex112/bin/ultrasparc32_9_9 $path)
+#set path = (/export/disk00/cplex/cplex90/bin/ultrasparc32_8_6.2 $path)
+#set path = (/home/hkooti/AMPL/final/ampl20081120.cplex112 $path)
+#set path = (/home/hkooti/AMPL/final/cplex112/bin/ultrasparc32_9_9 $path)
+#set path = (/export/disk00/cplex/cplex90/bin/ultrasparc32_8_6.2 $path)
+# set path = (/export/disk00/packages/cplex/cplex90/bin/ultrasparc32_8_6.2 $path)
+
+
+###############################################################################
+#
+# Specific Linux settings:
+#
+###############################################################################
+switch ( $THEOS )	
+	case "Linux":
+		#settings
+		setenv TERM linux
+		# colors for ls, etc. 
+		#aliases
+		alias konsole "konsole --noxft"
+		alias cp "cp -iv"
+		alias rm "rm -iv"
+		alias mv "mv -iv"
+		alias ls "ls -F --color=auto --human-readable --almost-all"
+		alias df "df -h"
+		alias screen "TERM=xterm screen"
+		breaksw
+
+###############################################################################
+#
+# Specific Solaris settings:
+#
+###############################################################################
+
+	case "SunOS":
+		#settings
+		setenv TERM vt100
+		#aliases
+		alias ls "ls -F"
+		alias ll "ls -la"
+		alias cp "cp -i"
+		alias mv "mv -i"
+		alias rm "rm -i"
+		alias screen "screen -l -h 500 -T vt100"
+		breaksw
+	default:
+		echo "non linux and sun o/s"
+endsw
+###############################################################################
+#
+# Specific gsu account settings:
+#
+###############################################################################
+
+switch ("${RUID}")
+"luser":
+	echo "Changing user to ${RUID}. Nothing specifc setup for user."
+	cd
+	breaksw
+default:
+	echo "Welcome to `uname -a`"
+	breaksw
+endsw
+

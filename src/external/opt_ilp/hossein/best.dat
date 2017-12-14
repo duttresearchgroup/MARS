@@ -1,0 +1,25 @@
+param NumTask := 4; 
+param NumSpm := 5;
+param NumPage := 4;
+
+param cost :  1  2  3  4  5	   :=
+	       1  1  4  4  7  25
+	       2  4  1  7  4  25
+		3  4  7  1  4  25
+		4  7  4  4  1  25;
+		  
+		  
+		  
+param access : 1  2  3  4  := 	   	
+		1  400  500  200  100   
+		2  100  200  300  400
+		3  50   60   10   20  
+		4  10   20   30   40; 
+			   
+param capacity :=  
+		1  2
+		2  2
+		3  2
+		4  2
+		5  16;
+      
