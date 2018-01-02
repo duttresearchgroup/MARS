@@ -13,14 +13,14 @@ Actuator::~Actuator()
 	//pinfo("%s called\n",__PRETTY_FUNCTION__);
 }
 
-std::map<actuation_type,std::map<void*,Actuator*>> Actuator::_actuatorMap;
+std::map<actuation_type,std::map<void*,Actuator*>> ActuationInterface::_actuatorMap;
 
 void Actuator::setActForResource(void *rsc)
 {
-	if(_actuatorMap.find(_type)==_actuatorMap.end()){
-		_actuatorMap[_type] = std::map<void*,Actuator*>();
+	if(ActuationInterface::_actuatorMap.find(_type)==ActuationInterface::_actuatorMap.end()){
+		ActuationInterface::_actuatorMap[_type] = std::map<void*,Actuator*>();
 	}
-	std::map<void*,Actuator*> &aux = _actuatorMap[_type];
+	std::map<void*,Actuator*> &aux = ActuationInterface::_actuatorMap[_type];
 	if(aux.find(rsc)!=aux.end())
 		arm_throw(ActuatorExcepetion,"Resource %p for actuation type %d already set",rsc,_type);
 	aux[rsc] = this;

@@ -16,48 +16,26 @@
 
 #include <runtime/interfaces/sensed_data.h>
 
+class ActuationInterface;
 
-/*
- * 1) One function implements the actuation on the system
- * 2) Another one in the model (this one could be generic probably)
- *
- * The policy should use 2) first to see the effects on the system,
- * then use 1) make them effective if this is the case
- *
- * Implement 1) first for RSP
- *
- *
- *
- */
 class Actuator {
-private:
-	static std::map<actuation_type,std::map<void*,Actuator*>> _actuatorMap;
+
+  private:
+
 	actuation_type _type;
 	actuation_mode _mode;
-public:
+
+  public:
+
 	const sys_info_t &info;
 
-protected:
-	Actuator(actuation_type type,const sys_info_t &_info);
-
-	virtual ~Actuator();
+  protected:
 
 	void setActForResource(void *rsc);
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static Actuator* actForResource(ResourceT *rsc)
-	{
-		auto aux = _actuatorMap.find(ACT_T);
-		if(aux == _actuatorMap.end())
-			arm_throw(ActuatorException,"Actuator for resource %p,actuation type %d not set",rsc,ACT_T);
-		else{
-			auto aux2 = aux->second.find(rsc);
-			if(aux2 == aux->second.end())
-				arm_throw(ActuatorException,"Actuator for resource %p,actuation type %d not set",rsc,ACT_T);
-			else
-				return aux2->second;
-		}
-	}
+	Actuator(actuation_type type,const sys_info_t &_info);
+
+	virtual ~Actuator();
 
 	virtual void implSystemMode(){
 		arm_throw(ActuatorException,"%s not implemented!",__PRETTY_FUNCTION__);
@@ -69,7 +47,7 @@ protected:
 		arm_throw(ActuatorException,"%s not implemented!",__PRETTY_FUNCTION__);
 	}
 
-public:
+  public:
 
 	actuation_type type() { return _type;}
 
@@ -89,67 +67,9 @@ public:
 	}
 
 	actuation_mode mode() { return _mode;}
+
 	bool systemMode() { return _mode==ACTMODE_SYSTEM;}
 	bool frameworkMode() { return _mode==ACTMODE_FRAMEWORK;}
-
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void actuation(ResourceT *rsc,ActuationValT val)
-	{
-		Actuator *act = actForResource<ACT_T>(rsc);
-		act->doSysActuation(rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void actuation(ResourceT *rsc,ActuationValT *val)
-	{
-		Actuator *act = actForResource<ACT_T>(rsc);
-		act->getSysActuation(rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void modelActuation(ResourceT *rsc,ActuationValT val)
-	{
-		Actuator *act = actForResource<ACT_T>(rsc);
-		act->doModelActuation(rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void modelActuation(ResourceT *rsc,ActuationValT *val)
-	{
-		Actuator *act = actForResource<ACT_T>(rsc);
-		act->getModelActuation(rsc,val);
-	}
-
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void actuation(ResourceT &rsc,ActuationValT val)
-	{
-		Actuator *act = actForResource<ACT_T>(&rsc);
-		act->doSysActuation(&rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void actuation(ResourceT &rsc,ActuationValT *val)
-	{
-		Actuator *act = actForResource<ACT_T>(&rsc);
-		act->getSysActuation(&rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void modelActuation(ResourceT &rsc,ActuationValT val)
-	{
-		Actuator *act = actForResource<ACT_T>(&rsc);
-		act->doModelActuation(&rsc,val);
-	}
-
-	template<actuation_type ACT_T,typename ResourceT,typename ActuationValT>
-	static void modelActuation(ResourceT &rsc,ActuationValT *val)
-	{
-		Actuator *act = actForResource<ACT_T>(&rsc);
-		act->getModelActuation(&rsc,val);
-	}
-
 
 	#define ActuatorDefDefaultActuationFuncs(ResourceT,ActuationValT,...)\
 	virtual void doSysActuation(ResourceT *rsc,ActuationValT val,##__VA_ARGS__){\
@@ -176,8 +96,6 @@ public:
 
 	//used when setting frequency
 	ActuatorDefDefaultActuationFuncs(freq_domain_info_t,
-									 core_freq_t);
-	ActuatorDefDefaultActuationFuncs(freq_domain_info_t,
 									 int);
 	//used when setting idle cores
 	ActuatorDefDefaultActuationFuncs(freq_domain_info_t,
@@ -188,11 +106,139 @@ public:
 };
 
 
-template<typename ActuatorT>
-class ActuationPolicy {
-	ActuatorT actuator;
-	//TODO
+class ActuationInterface {
+	friend class Actuator;
+
+  private:
+
+	static std::map<actuation_type,std::map<void*,Actuator*>> _actuatorMap;
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static Actuator* actForResource(ResourceT *rsc)
+	{
+		auto aux = _actuatorMap.find(ACT_T);
+		if(aux == _actuatorMap.end())
+			arm_throw(ActuatorException,"Actuator for resource %p,actuation type %d not set",rsc,ACT_T);
+		else{
+			auto aux2 = aux->second.find(rsc);
+			if(aux2 == aux->second.end())
+				arm_throw(ActuatorException,"Actuator for resource %p,actuation type %d not set",rsc,ACT_T);
+			else
+				return aux2->second;
+		}
+	}
+
+  public:
+
+	/*
+	 * Sets a new actuation valute
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static void actuate(ResourceT *rsc, typename actuation_type_val<ACT_T>::type val)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		act->doSysActuation(rsc,val);
+	}
+
+	/*
+	 * Gets the current actuation value.
+	 * Value is stored at *val
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static void actuationVal(ResourceT *rsc, typename actuation_type_val<ACT_T>::type *val)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		act->getSysActuation(rsc,val);
+	}
+
+	/*
+	 * Gets the current actuation value.
+	 * A new val object is returned
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static typename actuation_type_val<ACT_T>::type actuationVal(ResourceT *rsc)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		typename actuation_type_val<ACT_T>::type val;
+		act->getSysActuation(rsc,&val);
+		return val;
+	}
+
+
+	/*
+	 * Updates the predictive models with a new actuation value
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static void tryActuate(ResourceT *rsc, typename actuation_type_val<ACT_T>::type val)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		act->doModelActuation(rsc,val);
+	}
+
+	/*
+	 * Gets the current actuatuation values from the predictive models
+	 * Value is stored at *val
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static void tryActuationVal(ResourceT *rsc, typename actuation_type_val<ACT_T>::type *val)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		act->getModelActuation(rsc,val);
+	}
+
+	/*
+	 * Gets the current actuatuation values from the predictive models
+	 * A new val object is returned
+	 */
+	template<actuation_type ACT_T,typename ResourceT>
+	static typename actuation_type_val<ACT_T>::type tryActuationVal(ResourceT *rsc)
+	{
+		Actuator *act = actForResource<ACT_T>(rsc);
+		typename actuation_type_val<ACT_T>::type val;
+		act->getModelActuation(rsc,&val);
+		return val;
+	}
+
+
+	//Convenience functions that for passing resource as reference
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static void actuate(ResourceT &rsc, typename actuation_type_val<ACT_T>::type val)
+	{
+		actuate<ACT_T,ResourceT>(&rsc,val);
+	}
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static void actuationVal(ResourceT &rsc, typename actuation_type_val<ACT_T>::type *val)
+	{
+		actuationVal<ACT_T,ResourceT>(&rsc,val);
+	}
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static typename actuation_type_val<ACT_T>::type actuationVal(ResourceT &rsc)
+	{
+		return actuationVal<ACT_T,ResourceT>(&rsc);
+	}
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static void tryActuate(ResourceT &rsc, typename actuation_type_val<ACT_T>::type val)
+	{
+		tryActuate<ACT_T,ResourceT>(&rsc,val);
+	}
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static void tryActuationVal(ResourceT &rsc, typename actuation_type_val<ACT_T>::type *val)
+	{
+		tryActuationVal<ACT_T,ResourceT>(&rsc,val);
+	}
+
+	template<actuation_type ACT_T,typename ResourceT>
+	static typename actuation_type_val<ACT_T>::type tryActuationVal(ResourceT &rsc)
+	{
+		return tryActuationVal<ACT_T,ResourceT>(&rsc);
+	}
 };
+
 
 
 

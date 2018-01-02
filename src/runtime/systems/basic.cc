@@ -204,8 +204,8 @@ void InterfaceTest::setup()
 	_freqAct.setSystemMode();
 
 	for(int i = 0; i < info()->freq_domain_list_size; ++i){
-		if(freqToValMHz_i(_freqAct.freqMax(info()->freq_domain_list[i]))>freqToValMHz_i(COREFREQ_1800MHZ)){
-			_freqAct.freqMax(info()->freq_domain_list[i],COREFREQ_1800MHZ);
+		if(_freqAct.freqMax(info()->freq_domain_list[i]) > 1800){
+			_freqAct.freqMax(info()->freq_domain_list[i],1800);
 		}
 	}
 }
@@ -245,33 +245,33 @@ void InterfaceTest::window_handler(int wid,System *owner)
 				/ (double) sensedData.swCurrData(wid).freq_domains[1].time_ms_acc);
 
 	int aux;
-	Actuator::actuation<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[0],&aux);
+	actuationVal<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[0],&aux);
 	trace("freq_domain0_actedRead") = aux;
-	Actuator::actuation<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[1],&aux);
-	trace("freq_domain1_actedRead") = aux;
+
+	trace("freq_domain1_actedRead") = actuationVal<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[1]);
 
 	if((self->_sampleCnt > 50) && (wid == self->sensingWindow_fine->wid)){
 		if(self->_freqAct.frameworkMode()==false) self->_freqAct.setFrameworkMode();
 
 		if((self->_sampleCnt % 2)==0){
-			Actuator::actuation<ACT_FREQ_MHZ>(
+			actuate<ACT_FREQ_MHZ>(
 					owner->info()->freq_domain_list[0],
 					self->_freqAct.freqMax(owner->info()->freq_domain_list[0]));
-			trace("freq_domain0_actedWrite") = freqToValMHz_i(self->_freqAct.freqMax(owner->info()->freq_domain_list[0]));
-			Actuator::actuation<ACT_FREQ_MHZ>(
+			trace("freq_domain0_actedWrite") = self->_freqAct.freqMax(owner->info()->freq_domain_list[0]);
+			actuate<ACT_FREQ_MHZ>(
 					owner->info()->freq_domain_list[1],
 					self->_freqAct.freqMin(owner->info()->freq_domain_list[1]));
-			trace("freq_domain1_actedWrite") = freqToValMHz_i(self->_freqAct.freqMin(owner->info()->freq_domain_list[1]));
+			trace("freq_domain1_actedWrite") = self->_freqAct.freqMin(owner->info()->freq_domain_list[1]);
 		}
 		else{
-			Actuator::actuation<ACT_FREQ_MHZ>(
+			actuate<ACT_FREQ_MHZ>(
 					owner->info()->freq_domain_list[0],
 					self->_freqAct.freqMin(owner->info()->freq_domain_list[0]));
-			trace("freq_domain0_actedWrite") = freqToValMHz_i(self->_freqAct.freqMin(owner->info()->freq_domain_list[0]));
-			Actuator::actuation<ACT_FREQ_MHZ>(
+			trace("freq_domain0_actedWrite") = self->_freqAct.freqMin(owner->info()->freq_domain_list[0]);
+			actuate<ACT_FREQ_MHZ>(
 					owner->info()->freq_domain_list[1],
 					self->_freqAct.freqMax(owner->info()->freq_domain_list[1]));
-			trace("freq_domain1_actedWrite") = freqToValMHz_i(self->_freqAct.freqMax(owner->info()->freq_domain_list[1]));
+			trace("freq_domain1_actedWrite") = self->_freqAct.freqMax(owner->info()->freq_domain_list[1]);
 		}
 	}
 

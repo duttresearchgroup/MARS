@@ -14,43 +14,44 @@
 
 class FrequencyActuatorCommon {
 protected:
-	core_freq_t *_freq_max;
-	core_freq_t	*_freq_min;
+	int *_freq_max_mhz;
+	int	*_freq_min_mhz;
 
 	void _identify_sys(const sys_info_t &sys_info);
 
 	FrequencyActuatorCommon(const sys_info_t &sys_info)
-		:_freq_max(new core_freq_t[sys_info.freq_domain_list_size]),
-		 _freq_min(new core_freq_t[sys_info.freq_domain_list_size]){
+		:_freq_max_mhz(new int[sys_info.freq_domain_list_size]),
+		 _freq_min_mhz(new int[sys_info.freq_domain_list_size]){
 		_identify_sys(sys_info);
 	}
 
 	~FrequencyActuatorCommon()
 	{
 		//pinfo("%s called\n",__PRETTY_FUNCTION__);
-		delete[] _freq_max;
-		delete[] _freq_min;
+		delete[] _freq_max_mhz;
+		delete[] _freq_min_mhz;
 	}
 
 public:
 
-	core_freq_t freqMax(const freq_domain_info_t* domain) { return _freq_max[domain->domain_id];}
-	core_freq_t freqMin(const freq_domain_info_t* domain) { return _freq_min[domain->domain_id];}
-	core_freq_t freqMid(const freq_domain_info_t* domain){ return closestFreq((freqToValMHz_i(freqMax(domain))+freqToValMHz_i(freqMin(domain)))/2);}
+	int freqMax(const freq_domain_info_t* domain) { return _freq_max_mhz[domain->domain_id];}
+	int freqMin(const freq_domain_info_t* domain) { return _freq_min_mhz[domain->domain_id];}
+	int freqMid(const freq_domain_info_t* domain){ return (freqMax(domain)+freqMin(domain))/2;}
 
-	core_freq_t freqMax(const freq_domain_info_t& domain) { return freqMax(&domain);}
-	core_freq_t freqMin(const freq_domain_info_t& domain) { return freqMin(&domain);}
-	core_freq_t freqMid(const freq_domain_info_t& domain){ return freqMid(&domain);}
+	int freqMax(const freq_domain_info_t& domain) { return freqMax(&domain);}
+	int freqMin(const freq_domain_info_t& domain) { return freqMin(&domain);}
+	int freqMid(const freq_domain_info_t& domain){ return freqMid(&domain);}
+
 
 	/*
 	 * TODO should actually call the set max from CpuFreq
 	 */
-	void freqMax(const freq_domain_info_t* domain,core_freq_t setMax) { _freq_max[domain->domain_id] = setMax;}
-	void freqMax(const freq_domain_info_t& domain,core_freq_t setMax) { freqMax(&domain,setMax);}
+	void freqMax(const freq_domain_info_t* domain,int setMaxMHz) { _freq_max_mhz[domain->domain_id] = setMaxMHz;}
+	void freqMax(const freq_domain_info_t& domain,int setMaxMHz) { freqMax(&domain,setMaxMHz);}
 
 
 public:
-	static core_freq_t closestFreq(int freqMHz);
+	static core_freq_t closestValidFreq(int freqMHz);
 };
 
 
