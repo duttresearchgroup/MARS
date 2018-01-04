@@ -6,10 +6,10 @@
 #include <runtime/framework/actuator_commons.h>
 #include <runtime/framework/types.h>
 
-class OfflineFrequencyActuator : public Actuator, public FrequencyActuatorCommon {
+class OfflineFrequencyActuator : public Actuator {
 public:
 	OfflineFrequencyActuator(const sys_info_t &_info)
-		:Actuator(ACT_FREQ_MHZ,_info),FrequencyActuatorCommon(_info)
+		:Actuator(ACT_FREQ_MHZ,_info)
 	{
 		//TODO
 	}

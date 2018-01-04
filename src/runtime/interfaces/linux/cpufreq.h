@@ -19,6 +19,9 @@ class CpuFreq
 	std::ofstream *_scaling_max_freq_o;
 	std::ifstream *_scaling_max_freq_i;
 	std::string *_scaling_max_freq_initial_val;
+	std::ofstream *_scaling_min_freq_o;
+	std::ifstream *_scaling_min_freq_i;
+	std::string *_scaling_min_freq_initial_val;
 
 	//maps a int val in mhz to the string in khz
 	std::map<int,std::string> _freqMap;
@@ -43,7 +46,11 @@ public:
 	void scaling_setspeed(const freq_domain_info_t *domain, core_freq_t freq);
 
 	void scaling_max_freq(const freq_domain_info_t *domain, int freq_mhz);
-	void scaling_max_freq(const freq_domain_info_t *domain, core_freq_t freq);
+	void scaling_min_freq(const freq_domain_info_t *domain, int freq_mhz);
+	//return min/max in mhz
+	int scaling_max_freq(const freq_domain_info_t *domain);
+	int scaling_min_freq(const freq_domain_info_t *domain);
+
 };
 
 

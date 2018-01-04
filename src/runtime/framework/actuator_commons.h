@@ -11,48 +11,31 @@
 
 #include <core/core.h>
 
+// Returns the closest valid core_freq_t for the
+// given MHz freq value
+//
+// The new framework should be as independent as
+// possible from <core/core.h> so this should
+// be used to interface with older code only
+core_freq_t closestStaticFreq(int freqMHz);
 
-class FrequencyActuatorCommon {
-protected:
-	int *_freq_max_mhz;
-	int	*_freq_min_mhz;
+// Returns the maximum core_freq_t statically defined
+// for the core_arch_t of the cores in the given
+// frequency domain
+//
+// The new framework should be as independent as
+// possible from <core/core.h> so this should
+// be used to interface with older code only
+core_freq_t maxStaticFreq(const freq_domain_info_t* domain);
 
-	void _identify_sys(const sys_info_t &sys_info);
-
-	FrequencyActuatorCommon(const sys_info_t &sys_info)
-		:_freq_max_mhz(new int[sys_info.freq_domain_list_size]),
-		 _freq_min_mhz(new int[sys_info.freq_domain_list_size]){
-		_identify_sys(sys_info);
-	}
-
-	~FrequencyActuatorCommon()
-	{
-		//pinfo("%s called\n",__PRETTY_FUNCTION__);
-		delete[] _freq_max_mhz;
-		delete[] _freq_min_mhz;
-	}
-
-public:
-
-	int freqMax(const freq_domain_info_t* domain) { return _freq_max_mhz[domain->domain_id];}
-	int freqMin(const freq_domain_info_t* domain) { return _freq_min_mhz[domain->domain_id];}
-	int freqMid(const freq_domain_info_t* domain){ return (freqMax(domain)+freqMin(domain))/2;}
-
-	int freqMax(const freq_domain_info_t& domain) { return freqMax(&domain);}
-	int freqMin(const freq_domain_info_t& domain) { return freqMin(&domain);}
-	int freqMid(const freq_domain_info_t& domain){ return freqMid(&domain);}
-
-
-	/*
-	 * TODO should actually call the set max from CpuFreq
-	 */
-	void freqMax(const freq_domain_info_t* domain,int setMaxMHz) { _freq_max_mhz[domain->domain_id] = setMaxMHz;}
-	void freqMax(const freq_domain_info_t& domain,int setMaxMHz) { freqMax(&domain,setMaxMHz);}
-
-
-public:
-	static core_freq_t closestValidFreq(int freqMHz);
-};
+// Returns the minimum core_freq_t statically defined
+// for the core_arch_t of the cores in the given
+// frequency domain
+//
+// The new framework should be as independent as
+// possible from <core/core.h> so this should
+// be used to interface with older code only
+core_freq_t minStaticFreq(const freq_domain_info_t* domain);
 
 
 #endif /* ACTUATOR_H_ */

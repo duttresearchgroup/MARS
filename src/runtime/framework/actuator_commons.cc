@@ -6,7 +6,7 @@
 #include "actuator_commons.h"
 
 
-core_freq_t FrequencyActuatorCommon::closestValidFreq(int freqMHz)
+core_freq_t closestStaticFreq(int freqMHz)
 {
 	static std::map<int,core_freq_t> freqMap;
 
@@ -28,26 +28,30 @@ core_freq_t FrequencyActuatorCommon::closestValidFreq(int freqMHz)
 		return iter->second;
 }
 
-void FrequencyActuatorCommon::_identify_sys(const sys_info_t & sys_info)
+core_freq_t maxStaticFreq(const freq_domain_info_t* domain)
 {
-	for(int domain_id = 0; domain_id < sys_info.freq_domain_list_size; ++domain_id){
-		auto arch = sys_info.freq_domain_list[domain_id].__vitaminslist_head_cores->arch;
-		_freq_max_mhz[domain_id] = -1;
-		for(int f = 0; f < SIZE_COREFREQ; ++f){
-			if(pal_arch_has_freq(arch,(core_freq_t)f)){
-				_freq_max_mhz[domain_id] = freqToValMHz_i((core_freq_t)f);
-				break;
-			}
+	auto arch = domain->__vitaminslist_head_cores->arch;
+	int freq = -1;
+	for(int f = 0; f < SIZE_COREFREQ; ++f){
+		if(pal_arch_has_freq(arch,(core_freq_t)f)){
+			freq = f;
+			break;
 		}
-		if(_freq_max_mhz[domain_id] == -1) arm_throw(DaemonSystemException,"Cannot find maximum frequency");
-
-		_freq_min_mhz[domain_id] = -1;
-		for(int f = SIZE_COREFREQ-1; f >=0; --f){
-			if(pal_arch_has_freq(arch,(core_freq_t)f)){
-				_freq_min_mhz[domain_id] = freqToValMHz_i((core_freq_t)f);
-				break;
-			}
-		}
-		if(_freq_min_mhz[domain_id] == -1) arm_throw(DaemonSystemException,"Cannot find minimum frequency");
 	}
+	if(freq == -1) arm_throw(DaemonSystemException,"Cannot find maximum frequency");
+	return (core_freq_t)freq;
+}
+
+core_freq_t minStaticFreq(const freq_domain_info_t* domain)
+{
+	auto arch = domain->__vitaminslist_head_cores->arch;
+	int freq = -1;
+	for(int f = SIZE_COREFREQ-1; f >=0; --f){
+		if(pal_arch_has_freq(arch,(core_freq_t)f)){
+			freq = f;
+			break;
+		}
+	}
+	if(freq == -1) arm_throw(DaemonSystemException,"Cannot find minimum frequency");
+	return (core_freq_t)freq;
 }
