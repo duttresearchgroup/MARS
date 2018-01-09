@@ -22,6 +22,7 @@
 #include <runtime/interfaces/common/sense_data_shared.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 #include <runtime/interfaces/common/user_if_shared.h>
+#include <runtime/interfaces/common/pal/sensing_setup.h>
 
 #include <core/core.h>
 
@@ -31,7 +32,8 @@ bool LinuxSensingModule::_attached = false;
 
 LinuxSensingModule::LinuxSensingModule()
 	:_module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
-	 _sensingRunning(false)
+	 _sensingRunning(false),
+	 _numCreatedWindows(0)
 {
 	if(_attached) arm_throw(LinuxSensingModuleException,"There can be only one connection with the sensing module");
 
@@ -46,6 +48,9 @@ LinuxSensingModule::LinuxSensingModule()
     if(_module_shared_mem_raw_ptr == MAP_FAILED) arm_throw(LinuxSensingModuleException,"mmap error");
 
     _sensed_data = SensedData(reinterpret_cast<sensed_data_t*>(_module_shared_mem_raw_ptr));
+
+    //setup the platform sensors
+    pal_sensing_setup(this);
 
     _attached = true;
 
@@ -66,6 +71,9 @@ LinuxSensingModule::~LinuxSensingModule()
 
     if(close(_module_file_if) < 0)
     	pinfo("LinuxSensingModule::~LinuxSensingModule: close failed with errno=%d!\n",errno);
+
+    //unsetup the platform sensors
+    pal_sensing_teardown(this);
 }
 
 void LinuxSensingModule::forceDetach()
@@ -81,12 +89,19 @@ void LinuxSensingModule::sensingStart()
 
 	if(ioctl(_module_file_if, IOCTLCMD_SENSING_START,0) !=0)
 		arm_throw(LinuxSensingModuleException,"IOCTLCMD_SENSING_START failed errno=%d",errno);
+
+	// Start the other sensors
+	_psensingManager.setSensingWindows(_numCreatedWindows);
+	_psensingManager.startSensing();
+
 	_sensingRunning = true;
 }
 
 void LinuxSensingModule::sensingStop()
 {
 	if(_sensingRunning){
+		_psensingManager.stopSensing();
+
 		if(ioctl(_module_file_if, IOCTLCMD_SENSING_STOP,0) != 0)
 			arm_throw(LinuxSensingModuleException,"IOCTLCMD_SENSING_STOP failed errno=%d",errno);
 	}
@@ -116,7 +131,10 @@ int LinuxSensingModule::createSensingWindow(int period_ms)
 		}
 		arm_throw(LinuxSensingModuleException,"IOCTLCMD_SENSE_WINDOW_CREATE failed errno=%d",errno);
 	}
-	else return wid;
+	else{
+		_numCreatedWindows += 1;
+		return wid;
+	}
 }
 
 int LinuxSensingModule::nextSensingWindow()
@@ -129,7 +147,10 @@ int LinuxSensingModule::nextSensingWindow()
 		if(wid == WINDOW_EXIT) return wid;
 		else arm_throw(LinuxSensingModuleException,"IOCTLCMD_SENSE_WINDOW_WAIT_ANY failed errno=%d",errno);
 	}
-	else return wid;
+	else {
+		_psensingManager.windowReady(wid);
+		return wid;
+	}
 }
 
 bool LinuxSensingModule::isPerfCntAvailable(perfcnt_t cnt)
@@ -194,4 +215,9 @@ void LinuxSensingModule::resgisterAsDaemonProc()
 bool LinuxSensingModule::unresgisterAsDaemonProc()
 {
 	return ioctl(_module_file_if, IOCTLCMD_UNREGISTER_DAEMON,0) == 0;
+}
+
+void LinuxSensingModule::attachSensor(PeriodicSensor *sensor)
+{
+	_psensingManager.attachSensor(sensor);
 }

@@ -222,9 +222,12 @@ void InterfaceTest::window_handler(int wid,System *owner)
 	//save total power
 	double totalPowerW = 0;
 	for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-		const sensed_data_power_domain_t& powData = sensedData.swCurrData(wid).power_domains[domain_id];
-		totalPowerW += ((double)powData.avg_power_uW_acc / (double) powData.time_ms_acc)/1000000;
+		totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
 	}
+	//for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
+	//	const sensed_data_power_domain_t& powData = sensedData.swCurrData(wid).power_domains[domain_id];
+	//	totalPowerW += ((double)powData.avg_power_uW_acc / (double) powData.time_ms_acc)/1000000;
+	//}
 
 	trace("total_power_w") = 0.1234;
 	trace("sample_cnt") = self->_sampleCnt;

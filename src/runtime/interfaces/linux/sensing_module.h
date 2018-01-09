@@ -9,6 +9,7 @@
 #define LINUX_SENSING_MODULE_H_
 
 #include "../sensed_data.h"
+#include "sensor.h"
 
 class LinuxSensingModule
 {
@@ -19,7 +20,9 @@ class LinuxSensingModule
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
 	volatile bool _sensingRunning;
+	int _numCreatedWindows;
 	SensedData _sensed_data;
+	PeriodicSensingManager _psensingManager;
 
   public:
 	LinuxSensingModule();
@@ -56,6 +59,8 @@ class LinuxSensingModule
 	void tracePerfCounterResetAll();
 
 	void cleanUpCreatedTasks();
+
+	void attachSensor(PeriodicSensor *sensor);
 };
 
 #endif /* SENSING_MODULE_H_ */
