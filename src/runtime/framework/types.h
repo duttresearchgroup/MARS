@@ -55,18 +55,64 @@ template <> struct actuation_type_val<ACT_ACTIVE_CORES>{
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Sensing knob types
+// Sensing data types
 typedef enum {
 	SEN_PERFCNT = 0,
 	SEN_IPS,
-	SEN_TOTALTIME,
-	SEN_BUSYTIME,
+	SEN_TOTALTIME_S,
+	SEN_BUSYTIME_S,
 	SEN_BEATS,
 	SEN_POWER_W,
+	SEN_TEMP_C,
 	SEN_FREQ_MHZ,
 	/////////////
 	SIZE_SEN_TYPES
 } sensing_type ;
+
+// This struct defines the value type
+// for each type of sensing data
+// By default all values are double, but should
+// specialize this class for every sensing type
+template <sensing_type T>
+struct sensing_type_val {
+  using type = double;
+};
+//of course this template instantiation is invalid
+template <> struct sensing_type_val<SIZE_SEN_TYPES>;
+
+//Now the knob types values specializations
+
+template <> struct sensing_type_val<SEN_PERFCNT>{
+  using type = uint64_t; //number of events
+};
+
+template <> struct sensing_type_val<SEN_IPS>{
+  using type = double; // instr. per sec
+};
+
+template <> struct sensing_type_val<SEN_TOTALTIME_S>{
+  using type = double; // total time elapsed in s
+};
+
+template <> struct sensing_type_val<SEN_BUSYTIME_S>{
+  using type = double; // total time the cpu was busy in s
+};
+
+template <> struct sensing_type_val<SEN_BEATS>{
+  using type = unsigned int; // number of heartbeats issued
+};
+
+template <> struct sensing_type_val<SEN_POWER_W>{
+  using type = double; // average power in W
+};
+
+template <> struct sensing_type_val<SEN_TEMP_C>{
+  using type = double; // average temperature in C
+};
+
+template <> struct sensing_type_val<SEN_FREQ_MHZ>{
+  using type = double; // average frequency in MHz
+};
 
 
 #endif

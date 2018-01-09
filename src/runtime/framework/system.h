@@ -7,9 +7,10 @@
 #include <runtime/interfaces/sensed_data.h>
 #include <runtime/common/reports.h>
 
-#include "actuator.h"
+#include "actuation_interface.h"
+#include "sensing_interface.h"
 
-class System : public ActuationInterface {
+class System : public ActuationInterface, public SensingInterface {
   private:
 	//used to check only one system object should exist
 	static bool _system_created;
