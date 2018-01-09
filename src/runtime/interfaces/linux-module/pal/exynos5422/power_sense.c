@@ -1,7 +1,7 @@
 #include "../../../common/pal/exynos5422/_common.h"
 #include "../../../linux-module/pal/pal.h"
 
-//#define DISABLE_POWER_SENSING
+#define DISABLE_POWER_SENSING
 
 #ifndef DISABLE_POWER_SENSING
 //Defined at drivers/hardkernel/ina231-i2c.c
