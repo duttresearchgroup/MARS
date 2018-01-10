@@ -103,9 +103,9 @@ void TracingSystem::setup()
 void TracingSystem::window_handler(int wid,System *owner)
 {
 	TracingSystem* self = dynamic_cast<TracingSystem*>(owner);
-	const SensedData& data = self->sensedData();
+	const PerformanceData& data = self->sensedData();
 	auto trace = self->_execTrace.getHandle(data,wid);
-	const sensing_window_data_t& sw = data.swCurrData(wid);
+	const perf_window_data_t& sw = data.swCurrData(wid);
 
 ///////////////////////////// this is what we record //////////////////////
 //	data_names.push_back("total_time_s"); data_agg_att.push_back(traced_data::AGG_MAX);

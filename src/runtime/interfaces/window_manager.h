@@ -61,7 +61,7 @@ class SensingWindowManager
 
 	SensingModule *sensingModule() { return _sm; }
 
-	const SensedData& sensingData() { return _sm->data(); }
+	const PerformanceData& sensingData() { return _sm->data(); }
 };
 
 

@@ -2,12 +2,11 @@
 #define __arm_rt_idledomain_h
 
 #include <core/core.h>
-#include <runtime/interfaces/sensed_data.h>
-
 #include <sched.h>
 
 #include <map>
 #include <sstream>
+#include "../performance_data.h"
 
 class IdleDomain
 {
@@ -74,7 +73,7 @@ public:
 	//minimum value for cores is 1
 	//maxmum value is _domain.core_cnt
 	//return the actual value set
-	int idleCores(int cores, const SensedData& data, int wid, const int cores_min=1)
+	int idleCores(int cores, const PerformanceData& data, int wid, const int cores_min=1)
 	{
 		assert_true(cores_min>=0);
 		_currCoreCnt = (cores < cores_min) ? cores_min : ((cores > _domain.core_cnt) ? _domain.core_cnt : cores);

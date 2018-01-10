@@ -12,13 +12,13 @@
 #include "../common/task_beat_data.h"
 
 //pointer to the sensed data struct
-extern sensed_data_t *vitsdata;
+extern perf_data_t *vitsdata;
 extern unsigned int vitsdata_page_cnt;
 
 //allocs the memory to keep all the sensed data
 //should be called first thing when the module is loaded
 //updates the global vitsdata pointer
-sensed_data_t* alloc_sensed_data(sys_info_t *info);
+perf_data_t* alloc_sensed_data(sys_info_t *info);
 
 //deallocs the memory to keep all the sensed data
 //should be the last thing called when the module is unloaded

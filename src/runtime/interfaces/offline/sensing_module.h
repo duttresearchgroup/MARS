@@ -8,8 +8,8 @@
 #ifndef OFFLINE_SENSING_MODULE_H_
 #define OFFLINE_SENSING_MODULE_H_
 
-#include <runtime/interfaces/sensed_data.h>
 #include <offline_sim/exec_sim.h>
+#include "../performance_data.h"
 
 class OfflineSensingModule
 {
@@ -20,8 +20,8 @@ class OfflineSensingModule
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
 	volatile bool _sensingRunning;
-	SensedData _sensed_data;
-	sensed_data_t *vitsdata;
+	PerformanceData _sensed_data;
+	perf_data_t *vitsdata;
 
 	simulation_t *_sim;
 
@@ -49,11 +49,11 @@ class OfflineSensingModule
 
 	void sense_cpus(int wid);
 
-	void reset_perf_counters(sensed_data_perf_counters_t *sen_data);
-	void reset_task_counters(int cpu,sensed_data_task_t *sen_data);
-	void reset_cpu_counters(sensed_data_cpu_t *sen_data);
+	void reset_perf_counters(perf_data_perf_counters_t *sen_data);
+	void reset_task_counters(int cpu,perf_data_task_t *sen_data);
+	void reset_cpu_counters(perf_data_cpu_t *sen_data);
 	//void reset_power_counters(sensed_data_power_domain_t *sen_data);
-	void reset_freq_counters(sensed_data_freq_domain_t *sen_data);
+	void reset_freq_counters(perf_data_freq_domain_t *sen_data);
 
 	void vit_map_perfcnt();
 
@@ -80,8 +80,8 @@ class OfflineSensingModule
 	void resgisterAsDaemonProc();//registers calling process as a daemon process
 	bool unresgisterAsDaemonProc();
 
-	const SensedData& data() { return _sensed_data; }
-	const sensed_data_t& vitsData() { return *vitsdata; }
+	const PerformanceData& data() { return _sensed_data; }
+	const perf_data_t& vitsData() { return *vitsdata; }
 
 	//Returns true if counter is being collected.
 	bool isPerfCntAvailable(perfcnt_t cnt);

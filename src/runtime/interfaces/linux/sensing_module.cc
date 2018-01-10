@@ -43,11 +43,11 @@ LinuxSensingModule::LinuxSensingModule()
 
     resgisterAsDaemonProc();
 
-    _module_shared_mem_raw_ptr = mmap(NULL, sizeof(sensed_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, _module_file_if, 0);
+    _module_shared_mem_raw_ptr = mmap(NULL, sizeof(perf_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, _module_file_if, 0);
 
     if(_module_shared_mem_raw_ptr == MAP_FAILED) arm_throw(LinuxSensingModuleException,"mmap error");
 
-    _sensed_data = SensedData(reinterpret_cast<sensed_data_t*>(_module_shared_mem_raw_ptr));
+    _sensed_data = PerformanceData(reinterpret_cast<perf_data_t*>(_module_shared_mem_raw_ptr));
 
     //setup the platform sensors
     pal_sensing_setup(this);
@@ -63,7 +63,7 @@ LinuxSensingModule::~LinuxSensingModule()
 	if(_sensingRunning)
     	sensingStop();
 
-	if(munmap(_module_shared_mem_raw_ptr,sizeof(sensed_data_t)) < 0)
+	if(munmap(_module_shared_mem_raw_ptr,sizeof(perf_data_t)) < 0)
     	pinfo("LinuxSensingModule::~LinuxSensingModule: munmap failed with errno=%d!\n",errno);
 
 	if(!unresgisterAsDaemonProc())
@@ -78,7 +78,7 @@ LinuxSensingModule::~LinuxSensingModule()
 
 void LinuxSensingModule::forceDetach()
 {
-	munmap(_module_shared_mem_raw_ptr,sizeof(sensed_data_t));
+	munmap(_module_shared_mem_raw_ptr,sizeof(perf_data_t));
     close(_module_file_if);
 }
 
@@ -202,7 +202,7 @@ void LinuxSensingModule::cleanUpCreatedTasks()
 		if(_sensed_data._raw_data->created_tasks[i].tsk_model != nullptr)
 			delete _sensed_data._raw_data->created_tasks[i].tsk_model;
 	}
-	const_cast<sensed_data_t*>(_sensed_data._raw_data)->created_tasks_cnt = 0;
+	const_cast<perf_data_t*>(_sensed_data._raw_data)->created_tasks_cnt = 0;
 }
 
 

@@ -22,7 +22,7 @@ class IdleTask
 	};
 
 	struct IdleTaskInfo {
-		IdleTaskInfo(const tracked_task_data_t& t, const sensing_window_t& w, double mu, bool util_is_ratio)
+		IdleTaskInfo(const tracked_task_data_t& t, const perf_window_t& w, double mu, bool util_is_ratio)
 			:task(t),window(w),max_util_or_ratio(mu),
 			 running_periods(0),_running_periods_left(0),idle_periods(0),_idle_periods_left(0),_curr_period_idx(0),
 			 state(RUNNING),skip(false){
@@ -50,7 +50,7 @@ class IdleTask
 		}
 
 		const tracked_task_data_t& task;//task being idled
-		const sensing_window_t& window;//sensing window to use
+		const perf_window_t& window;//sensing window to use
 		double max_util_or_ratio;//idle until max util
 
 		int running_periods;

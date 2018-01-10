@@ -7,15 +7,15 @@
 #include "../common/task_beat_data.h"
 #include "../linux-module/core.h"
 
-sensed_data_t *vitsdata = nullptr;
+perf_data_t *vitsdata = nullptr;
 unsigned int vitsdata_page_cnt = 0;
 
 static unsigned int _alloc_order;
 static inline void _alloc_sensed_data(void){
-	_alloc_order = get_order(roundup_pow_of_two(sizeof(struct sensed_data_struct)));
+	_alloc_order = get_order(roundup_pow_of_two(sizeof(struct perf_data_struct)));
 	vitsdata_page_cnt = 1 << _alloc_order;
 
-	vitsdata = (struct sensed_data_struct*)__get_free_pages(GFP_KERNEL,_alloc_order);
+	vitsdata = (struct perf_data_struct*)__get_free_pages(GFP_KERNEL,_alloc_order);
 	//if(vitsdata){
 	//	pinfo("Allocated %u bytes of sensed data using %u pages (%lu bytes)\n",sizeof(struct sensed_data_struct),vitsdata_page_cnt,vitsdata_page_cnt*PAGE_SIZE);
 	//}
@@ -29,7 +29,7 @@ static inline void _alloc_sensed_data(void){
 
 //allocs the memory to keep all the sensed data
 //should be called first thing when the module is loaded
-sensed_data_t* alloc_sensed_data(sys_info_t *info){
+perf_data_t* alloc_sensed_data(sys_info_t *info){
 	_alloc_sensed_data();
 	if(vitsdata == nullptr) return nullptr;
 
@@ -41,7 +41,7 @@ sensed_data_t* alloc_sensed_data(sys_info_t *info){
 	BUG_ON(MAX_NR_CPUS < NR_CPUS);
 
 	vitsdata->__sysChecksum = sys_info_cksum(info);
-	set_sensed_data_cksum(vitsdata);
+	set_perf_data_cksum(vitsdata);
 
 	return vitsdata;
 }

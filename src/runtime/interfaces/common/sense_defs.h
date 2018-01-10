@@ -32,17 +32,17 @@ typedef struct {
     //from jiffies
     uint64_t time_busy_ms;
     uint64_t time_total_ms;//time_total is only updated at epochs
-} sensed_data_perf_counters_t;
+} perf_data_perf_counters_t;
 
 #define get_perfcnt(counters,perfcnt) ((counters).perfcnts[vitsdata->perfcnt_to_idx_map[(perfcnt)]])
 
 //sensed data for each task and each sensing window
-struct sensed_data_task_struct {
-    sensed_data_perf_counters_t perfcnt;//only valid for the latest epoch this task executed
+struct perf_data_task_struct {
+    perf_data_perf_counters_t perfcnt;//only valid for the latest epoch this task executed
     uint64_t					beats[MAX_BEAT_DOMAINS];//if the task is using the beats interface, this records the # of beats in the window in each domain
     int 						last_cpu_used;//tells in which cpu the task executed recently
 };
-typedef struct sensed_data_task_struct sensed_data_task_t;
+typedef struct perf_data_task_struct perf_data_task_t;
 
 //this is the data structure allocated for each task created after the module is loaded
 struct tracked_task_data_struct {
@@ -67,11 +67,11 @@ typedef struct tracked_task_data_struct tracked_task_data_t;
 //info sensed for each cpu
 //sums up info sensed for all tasks on this cpu
 //but the datastruct is the same used per task
-struct sensed_data_cpu_struct {
-    sensed_data_perf_counters_t perfcnt;//cpu perfcnts
+struct perf_data_cpu_struct {
+    perf_data_perf_counters_t perfcnt;//cpu perfcnts
     uint64_t beats[MAX_BEAT_DOMAINS];//sums up all beats for all tasks in this cpu. NOT meanifull if tasks with different beat semantics run in the same cpu
 };
-typedef struct sensed_data_cpu_struct sensed_data_cpu_t;
+typedef struct perf_data_cpu_struct perf_data_cpu_t;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //info sensed for each freq domain (updated at epochs)
@@ -81,7 +81,7 @@ typedef struct {
 	uint64_t avg_freq_mhz_acc;
     uint64_t time_ms_acc;
     uint64_t last_update_time_ms;
-} sensed_data_freq_domain_t;
+} perf_data_freq_domain_t;
 
 
 // helper funcitons

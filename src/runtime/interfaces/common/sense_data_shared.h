@@ -14,28 +14,28 @@
 //TODO unsafe XD
 #define SECRET_WORD 0xCAFEBABE
 
-struct sensing_window_data_struct {
+struct perf_window_data_struct {
 	//updated before when the sensing window period is done
 	//no synch and the user-level task should be done reading these guys before the next perio expires
-	sensed_data_cpu_t			cpus[MAX_NR_CPUS];
-	sensed_data_freq_domain_t	freq_domains[MAX_NR_CPUS];
+	perf_data_cpu_t			cpus[MAX_NR_CPUS];
+	perf_data_freq_domain_t	freq_domains[MAX_NR_CPUS];
 
-	sensed_data_task_t			tasks[MAX_CREATED_TASKS];
+	perf_data_task_t			tasks[MAX_CREATED_TASKS];
 };
-typedef struct sensing_window_data_struct sensing_window_data_t;
+typedef struct perf_window_data_struct perf_window_data_t;
 
-struct sensing_window_struct {
+struct perf_window_struct {
 	//continuously incremented during the sensing period
 	//unsafe to read from user-level
 	//changed by the sensing module only
-	sensing_window_data_t _acc;
+	perf_window_data_t _acc;
 
 	//sensing window data
 	//updated before when the sensing window period is done
 	//user interface accesses these for all counter data
 	//no synch and the user-level task should be done reading these guys before the next period expires
-	sensing_window_data_t curr;
-    sensing_window_data_t aggr;//aggregate values for all previous samples for this window.
+	perf_window_data_t curr;
+    perf_window_data_t aggr;//aggregate values for all previous samples for this window.
 
 	uint64_t		   			curr_sample_time_ms;
 	uint64_t		   			prev_sample_time_ms;
@@ -45,16 +45,16 @@ struct sensing_window_struct {
 	//this window id
 	int wid;
 };
-typedef struct sensing_window_struct sensing_window_t;
+typedef struct perf_window_struct perf_window_t;
 
 //single struct containing all the sensed data
 //there is only one instance of this
-struct sensed_data_struct {
+struct perf_data_struct {
 	uint32_t __checksum0;
 
 	//sensing window global sensed data
 	//the tasks' sensed data for each window is inside each task hook data
-	sensing_window_t sensing_windows[MAX_WINDOW_CNT];
+	perf_window_t sensing_windows[MAX_WINDOW_CNT];
 
 	// list of created tasks. Stores sensing info for each task
 	//as of now there is no dealloc because we keep al the sensed info even
@@ -78,14 +78,14 @@ struct sensed_data_struct {
 	uint32_t __sysChecksum;
 	uint32_t __checksum1;
 };
-typedef struct sensed_data_struct sensed_data_t;
+typedef struct perf_data_struct perf_data_t;
 
-static inline void set_sensed_data_cksum(sensed_data_t *data){
+static inline void set_perf_data_cksum(perf_data_t *data){
 	data->__checksum0 = 0xDEADBEEF;
 	data->__checksum1 = 0xBEEFDEAD;
 }
 
-static inline bool check_sensed_data_cksum(sensed_data_t *data){
+static inline bool check_perf_data_cksum(perf_data_t *data){
 	return (data->__checksum0 == 0xDEADBEEF) && (data->__checksum1 == 0xBEEFDEAD);
 }
 

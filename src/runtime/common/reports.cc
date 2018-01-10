@@ -56,7 +56,7 @@ void SensingDataTracer::init_counters_names(std::initializer_list<std::string> a
 		data_names.push_back(i); data_agg_att.push_back(traced_data::AGG_NOPE);
 	}
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_cpu_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_cpu_t &sd,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(_total_time_s(sd.perfcnt));
@@ -74,7 +74,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(_total_time_s(sd.perfcnt));
@@ -110,7 +110,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_freq_domain_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_freq_domain_t &sd,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(traced_data::NO_DATA);//total_time
@@ -129,7 +129,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
 //adds the core freq domain and power domain info to task
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,const sensed_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg, std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,const perf_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg, std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(_total_time_s(sd.perfcnt));
@@ -191,7 +191,7 @@ void SensingDataTracer::_init_counters(database_type &data,int num_of_components
 	}
 }
 
-SensingDataTracer::SensingDataTracer(sys_info_t *sys,const SensedData &data)
+SensingDataTracer::SensingDataTracer(sys_info_t *sys,const PerformanceData &data)
 	:_sys(sys),_data(data),_time_series_size(0),_wid(-1),_doneCalled(false)
 {
 	_init_counters(_d_sys,1);
@@ -264,7 +264,7 @@ void ExecutionSummary::record(std::initializer_list<double> a_args)
 	assert_false(_wid < 0);
 	_timestamps.push_back((double)(_data.sensingStopTimeMS() - _data.sensingStartTimeMS())/1000.0);
 
-	const sensing_window_data_t& sw = _data.swAggrData(_wid);
+	const perf_window_data_t& sw = _data.swAggrData(_wid);
 
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu){
 		_d_cpu[cpu].push_back(new traced_data(*this,sw.cpus[cpu],a_args));
@@ -350,7 +350,7 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 	assert_false(_wid < 0);
 	_timestamps.push_back((double)(_data.swCurrSampleTimeMS(_wid) - _data.sensingStartTimeMS())/1000.0);
 
-	const sensing_window_data_t& sw = _data.swCurrData(_wid);
+	const perf_window_data_t& sw = _data.swCurrData(_wid);
 
 	//in the time trace we copy the core's domain data to its own data to make it easier to analyse later
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu){
@@ -476,7 +476,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
 	const tracked_task_data_t *traced_task = nullptr;
 	_traced_task = nullptr;
 
-	const sensing_window_data_t& sw = _data.swAggrData(_wid);
+	const perf_window_data_t& sw = _data.swAggrData(_wid);
 
 	for(int i = 0; i < _data.numCreatedTasks(); ++i){
 		const tracked_task_data_t &task = _data.task(i);
@@ -530,7 +530,7 @@ void ExecutionSummaryWithTracedTask::showReport()
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 
-ExecutionTrace::ExecutionTraceHandle& ExecutionTrace::getHandle(const SensedData &sensedData, int wid)
+ExecutionTrace::ExecutionTraceHandle& ExecutionTrace::getHandle(const PerformanceData &sensedData, int wid)
 {
 	uint64_t timestampMS = sensedData.swCurrSampleTimeMS(wid) - sensedData.sensingStartTimeMS();
 

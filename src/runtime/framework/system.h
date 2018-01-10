@@ -4,8 +4,8 @@
 #include <core/core.h>
 
 #include <runtime/interfaces/window_manager.h>
-#include <runtime/interfaces/sensed_data.h>
 #include <runtime/common/reports.h>
+#include <runtime/interfaces/performance_data.h>
 
 #include "actuation_interface.h"
 #include "sensing_interface.h"
@@ -54,7 +54,7 @@ class System : public ActuationInterface, public SensingInterface {
 
 	SensingModule *sensingModule() { return _manager->sensingModule(); }
 	SensingWindowManager *windowManager() { return _manager; }
-	const SensedData& sensedData() { return sensingModule()->data(); }
+	const PerformanceData& sensedData() { return sensingModule()->data(); }
 
 };
 

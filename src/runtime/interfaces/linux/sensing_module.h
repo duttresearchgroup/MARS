@@ -8,7 +8,7 @@
 #ifndef LINUX_SENSING_MODULE_H_
 #define LINUX_SENSING_MODULE_H_
 
-#include "../sensed_data.h"
+#include "../performance_data.h"
 #include "sensor.h"
 
 class LinuxSensingModule
@@ -21,7 +21,7 @@ class LinuxSensingModule
 	void* _module_shared_mem_raw_ptr;
 	volatile bool _sensingRunning;
 	int _numCreatedWindows;
-	SensedData _sensed_data;
+	PerformanceData _sensed_data;
 	PeriodicSensingManager _psensingManager;
 
   public:
@@ -47,7 +47,7 @@ class LinuxSensingModule
 	void resgisterAsDaemonProc();//registers calling process as a daemon process
 	bool unresgisterAsDaemonProc();
 
-	const SensedData& data() { return _sensed_data; }
+	const PerformanceData& data() { return _sensed_data; }
 
 	//Returns true if counter is being collected.
 	bool isPerfCntAvailable(perfcnt_t cnt);

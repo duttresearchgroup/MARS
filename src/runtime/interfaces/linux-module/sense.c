@@ -22,7 +22,7 @@ DEFINE_PER_CPU(bool,vitamins_flush_tasks_done);
 static volatile bool vitamins_flush_tasks_stopping;
 
 
-static inline void reset_perf_counters(sensed_data_perf_counters_t *sen_data){
+static inline void reset_perf_counters(perf_data_perf_counters_t *sen_data){
 	int cnt;
 	for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt) sen_data->perfcnts[cnt] = 0;
 	sen_data->nivcsw= 0;
@@ -32,20 +32,20 @@ static inline void reset_perf_counters(sensed_data_perf_counters_t *sen_data){
 	smp_mb();
 }
 
-static inline void reset_task_counters(int cpu,sensed_data_task_t *sen_data){
+static inline void reset_task_counters(int cpu,perf_data_task_t *sen_data){
 	int cnt;
 	reset_perf_counters(&(sen_data->perfcnt));
 	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
 	sen_data->last_cpu_used = cpu;
 }
 
-static inline void reset_cpu_counters(sensed_data_cpu_t *sen_data){
+static inline void reset_cpu_counters(perf_data_cpu_t *sen_data){
 	int cnt;
 	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
 	reset_perf_counters(&(sen_data->perfcnt));
 }
 
-static inline void reset_freq_counters(sensed_data_freq_domain_t *sen_data){
+static inline void reset_freq_counters(perf_data_freq_domain_t *sen_data){
 	sen_data->avg_freq_mhz_acc = 0;
 	sen_data->time_ms_acc = 0;
 	sen_data->last_update_time_ms = jiffies_to_msecs(jiffies);
@@ -219,9 +219,9 @@ static void sense_cpus(sys_info_t *sys, int wid)
     vitsdata->sensing_windows[wid].curr_sample_time_ms = curr_time_ms;
 
 	for_each_online_cpu(i){
-	    sensed_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
-	    sensed_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
-	    sensed_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[i]);
+	    perf_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
+	    perf_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
+	    perf_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[i]);
 
 	    spin_lock(&(vitamins_cpu_counters_acc_lock[i]));
 
@@ -247,9 +247,9 @@ static void sense_cpus(sys_info_t *sys, int wid)
     //freq sense
     for(i = 0; i < sys->freq_domain_list_size; ++i){
 
-    	sensed_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
-    	sensed_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
-    	sensed_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.freq_domains[i]);
+    	perf_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
+    	perf_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
+    	perf_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.freq_domains[i]);
 
     	curr_epoch->avg_freq_mhz_acc = data_cnt->avg_freq_mhz_acc - last_total->avg_freq_mhz_acc;
     	curr_epoch->time_ms_acc = data_cnt->time_ms_acc -  last_total->time_ms_acc;
@@ -294,9 +294,9 @@ static inline void sense_tasks(sys_info_t *sys,int wid)
 	for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
 		int cnt;
 		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
-		sensed_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
-		sensed_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
-		sensed_data_task_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.tasks[p]);
+		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
+		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
+		perf_data_task_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.tasks[p]);
 
 		spin_lock(&(task_priv_hook->sen_data_lock));
 			for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt)
@@ -360,7 +360,7 @@ void minimum_sensing_window(sys_info_t *sys)
     	int curr_freq_MHz = kern_cpu_get_freq_mhz(sys->freq_domain_list[i].__vitaminslist_head_cores->position);
 
     	for(j=0;j<sensing_window_cnt;++j){
-    		sensed_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[j]._acc.freq_domains[i]);
+    		perf_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[j]._acc.freq_domains[i]);
     		uint64_t time_elapsed = curr_time - data_cnt->last_update_time_ms;
     		data_cnt->last_update_time_ms = curr_time;
     		data_cnt->time_ms_acc += time_elapsed;
@@ -421,14 +421,14 @@ static inline void vitamins_task_created_probe(struct task_struct *parent, struc
 
 
 // stores the counters when a task enters the cpu
-static sensed_data_cpu_t cpu_counters_begin[NR_CPUS];//update every context switch
+static perf_data_cpu_t cpu_counters_begin[NR_CPUS];//update every context switch
 static volatile bool first_sense[NR_CPUS];
 
 
 static inline void vitamins_sensing_begin_probe(int cpu, struct task_struct *tsk)
 {
 	private_hook_data_t *p;
-	sensed_data_cpu_t *data = &(cpu_counters_begin[cpu]);
+	perf_data_cpu_t *data = &(cpu_counters_begin[cpu]);
 	int i;
 
 	//if its the first time sensing we don't need to do anything at begin
@@ -462,7 +462,7 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 	//true if the task is leaving the cpu voluntarly
 	bool vcsw = tsk->state && !(preempt_count() & PREEMPT_ACTIVE);
 
-    sensed_data_cpu_t *data_begin = &(cpu_counters_begin[cpu]);
+    perf_data_cpu_t *data_begin = &(cpu_counters_begin[cpu]);
 
 	//if its the first time sensing we skip this call until we get another call to begin (which sets vitamins_first_sense = false)
     if(first_sense[cpu]) return;
@@ -486,7 +486,7 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 
     spin_lock(&(vitamins_cpu_counters_acc_lock[cpu]));
     for(wid=0;wid<sensing_window_cnt;++wid){
-    	sensed_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[cpu]);
+    	perf_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[cpu]);
     	for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data_cnt->perfcnt.perfcnts[i] += perfcnts[i];
     	data_cnt->perfcnt.time_busy_ms += time_busy_ms;
     	if(vcsw) data_cnt->perfcnt.nvcsw += 1;

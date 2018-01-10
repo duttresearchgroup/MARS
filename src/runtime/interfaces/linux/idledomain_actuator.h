@@ -43,10 +43,10 @@ public:
 		delete _idleDomain;
 	}
 
-	void doSysActuation(freq_domain_info_t *rsc, int cores, const SensedData& data, int wid, int cores_min=1){
+	void doSysActuation(freq_domain_info_t *rsc, int cores, const PerformanceData& data, int wid, int cores_min=1){
 		_idleDomain[rsc->domain_id]->idleCores(cores,data,wid,cores_min);
 	}
-	void getSysActuation(freq_domain_info_t *rsc, int *cores, const SensedData& data, int wid, int cores_min=1){
+	void getSysActuation(freq_domain_info_t *rsc, int *cores, const PerformanceData& data, int wid, int cores_min=1){
 		*cores = _idleDomain[rsc->domain_id]->idleCores();
 	}
 

@@ -1,7 +1,7 @@
 #ifndef __arm_rt_perffilter_h
 #define __arm_rt_perffilter_h
 
-#include <runtime/interfaces/sensed_data.h>
+#include <runtime/interfaces/performance_data.h>
 
 class PerfFilter
 {
@@ -48,7 +48,7 @@ public:
 
 	//sums-up the beats of all tasks and their respective ips
 	//updates a beats->ips mapping using an average filter
-	void sampleTasks(const SensedData& data, int wid)
+	void sampleTasks(const PerformanceData& data, int wid)
 	{
 		_currBeats = 0;
 		uint64_t instr = 0;

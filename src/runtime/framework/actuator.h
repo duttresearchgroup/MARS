@@ -14,7 +14,7 @@
 #include "types.h"
 #include <core/core.h>
 
-#include <runtime/interfaces/sensed_data.h>
+#include <runtime/interfaces/performance_data.h>
 
 class ActuationInterface;
 
@@ -118,7 +118,7 @@ class Actuator {
 	//used when setting idle cores
 	ActuatorDefDefaultActuationFuncs(freq_domain_info_t,
 									 int,
-									 const SensedData& data, int wid, int cores_min=1);
+									 const PerformanceData& data, int wid, int cores_min=1);
 
 
 };

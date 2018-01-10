@@ -58,10 +58,10 @@ OfflineSensingModule::OfflineSensingModule()
 
     resgisterAsDaemonProc();
 
-    vitsdata = reinterpret_cast<sensed_data_t*>(malloc(sizeof(sensed_data_t)));
+    vitsdata = reinterpret_cast<perf_data_t*>(malloc(sizeof(perf_data_t)));
     if(vitsdata == nullptr) arm_throw(SensingModuleException,"malloc error");
 
-    _sensed_data = SensedData(vitsdata);
+    _sensed_data = PerformanceData(vitsdata);
 
     _attached = true;
 
@@ -333,7 +333,7 @@ void OfflineSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 //		arm_throw(SensingModuleException,"IOCTLCMD_PERFCNT_ENABLE failed errno=%d",errno);
 }
 
- void OfflineSensingModule::reset_perf_counters(sensed_data_perf_counters_t *sen_data){
+ void OfflineSensingModule::reset_perf_counters(perf_data_perf_counters_t *sen_data){
 	int cnt;
 	for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt) sen_data->perfcnts[cnt] = 0;
 	sen_data->nivcsw= 0;
@@ -342,14 +342,14 @@ void OfflineSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 	sen_data->time_total_ms = 0;
 }
 
- void OfflineSensingModule::reset_task_counters(int cpu,sensed_data_task_t *sen_data){
+ void OfflineSensingModule::reset_task_counters(int cpu,perf_data_task_t *sen_data){
 	int cnt;
 	reset_perf_counters(&(sen_data->perfcnt));
 	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
 	sen_data->last_cpu_used = cpu;
 }
 
- void OfflineSensingModule::reset_cpu_counters(sensed_data_cpu_t *sen_data){
+ void OfflineSensingModule::reset_cpu_counters(perf_data_cpu_t *sen_data){
 	int cnt;
 	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
 	reset_perf_counters(&(sen_data->perfcnt));
@@ -360,7 +360,7 @@ void OfflineSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 	sen_data->time_ms_acc = 0;
 }
 
- void OfflineSensingModule::reset_freq_counters(sensed_data_freq_domain_t *sen_data){
+ void OfflineSensingModule::reset_freq_counters(perf_data_freq_domain_t *sen_data){
 	sen_data->avg_freq_mhz_acc = 0;
 	sen_data->time_ms_acc = 0;
 }
@@ -413,8 +413,8 @@ void OfflineSensingModule::sense_tasks(int wid)
 	for(auto task : _sim->task_list_vector()) {
 
 //		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
-		sensed_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[task->id-1]);
-		sensed_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[task->id-1]);
+		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[task->id-1]);
+		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[task->id-1]);
 		p++;
 
 //		spin_lock(&(task_priv_hook->sen_data_lock));
@@ -602,15 +602,15 @@ void OfflineSensingModule::sense_cpus(int wid)
 
     for(auto core : _sim->core_list_vector()) {
     	i = core.info->position;
-	    sensed_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
-	    sensed_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
+	    perf_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
+	    perf_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
 
 	    reset_cpu_counters(curr_epoch);
 
 	    for(auto task : _sim->task_list_vector()){
 	    	if(task_curr_core_idx(task) == (int)i){
 	    		const simulation_t::vitamins_task_sensed_data_raw_t *counters = _sim->task_counters(task);
-	    		sensed_data_task_t *last_total_task = &(vitsdata->sensing_windows[wid].aggr.tasks[task->id-1]);
+	    		perf_data_task_t *last_total_task = &(vitsdata->sensing_windows[wid].aggr.tasks[task->id-1]);
 
 	    	    double active_cy = 0;
 	    	    uint64_t active_ms = 0;
@@ -712,8 +712,8 @@ void OfflineSensingModule::sense_cpus(int wid)
 
     //freq sense
     for(i = 0; i < sys->freq_domain_list_size; ++i){
-		sensed_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
-		sensed_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
+		perf_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
+		perf_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
 
 	    double active_time = 0;
 	    uint64_t active_cy = 0;

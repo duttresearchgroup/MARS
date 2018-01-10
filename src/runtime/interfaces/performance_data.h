@@ -10,18 +10,18 @@
 
 #include <runtime/interfaces/common/sense_data_shared.h>
 
-class SensedData {
-	const sensed_data_t *_raw_data;
+class PerformanceData {
+	const perf_data_t *_raw_data;
 
 	//special constructor should only be called from the friend class
-	SensedData():_raw_data(nullptr){}
+	PerformanceData():_raw_data(nullptr){}
 	friend class LinuxSensingModule;
 	friend class OfflineSensingModule;
 
 public:
-	SensedData(sensed_data_t *raw_data) :_raw_data(raw_data){
+	PerformanceData(perf_data_t *raw_data) :_raw_data(raw_data){
 #if defined(IS_LINUX_PLAT)
-		if(!check_sensed_data_cksum(raw_data)) arm_throw(SensingDataException,"Wrong checksum in mapped shared data");
+		if(!check_perf_data_cksum(raw_data)) arm_throw(SensingDataException,"Wrong checksum in mapped shared data");
 #endif
 	}
 
@@ -49,10 +49,10 @@ public:
 
 	inline bool perfCntAvailable(perfcnt_t cnt) { return _raw_data->perfcnt_to_idx_map[cnt] >= 0;}
 
-	inline uint64_t getPerfcntVal(const sensed_data_perf_counters_t &perfcnt, int perfcnt_id) const{
+	inline uint64_t getPerfcntVal(const perf_data_perf_counters_t &perfcnt, int perfcnt_id) const{
 		return perfcnt.perfcnts[_raw_data->perfcnt_to_idx_map[perfcnt_id]];
 	}
-	inline uint64_t getPerfcntVal(const sensed_data_perf_counters_t &perfcnt, perfcnt_t perfcnt_id) const{
+	inline uint64_t getPerfcntVal(const perf_data_perf_counters_t &perfcnt, perfcnt_t perfcnt_id) const{
 		return perfcnt.perfcnts[_raw_data->perfcnt_to_idx_map[perfcnt_id]];
 	}
 
@@ -71,15 +71,15 @@ public:
 		return _raw_data->sensing_windows[wid].num_of_samples;
 	}
 
-	inline const sensing_window_data_t& swCurrData(int wid) const {
+	inline const perf_window_data_t& swCurrData(int wid) const {
 		assert_false(wid >= MAX_WINDOW_CNT);
 		return _raw_data->sensing_windows[wid].curr;
 	}
-	inline const sensing_window_data_t& swAggrData(int wid) const {
+	inline const perf_window_data_t& swAggrData(int wid) const {
 		assert_false(wid >= MAX_WINDOW_CNT);
 		return _raw_data->sensing_windows[wid].aggr;
 	}
-	inline const sensing_window_t& swRawData(int wid) const {
+	inline const perf_window_t& swRawData(int wid) const {
 		assert_false(wid >= MAX_WINDOW_CNT);
 		return _raw_data->sensing_windows[wid];
 	}

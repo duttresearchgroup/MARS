@@ -1,9 +1,9 @@
 #ifndef __arm_rt_powerfilter_h
 #define __arm_rt_powerfilter_h
 
-#include <runtime/interfaces/sensed_data.h>
 #include <runtime/framework/sensing_interface.h>
 #include <core/core.h>
+#include <runtime/interfaces/performance_data.h>
 
 class PowerFilter
 {
@@ -24,7 +24,7 @@ public:
 	void powerFilter(int window_length_ms) { _avgWeight = (window_length_ms) > 1000 ? 0 : 1-(((double)window_length_ms*1) / 1000.0);}
 
 	//reads the power from the power domain
-	void sampleSys(const SensedData& data, int wid)
+	void sampleSys(const PerformanceData& data, int wid)
 	{
 		_currPow = SensingInterface::sense<SEN_POWER_W>(_pd,wid);
 		_currPowFiltered = (_avgWeight*_currPowFiltered) + ((1-_avgWeight)*_currPow);
