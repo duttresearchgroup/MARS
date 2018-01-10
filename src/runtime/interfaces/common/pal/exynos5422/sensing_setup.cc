@@ -123,6 +123,9 @@ struct SensorWrapper {
 
 	double bigPowerW(int wid) { return bigClusterPower.accData(wid)/bigClusterPower.samples(wid);}
 	double lilPowerW(int wid) { return littleClusterPower.accData(wid)/littleClusterPower.samples(wid);}
+
+	double bigAggPowerW(int wid) { return bigClusterPower.accDataAgg(wid)/bigClusterPower.samplesAgg(wid);}
+	double lilAggPowerW(int wid) { return littleClusterPower.accDataAgg(wid)/littleClusterPower.samplesAgg(wid);}
 };
 
 static SensorWrapper *sensors = nullptr;
@@ -142,9 +145,14 @@ void pal_sensing_teardown<SensingModule>(SensingModule *m){
 	sensors = nullptr;
 }
 
+
+/*
+ * Sensing interface functions implementation
+ */
+
 template<>
 typename sensing_type_val<SEN_POWER_W>::type
-SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(power_domain_info_t *rsc, int wid)
+SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	switch (rsc->domain_id) {
 		case 0:
@@ -157,3 +165,20 @@ SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(power_domain_info_t *rs
 	arm_throw(SensingException,"Invalid power domain id %d",rsc->domain_id);
 	return 0;
 }
+
+template<>
+typename sensing_type_val<SEN_POWER_W>::type
+SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+{
+	switch (rsc->domain_id) {
+		case 0:
+			return sensors->bigAggPowerW(wid);
+		case 1:
+			return sensors->lilAggPowerW(wid);
+		default:
+			break;
+	}
+	arm_throw(SensingException,"Invalid power domain id %d",rsc->domain_id);
+	return 0;
+}
+
