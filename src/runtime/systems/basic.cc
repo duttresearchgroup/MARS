@@ -171,7 +171,7 @@ void TracingSystem::window_handler(int wid,System *owner)
 				trace("busy_ips") = ((double)data.getPerfcntVal(sw.tasks[p].perfcnt, PERFCNT_INSTR_EXE) / (double)sw.tasks[p].perfcnt.time_busy_ms * 1000.0);
 			trace("util") = ((double)sw.tasks[p].perfcnt.time_busy_ms / (double)sw.tasks[p].perfcnt.time_total_ms);
 //			trace("power_w") = ((double)sw.power_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].power->domain_id].avg_power_uW_acc / (double)sw.power_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].power->domain_id].time_ms_acc / 1000.0);
-			trace("power_w") = ((double)sw.power_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].power->domain_id].avg_power_uW_acc / 1000000.0);
+			trace("power_w") = sense<SEN_POWER_W>(self->info()->core_list[sw.tasks[p].last_cpu_used].power,wid);
 			trace("freq_mhz") = sw.freq_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].freq->domain_id].avg_freq_mhz_acc;
 			for(int i = 0; i < data.numMappedPerfcnts(); ++i) {
 				trace(perfcnt_str(data.perfcntFromIdx(i))) = sw.tasks[p].perfcnt.perfcnts[i];

@@ -92,7 +92,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_power_domain_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const power_domain_info_t &sd, int wid, bool isAgg, std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(traced_data::NO_DATA);//total_time
@@ -100,7 +100,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(traced_data::NO_DATA);//ips
 	data_vals.push_back(traced_data::NO_DATA);//busy_ips
 	data_vals.push_back(traced_data::NO_DATA);//util
-	data_vals.push_back(_power_w(sd));//power
+	data_vals.push_back(_power_w(sd,wid,isAgg));//power
 	data_vals.push_back(traced_data::NO_DATA);//freq
 	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(traced_data::NO_DATA);
@@ -129,7 +129,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
 //adds the core freq domain and power domain info to task
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,const sensed_data_freq_domain_t &sd_freq,const sensed_data_power_domain_t &sd_power,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,const sensed_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg, std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(_total_time_s(sd.perfcnt));
@@ -137,7 +137,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(_total_ips(tracer._data,sd.perfcnt));
 	data_vals.push_back(_busy_ips(tracer._data,sd.perfcnt));
 	data_vals.push_back(_util(sd.perfcnt));
-	data_vals.push_back(_power_w(sd_power));
+	data_vals.push_back(_power_w(sd_power,wid,isAgg));
 	data_vals.push_back(_freq_mhz(sd_freq));
 	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(sd.perfcnt.perfcnts[j]);
@@ -250,7 +250,6 @@ void SensingDataTracer::wrapUp()
 		}
 	}
 
-
 	//sys-wide stuff by aggregating data from allpower domains (for power data)
 	for(auto ts : _d_sys[0]) delete ts;//cleanup first
 	_d_sys[0].clear();
@@ -271,7 +270,7 @@ void ExecutionSummary::record(std::initializer_list<double> a_args)
 		_d_cpu[cpu].push_back(new traced_data(*this,sw.cpus[cpu],a_args));
 	}
 	for(int power_domain = 0; power_domain < _sys->power_domain_list_size; ++power_domain){
-		_d_pd[power_domain].push_back(new traced_data(*this,sw.power_domains[power_domain],a_args));
+		_d_pd[power_domain].push_back(new traced_data(*this,_sys->power_domain_list[power_domain],_wid,true,a_args));
 	}
 	for(int freq_domain = 0; freq_domain < _sys->freq_domain_list_size; ++freq_domain){
 		_d_fd[freq_domain].push_back(new traced_data(*this,sw.freq_domains[freq_domain],a_args));
@@ -361,7 +360,7 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 		_d_cpu[cpu].push_back(new traced_data(*this,sw.cpus[cpu],a_args));
 	}
 	for(int power_domain = 0; power_domain < _sys->power_domain_list_size; ++power_domain){
-		_d_pd[power_domain].push_back(new traced_data(*this,sw.power_domains[power_domain],a_args));
+		_d_pd[power_domain].push_back(new traced_data(*this,_sys->power_domain_list[power_domain],_wid,false,a_args));
 	}
 	for(int freq_domain = 0; freq_domain < _sys->freq_domain_list_size; ++freq_domain){
 		_d_fd[freq_domain].push_back(new traced_data(*this,sw.freq_domains[freq_domain],a_args));
@@ -386,7 +385,7 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 			//data for this epoch
 			int fd = _sys->core_list[sw.tasks[p].last_cpu_used].freq->domain_id;
 			int pd = _sys->core_list[sw.tasks[p].last_cpu_used].power->domain_id;
-			traced_data *aux = new traced_data(*this,sw.tasks[p],sw.freq_domains[fd],sw.power_domains[pd],a_args);
+			traced_data *aux = new traced_data(*this,sw.tasks[p],sw.freq_domains[fd],_sys->power_domain_list[pd],_wid,false,a_args);
 			_d_task[idx].push_back(aux);
 		}
 	}

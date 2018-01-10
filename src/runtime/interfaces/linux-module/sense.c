@@ -45,13 +45,6 @@ static inline void reset_cpu_counters(sensed_data_cpu_t *sen_data){
 	reset_perf_counters(&(sen_data->perfcnt));
 }
 
-static inline void reset_power_counters(sensed_data_power_domain_t *sen_data){
-	sen_data->avg_power_uW_acc = 0;
-	sen_data->time_ms_acc = 0;
-	sen_data->last_update_time_ms = jiffies_to_msecs(jiffies);
-	smp_mb();
-}
-
 static inline void reset_freq_counters(sensed_data_freq_domain_t *sen_data){
 	sen_data->avg_freq_mhz_acc = 0;
 	sen_data->time_ms_acc = 0;
@@ -263,19 +256,6 @@ static void sense_cpus(sys_info_t *sys, int wid)
 
     	*last_total = *data_cnt;
     }
-
-	//power sense
-    for(i = 0; i < sys->power_domain_list_size; ++i){
-    	sensed_data_power_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.power_domains[i]);
-    	sensed_data_power_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.power_domains[i]);
-    	sensed_data_power_domain_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.power_domains[i]);
-
-    	curr_epoch->avg_power_uW_acc = data_cnt->avg_power_uW_acc - last_total->avg_power_uW_acc;
-    	curr_epoch->time_ms_acc = data_cnt->time_ms_acc -  last_total->time_ms_acc;
-
-    	*last_total = *data_cnt;
-    }
-
 }
 
 /////////////////////////////
@@ -386,22 +366,6 @@ void minimum_sensing_window(sys_info_t *sys)
     		data_cnt->time_ms_acc += time_elapsed;
     		data_cnt->avg_freq_mhz_acc += time_elapsed * curr_freq_MHz;
     	}
-    }
-
-    //sense power
-    for(i = 0; i < sys->power_domain_list_size; ++i){
-		uint32_t power_uW = power_sense_end(&(sys->power_domain_list[i]));
-
-		for(j=0;j<sensing_window_cnt;++j){
-			sensed_data_power_domain_t *data_cnt = &(vitsdata->sensing_windows[j]._acc.power_domains[i]);
-			uint64_t time_elapsed = curr_time - data_cnt->last_update_time_ms;
-			data_cnt->last_update_time_ms = curr_time;
-			data_cnt->time_ms_acc += time_elapsed;
-			data_cnt->avg_power_uW_acc += time_elapsed * power_uW;
-		}
-    }
-    for(i = 0; i < sys->power_domain_list_size; ++i){
-    	power_sense_start(&(sys->power_domain_list[i]));
     }
 
     sensing_window_tasks_flushed = false;
@@ -625,11 +589,6 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
     vitsdata->num_of_minimum_periods = 0;
 
     for(wid=0;wid<sensing_window_cnt;++wid){
-    	for(i = 0; i < sys->power_domain_list_size; ++i){
-    		reset_power_counters(&(vitsdata->sensing_windows[wid]._acc.power_domains[i]));
-    		reset_power_counters(&(vitsdata->sensing_windows[wid].curr.power_domains[i]));
-    		reset_power_counters(&(vitsdata->sensing_windows[wid].aggr.power_domains[i]));
-    	}
     	for(i = 0; i < sys->freq_domain_list_size; ++i){
     		reset_freq_counters(&(vitsdata->sensing_windows[wid]._acc.freq_domains[i]));
     		reset_freq_counters(&(vitsdata->sensing_windows[wid].curr.freq_domains[i]));
@@ -660,8 +619,6 @@ bool trace_perf_counter_reset(void){
 
 void sense_begin(sys_info_t *sys)
 {
-    int i;
-
     vitamins_sense_cleanup_counters(sys);
 
     vitsdata->starttime_ms = jiffies_to_msecs(jiffies);
@@ -672,26 +629,15 @@ void sense_begin(sys_info_t *sys)
 
     register_trace_sched_switch(vitamins_context_switch_probe,0);
     register_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
-
-    for(i = 0; i < sys->power_domain_list_size; ++i){
-    	power_sense_start(&(sys->power_domain_list[i]));
-    }
 }
 
 void sense_stop(sys_info_t *sys)
 {
-    int cpu;
-
     vitsdata->stoptime_ms = jiffies_to_msecs(jiffies);
 
     unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
     unregister_trace_sched_switch(vitamins_context_switch_probe,0);
 	tracepoint_synchronize_unregister();
-
-    for(cpu = 0; cpu < sys->power_domain_list_size; ++cpu){
-    	power_sense_end(&(sys->power_domain_list[cpu]));
-    }
-
 }
 
 void sense_destroy_mechanisms(sys_info_t *sys){

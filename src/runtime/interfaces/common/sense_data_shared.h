@@ -18,7 +18,6 @@ struct sensing_window_data_struct {
 	//updated before when the sensing window period is done
 	//no synch and the user-level task should be done reading these guys before the next perio expires
 	sensed_data_cpu_t			cpus[MAX_NR_CPUS];
-	sensed_data_power_domain_t	power_domains[MAX_NR_CPUS];
 	sensed_data_freq_domain_t	freq_domains[MAX_NR_CPUS];
 
 	sensed_data_task_t			tasks[MAX_CREATED_TASKS];
@@ -70,12 +69,6 @@ struct sensed_data_struct {
 	int number_of_cpus;
 	uint32_t starttime_ms;
 	uint32_t stoptime_ms;
-
-	// history data for controller
-	int power_err_prev_epoch[MAX_NR_CPUS];
-	int power_set_prev_epoch[MAX_NR_CPUS];
-	int ips_err_prev_epoch[MAX_NR_CPUS];
-	int ips_set_prev_epoch[MAX_NR_CPUS];
 
 	// perf counter mapping info
 	int idx_to_perfcnt_map[MAX_PERFCNTS];

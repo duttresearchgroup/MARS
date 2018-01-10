@@ -73,14 +73,6 @@ struct sensed_data_cpu_struct {
 };
 typedef struct sensed_data_cpu_struct sensed_data_cpu_t;
 
-///////////////////////////////////////////////////////
-//info sensed for each power domain (updated at epochs)
-typedef struct {
-    uint64_t avg_power_uW_acc;
-    uint64_t time_ms_acc;
-    uint64_t last_update_time_ms;
-} sensed_data_power_domain_t;
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //info sensed for each freq domain (updated at epochs)
 //note: these are different from the other freq. counters

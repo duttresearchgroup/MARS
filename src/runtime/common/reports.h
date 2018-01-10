@@ -9,6 +9,7 @@
 
 #include <runtime/common/rt_config_params.h>
 #include <runtime/interfaces/sensed_data.h>
+#include <runtime/framework/sensing_interface.h>
 
 inline std::ostream& operator<< (std::ostream& os, const sys_info_t& obj){
 	os << "sys"; return os;
@@ -35,9 +36,9 @@ protected:
 
 		traced_data(const SensingDataTracer &tracer,const sensed_data_cpu_t &sd,std::initializer_list<double> &a_args);
 		traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,std::initializer_list<double> &a_args);
-		traced_data(const SensingDataTracer &tracer,const sensed_data_power_domain_t &sd,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const power_domain_info_t &sd, int wid, bool isAgg, std::initializer_list<double> &a_args);
 		traced_data(const SensingDataTracer &tracer,const sensed_data_freq_domain_t &sd,std::initializer_list<double> &a_args);
-		traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,const sensed_data_freq_domain_t &sd_freq,const sensed_data_power_domain_t &sd_power,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const sensed_data_task_t &sd,const sensed_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg,std::initializer_list<double> &a_args);
 		traced_data(const SensingDataTracer &tracer);
 
 		inline double _total_time_s(const sensed_data_perf_counters_t &counters){
@@ -55,8 +56,8 @@ protected:
 		inline double _util(const sensed_data_perf_counters_t &counters){
 			return (double)counters.time_busy_ms / (double) counters.time_total_ms;
 		}
-		inline double _power_w(const sensed_data_power_domain_t &counters){
-			return ((double)counters.avg_power_uW_acc / (double) counters.time_ms_acc)/1000000;
+		inline double _power_w(const power_domain_info_t &pd, int wid, bool isAgg){
+			return isAgg ? SensingInterface::senseAgg<SEN_POWER_W>(pd,wid) : SensingInterface::sense<SEN_POWER_W>(pd,wid);
 		}
 		inline double _freq_mhz(const sensed_data_freq_domain_t &counters){
 			return ((double)counters.avg_freq_mhz_acc / (double) counters.time_ms_acc);

@@ -6,11 +6,6 @@
 /////////////////////////////////////////
 //platform specific functions
 
-//start/stop sensing power on the spaeicifed domain
-//end stops sensing and returns power in uW
-void power_sense_start(power_domain_info_t *domain);
-uint32_t power_sense_end(power_domain_info_t *domain);
-
 //start/stop perf sense on the current cpu. Despite taking the cpu as argument, the value should always be == the current cpu
 void start_perf_sense(int cpu);
 void stop_perf_sense(int cpu);

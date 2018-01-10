@@ -52,7 +52,7 @@ class OfflineSensingModule
 	void reset_perf_counters(sensed_data_perf_counters_t *sen_data);
 	void reset_task_counters(int cpu,sensed_data_task_t *sen_data);
 	void reset_cpu_counters(sensed_data_cpu_t *sen_data);
-	void reset_power_counters(sensed_data_power_domain_t *sen_data);
+	//void reset_power_counters(sensed_data_power_domain_t *sen_data);
 	void reset_freq_counters(sensed_data_freq_domain_t *sen_data);
 
 	void vit_map_perfcnt();

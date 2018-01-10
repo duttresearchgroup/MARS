@@ -2,6 +2,7 @@
 #define __arm_rt_powerfilter_h
 
 #include <runtime/interfaces/sensed_data.h>
+#include <runtime/framework/sensing_interface.h>
 #include <core/core.h>
 
 class PowerFilter
@@ -25,8 +26,7 @@ public:
 	//reads the power from the power domain
 	void sampleSys(const SensedData& data, int wid)
 	{
-		const sensed_data_power_domain_t& powData = data.swCurrData(wid).power_domains[_pd.domain_id];
-		_currPow = ((double)powData.avg_power_uW_acc / (double) powData.time_ms_acc)/1000000;
+		_currPow = SensingInterface::sense<SEN_POWER_W>(_pd,wid);
 		_currPowFiltered = (_avgWeight*_currPowFiltered) + ((1-_avgWeight)*_currPow);
 	}
 };
