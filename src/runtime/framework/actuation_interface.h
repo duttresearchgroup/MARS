@@ -23,8 +23,8 @@ class ActuationInterface {
 	/*
 	 * Sets a new actuation valute
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static void actuate(ResourceT *rsc, typename actuation_type_val<ACT_T>::type val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void actuate(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
 		act->doSysActuation(rsc,val);
@@ -34,8 +34,8 @@ class ActuationInterface {
 	 * Gets the current actuation value.
 	 * Value is stored at *val
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static void actuationVal(ResourceT *rsc, typename actuation_type_val<ACT_T>::type *val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void actuationVal(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
 		act->getSysActuation(rsc,val);
@@ -45,11 +45,11 @@ class ActuationInterface {
 	 * Gets the current actuation value.
 	 * A new val object is returned
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static typename actuation_type_val<ACT_T>::type actuationVal(ResourceT *rsc)
+	template<ActuationType ACT_T,typename ResourceT>
+	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(ResourceT *rsc)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		typename actuation_type_val<ACT_T>::type val;
+		typename ActuationTypeInfo<ACT_T>::ValType val;
 		act->getSysActuation(rsc,&val);
 		return val;
 	}
@@ -58,8 +58,8 @@ class ActuationInterface {
 	/*
 	 * Updates the predictive models with a new actuation value
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static void tryActuate(ResourceT *rsc, typename actuation_type_val<ACT_T>::type val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void tryActuate(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
 		act->doModelActuation(rsc,val);
@@ -69,8 +69,8 @@ class ActuationInterface {
 	 * Gets the current actuatuation values from the predictive models
 	 * Value is stored at *val
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static void tryActuationVal(ResourceT *rsc, typename actuation_type_val<ACT_T>::type *val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void tryActuationVal(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
 		act->getModelActuation(rsc,val);
@@ -80,11 +80,11 @@ class ActuationInterface {
 	 * Gets the current actuatuation values from the predictive models
 	 * A new val object is returned
 	 */
-	template<actuation_type ACT_T,typename ResourceT>
-	static typename actuation_type_val<ACT_T>::type tryActuationVal(ResourceT *rsc)
+	template<ActuationType ACT_T,typename ResourceT>
+	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(ResourceT *rsc)
 	{
 		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		typename actuation_type_val<ACT_T>::type val;
+		typename ActuationTypeInfo<ACT_T>::ValType val;
 		act->getModelActuation(rsc,&val);
 		return val;
 	}
@@ -92,38 +92,38 @@ class ActuationInterface {
 
 	//Convenience functions that for passing resource as reference
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static void actuate(ResourceT &rsc, typename actuation_type_val<ACT_T>::type val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void actuate(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
 		actuate<ACT_T,ResourceT>(&rsc,val);
 	}
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static void actuationVal(ResourceT &rsc, typename actuation_type_val<ACT_T>::type *val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void actuationVal(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
 	{
 		actuationVal<ACT_T,ResourceT>(&rsc,val);
 	}
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static typename actuation_type_val<ACT_T>::type actuationVal(ResourceT &rsc)
+	template<ActuationType ACT_T,typename ResourceT>
+	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(ResourceT &rsc)
 	{
 		return actuationVal<ACT_T,ResourceT>(&rsc);
 	}
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static void tryActuate(ResourceT &rsc, typename actuation_type_val<ACT_T>::type val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void tryActuate(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
 		tryActuate<ACT_T,ResourceT>(&rsc,val);
 	}
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static void tryActuationVal(ResourceT &rsc, typename actuation_type_val<ACT_T>::type *val)
+	template<ActuationType ACT_T,typename ResourceT>
+	static void tryActuationVal(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
 	{
 		tryActuationVal<ACT_T,ResourceT>(&rsc,val);
 	}
 
-	template<actuation_type ACT_T,typename ResourceT>
-	static typename actuation_type_val<ACT_T>::type tryActuationVal(ResourceT &rsc)
+	template<ActuationType ACT_T,typename ResourceT>
+	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(ResourceT &rsc)
 	{
 		return tryActuationVal<ACT_T,ResourceT>(&rsc);
 	}

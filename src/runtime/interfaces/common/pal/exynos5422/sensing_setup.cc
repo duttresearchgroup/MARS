@@ -60,7 +60,7 @@ class INA231 : public SensorBase<SEN_POWER_W,INA231> {
 		close_sensor(&sensor);
 	}
 
-	typename sensing_type_val<SEN_POWER_W>::type readSample()
+	typename SensingTypeInfo<SEN_POWER_W>::ValType readSample()
 	{
 		read_sensor(&sensor);
 		return (double)(sensor.data.cur_uW / 1000) / 1000;
@@ -151,7 +151,7 @@ void pal_sensing_teardown<SensingModule>(SensingModule *m){
  */
 
 template<>
-typename sensing_type_val<SEN_POWER_W>::type
+typename SensingTypeInfo<SEN_POWER_W>::ValType
 SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	switch (rsc->domain_id) {
@@ -167,7 +167,7 @@ SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info
 }
 
 template<>
-typename sensing_type_val<SEN_POWER_W>::type
+typename SensingTypeInfo<SEN_POWER_W>::ValType
 SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	switch (rsc->domain_id) {

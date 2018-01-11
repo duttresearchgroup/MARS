@@ -23,8 +23,8 @@ class Actuator {
 
   private:
 
-	actuation_type _type;
-	actuation_mode _mode;
+	ActuationType _type;
+	ActuationMode _mode;
 
   public:
 
@@ -32,11 +32,11 @@ class Actuator {
 
   protected:
 
-	static std::map<actuation_type,std::map<void*,Actuator*>> _actuatorMap;
+	static std::map<ActuationType,std::map<void*,Actuator*>> _actuatorMap;
 
 	void setActForResource(void *rsc);
 
-	template<actuation_type ACT_T,typename ResourceT>
+	template<ActuationType ACT_T,typename ResourceT>
 	static Actuator* actForResource(ResourceT *rsc)
 	{
 		auto aux = _actuatorMap.find(ACT_T);
@@ -51,7 +51,7 @@ class Actuator {
 		}
 	}
 
-	Actuator(actuation_type type,const sys_info_t &_info);
+	Actuator(ActuationType type,const sys_info_t &_info);
 
 	virtual ~Actuator();
 
@@ -67,7 +67,7 @@ class Actuator {
 
   public:
 
-	actuation_type type() { return _type;}
+	ActuationType type() { return _type;}
 
 	void setSystemMode()
 	{
@@ -84,7 +84,7 @@ class Actuator {
 		implFrameworkMode();
 	}
 
-	actuation_mode mode() { return _mode;}
+	ActuationMode mode() { return _mode;}
 
 	bool systemMode() { return _mode==ACTMODE_SYSTEM;}
 	bool frameworkMode() { return _mode==ACTMODE_FRAMEWORK;}

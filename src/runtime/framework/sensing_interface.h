@@ -12,44 +12,75 @@ class SensingInterface {
 	/*
 	 * Returns the sensed value for given window
 	 */
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type sense(const ResourceT *rsc, int wid);
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT *rsc, int wid);
+
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
 
 
 	/*
 	 * Returns aggregated sensed value for the
 	 * current and previous instances of the given window
 	 */
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type senseAgg(const ResourceT *rsc, int wid);
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT *rsc, int wid);
+
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
 
 	/*
 	 * Wrappers for the functions above supporting the resource being passed as ref
 	 * or non const
 	 */
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type sense(ResourceT *rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType sense(ResourceT *rsc, int wid)
 	{ return sense<SEN_T,ResourceT>((const ResourceT*)rsc,wid); }
 
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type sense(ResourceT &rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType sense(ResourceT &rsc, int wid)
 	{ return sense<SEN_T,ResourceT>(&rsc,wid); }
 
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type sense(const ResourceT &rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT &rsc, int wid)
 	{ return sense<SEN_T,ResourceT>(&rsc,wid); }
 
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type senseAgg(ResourceT *rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType senseAgg(ResourceT *rsc, int wid)
 	{ return senseAgg<SEN_T,ResourceT>((const ResourceT*)rsc,wid); }
 
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type senseAgg(ResourceT &rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType senseAgg(ResourceT &rsc, int wid)
 	{ return senseAgg<SEN_T,ResourceT>(&rsc,wid); }
 
-	template<sensing_type SEN_T,typename ResourceT>
-	static typename sensing_type_val<SEN_T>::type senseAgg(const ResourceT &rsc, int wid)
+	template<SensingType SEN_T,typename ResourceT>
+	static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT &rsc, int wid)
 	{ return senseAgg<SEN_T,ResourceT>(&rsc,wid); }
+
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, ResourceT *rsc, int wid)
+    { return sense<SEN_T,ResourceT>(p,(const ResourceT*)rsc,wid); }
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, ResourceT &rsc, int wid)
+    { return sense<SEN_T,ResourceT>(p,&rsc,wid); }
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT &rsc, int wid)
+    { return sense<SEN_T,ResourceT>(p,&rsc,wid); }
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, ResourceT *rsc, int wid)
+    { return senseAgg<SEN_T,ResourceT>(p,(const ResourceT*)rsc,wid); }
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, ResourceT &rsc, int wid)
+    { return senseAgg<SEN_T,ResourceT>(p,&rsc,wid); }
+
+    template<SensingType SEN_T,typename ResourceT>
+    static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT &rsc, int wid)
+    { return senseAgg<SEN_T,ResourceT>(p,&rsc,wid); }
 
 };
 

@@ -1,11 +1,14 @@
 #ifndef __arm_rt_actutation_types_h
 #define __arm_rt_actutation_types_h
 
+#include <core/core.h>
+#include <runtime/interfaces/common/perfcnts.h>
+
 //////////////////////////////////////////////////////////////////////////////
 // This struct should be reviewed. Proably need to get rid of this "modes".
 // If a system actuator need to be consiedered by the models, its model
 // should be registered explicitly.
-typedef enum {
+enum ActuationMode {
 	//actuation values are set by the framework
 	ACTMODE_FRAMEWORK = 0,
 
@@ -15,40 +18,42 @@ typedef enum {
 	//////////////////////////
 	//////////////////////////
 	SIZE_ACTMODE
-} actuation_mode ;
+};
 //////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Actuation knob types
-typedef enum {
+enum ActuationType {
 	ACT_NULL = 0,
 	ACT_FREQ_MHZ,
 	ACT_ACTIVE_CORES,
 	//////////////////////////
 	//////////////////////////
 	SIZE_ACT_TYPES
-} actuation_type ;
+};
 
-// This struct defines the data types
-// that can be set for actuation knobs.
-// By default all values are double.
-// Specialize this class for every knob type
-template <actuation_type T>
-struct actuation_type_val {
-  using type = double;
+// This struct has information
+// describing each actuation knob type.
+// Some default information is provided, but
+// this struct should be specialized for every
+// knob type.
+template <ActuationType T>
+struct ActuationTypeInfo {
+	//the data type of the actuation knob value
+	using ValType = double;
 };
 //of course this template instantiation is invalid
-template <> struct actuation_type_val<SIZE_ACT_TYPES>;
+template <> struct ActuationTypeInfo<SIZE_ACT_TYPES>;
 
 //Now the knob types values specializations
 
-template <> struct actuation_type_val<ACT_FREQ_MHZ>{
-  using type = int; //integer value in MHz
+template <> struct ActuationTypeInfo<ACT_FREQ_MHZ>{
+    using ValType = int; //integer value in MHz
 };
 
-template <> struct actuation_type_val<ACT_ACTIVE_CORES>{
-  using type = int;
+template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
+    using ValType = int;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -56,7 +61,7 @@ template <> struct actuation_type_val<ACT_ACTIVE_CORES>{
 
 //////////////////////////////////////////////////////////////////////////////
 // Sensing data types
-typedef enum {
+enum SensingType {
 	SEN_PERFCNT = 0,
 	SEN_IPS,
 	SEN_TOTALTIME_S,
@@ -67,51 +72,68 @@ typedef enum {
 	SEN_FREQ_MHZ,
 	/////////////
 	SIZE_SEN_TYPES
-} sensing_type ;
+};
 
-// This struct defines the value type
-// for each type of sensing data
-// By default all values are double, but should
-// specialize this class for every sensing type
-template <sensing_type T>
-struct sensing_type_val {
-  using type = double;
+
+// This struct has information
+// describing each sensinng type.
+// Some default information is provided, but
+// this struct should be specialized type.
+template <SensingType T>
+struct SensingTypeInfo {
+    // The data type of the sensing value
+    // Default is double
+    using ValType = double;
+
+    // ParamType. Used by SEN_PERFCNT to
+    // specify which counter we are reading.
+    // For most SEN_* this won't be used and
+    // is void
+    using ParamType = void;
 };
 //of course this template instantiation is invalid
-template <> struct sensing_type_val<SIZE_SEN_TYPES>;
+template <> struct SensingTypeInfo<SIZE_SEN_TYPES>;
 
 //Now the knob types values specializations
 
-template <> struct sensing_type_val<SEN_PERFCNT>{
-  using type = uint64_t; //number of events
+template <> struct SensingTypeInfo<SEN_PERFCNT>{
+    using ValType = uint64_t; //number of events
+    using ParamType = perfcnt_t;
 };
 
-template <> struct sensing_type_val<SEN_IPS>{
-  using type = double; // instr. per sec
+template <> struct SensingTypeInfo<SEN_IPS>{
+    using ValType = double; // instr. per sec
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_TOTALTIME_S>{
-  using type = double; // total time elapsed in s
+template <> struct SensingTypeInfo<SEN_TOTALTIME_S>{
+    using ValType = double; // total time elapsed in s
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_BUSYTIME_S>{
-  using type = double; // total time the cpu was busy in s
+template <> struct SensingTypeInfo<SEN_BUSYTIME_S>{
+    using ValType = double; // total time the cpu was busy in s
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_BEATS>{
-  using type = unsigned int; // number of heartbeats issued
+template <> struct SensingTypeInfo<SEN_BEATS>{
+    using ValType = unsigned int; // number of heartbeats issued
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_POWER_W>{
-  using type = double; // average power in W
+template <> struct SensingTypeInfo<SEN_POWER_W>{
+    using ValType = double; // average power in W
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_TEMP_C>{
-  using type = double; // average temperature in C
+template <> struct SensingTypeInfo<SEN_TEMP_C>{
+    using ValType = double; // average temperature in C
+    using ParamType = void;
 };
 
-template <> struct sensing_type_val<SEN_FREQ_MHZ>{
-  using type = double; // average frequency in MHz
+template <> struct SensingTypeInfo<SEN_FREQ_MHZ>{
+    using ValType = double; // average frequency in MHz
+    using ParamType = void;
 };
 
 

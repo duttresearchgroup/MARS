@@ -56,7 +56,7 @@ class PeriodicSensingManager {
 
 
 
-template<sensing_type TYPE, typename Derived>
+template<SensingType TYPE, typename Derived>
 class SensorBase : public PeriodicSensor {
 
 	friend class PeriodicSensing;
@@ -64,17 +64,17 @@ class SensorBase : public PeriodicSensor {
   private:
 	pthread_mutex_t _windowMutex;
 
-	std::vector<typename sensing_type_val<TYPE>::type> _currWindowAcc;
-	std::vector<typename sensing_type_val<TYPE>::type> _currWindowSamples;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _currWindowAcc;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _currWindowSamples;
 
-	std::vector<typename sensing_type_val<TYPE>::type> _lastWindowAcc;
-	std::vector<typename sensing_type_val<TYPE>::type> _lastWindowSamples;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _lastWindowAcc;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _lastWindowSamples;
 
-	std::vector<typename sensing_type_val<TYPE>::type> _aggWindowAcc;
-	std::vector<typename sensing_type_val<TYPE>::type> _aggWindowSamples;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _aggWindowAcc;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _aggWindowSamples;
 
-	std::vector<typename sensing_type_val<TYPE>::type> _lastAggWindowAcc;
-	std::vector<typename sensing_type_val<TYPE>::type> _lastAggWindowSamples;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _lastAggWindowAcc;
+	std::vector<typename SensingTypeInfo<TYPE>::ValType> _lastAggWindowSamples;
 
 	void _windowsOK() const{
 		assert_true(_currWindowAcc.size()>0);
@@ -115,7 +115,7 @@ class SensorBase : public PeriodicSensor {
 	void doSampling() override
 	{
 		_windowsOK();
-		typename sensing_type_val<TYPE>::type sample = static_cast<Derived*>(this)->readSample();
+		typename SensingTypeInfo<TYPE>::ValType sample = static_cast<Derived*>(this)->readSample();
 		pthread_mutex_lock(&_windowMutex);
 		for(unsigned int i = 0; i < _currWindowAcc.size(); ++i){
 			_currWindowAcc[i] += sample;
@@ -135,14 +135,14 @@ class SensorBase : public PeriodicSensor {
   public:
 
 	// Returns the accumulated sample data for a sensing window
-	typename sensing_type_val<TYPE>::type accData(int wid) { return _lastWindowAcc[wid]; }
-	typename sensing_type_val<TYPE>::type samples(int wid) { return _lastWindowSamples[wid]; }
+	typename SensingTypeInfo<TYPE>::ValType accData(int wid) { return _lastWindowAcc[wid]; }
+	typename SensingTypeInfo<TYPE>::ValType samples(int wid) { return _lastWindowSamples[wid]; }
 
-	typename sensing_type_val<TYPE>::type accDataAgg(int wid) { return _lastAggWindowAcc[wid]; }
-	typename sensing_type_val<TYPE>::type samplesAgg(int wid) { return _lastAggWindowSamples[wid]; }
+	typename SensingTypeInfo<TYPE>::ValType accDataAgg(int wid) { return _lastAggWindowAcc[wid]; }
+	typename SensingTypeInfo<TYPE>::ValType samplesAgg(int wid) { return _lastAggWindowSamples[wid]; }
 
 	// The type of information we are sensing
-	sensing_type type() const { return TYPE;}
+	SensingType type() const { return TYPE;}
 
 	virtual ~SensorBase(){}
 };

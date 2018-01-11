@@ -1,7 +1,7 @@
 
 #include "actuator.h"
 
-Actuator::Actuator(actuation_type type,const sys_info_t &_info)
+Actuator::Actuator(ActuationType type,const sys_info_t &_info)
 	:_type(type),_mode(ACTMODE_SYSTEM),info(_info)
 {
 
@@ -13,7 +13,7 @@ Actuator::~Actuator()
 	//pinfo("%s called\n",__PRETTY_FUNCTION__);
 }
 
-std::map<actuation_type,std::map<void*,Actuator*>> Actuator::_actuatorMap;
+std::map<ActuationType,std::map<void*,Actuator*>> Actuator::_actuatorMap;
 
 void Actuator::setActForResource(void *rsc)
 {
