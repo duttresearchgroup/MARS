@@ -62,14 +62,17 @@ template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
 //////////////////////////////////////////////////////////////////////////////
 // Sensing data types
 enum SensingType {
+    //Performance stuff
 	SEN_PERFCNT = 0,
-	SEN_IPS,
 	SEN_TOTALTIME_S,
 	SEN_BUSYTIME_S,
 	SEN_BEATS,
+	SEN_FREQ_MHZ,
+
+	//Other sensing data
 	SEN_POWER_W,
 	SEN_TEMP_C,
-	SEN_FREQ_MHZ,
+
 	/////////////
 	SIZE_SEN_TYPES
 };
