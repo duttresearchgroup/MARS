@@ -198,88 +198,101 @@ void TracingSystem::report()
 void InterfaceTest::setup()
 {
 	_manager->sensingModule()->enablePerTaskSensing();
-	sensingWindow_fine = _manager->addSensingWindowHandler(WINDOW_LENGTH_FINE_MS,this,window_handler);
-	sensingWindow_coarse = _manager->addSensingWindowHandler(WINDOW_LENGTH_COARSE_MS,this,window_handler);
+	sensingWindow_fine = _manager->addSensingWindowHandler(WINDOW_LENGTH_FINE_MS,this,fine_window_handler);
+	sensingWindow_coarse = _manager->addSensingWindowHandler(WINDOW_LENGTH_COARSE_MS,this,coarse_window_handler);
 
-	_freqAct.setSystemMode();
-
-	for(int i = 0; i < info()->freq_domain_list_size; ++i){
-		if(_freqAct.freqMax(info()->freq_domain_list[i]) > 1800){
-			_freqAct.freqMax(info()->freq_domain_list[i],1800);
-		}
+	_freqAct.setFrameworkMode();
+	for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
+		_fd_state[domain_id] = false;
+		actuate<ACT_FREQ_MHZ>(
+							info()->freq_domain_list[domain_id],
+							_freqAct.freqMax(info()->freq_domain_list[domain_id]));
 	}
 }
 
-void InterfaceTest::window_handler(int wid,System *owner)
+static char _formatstr_buff[64];
+template<typename... Args>
+static const char * formatstr(const char *s, Args... args){
+	std::snprintf(_formatstr_buff,64,s,args...);
+	return _formatstr_buff;
+}
+
+void InterfaceTest::fine_window_handler(int wid,System *owner)
 {
 	InterfaceTest *self =  dynamic_cast<InterfaceTest*>(owner);
 
 	auto sensedData = self->sensingModule()->data();
-	auto trace = (wid == self->sensingWindow_fine->wid) ?
-					self->_execTrace_fine.getHandle(sensedData,wid) :
-					self->_execTrace_coarse.getHandle(sensedData,wid);
+	auto trace = self->_execTrace_fine.getHandle(sensedData,wid);
 
 	//save total power
 	double totalPowerW = 0;
 	for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
 		totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
 	}
-	//for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-	//	const sensed_data_power_domain_t& powData = sensedData.swCurrData(wid).power_domains[domain_id];
-	//	totalPowerW += ((double)powData.avg_power_uW_acc / (double) powData.time_ms_acc)/1000000;
-	//}
-
-	trace("total_power_w") = 0.1234;
-	trace("sample_cnt") = self->_sampleCnt;
-
-	//this should overwrite the previous one
 	trace("total_power_w") = totalPowerW;
 
-	//calling getHandle multiple times for the same window sample should have no effect
-	auto trace2 = (wid == self->sensingWindow_fine->wid) ?
-			self->_execTrace_fine.getHandle(sensedData,wid) :
-			self->_execTrace_coarse.getHandle(sensedData,wid);
-	trace2("sample_cnt_plus1") = self->_sampleCnt+1;
+	uint64_t totalInsts = 0;
+	double totalCPUTime = 0;
 
-
-	trace("freq_domain0_sensed") = ((double)sensedData.swCurrData(wid).freq_domains[0].avg_freq_mhz_acc
-			/ (double) sensedData.swCurrData(wid).freq_domains[0].time_ms_acc);
-	trace("freq_domain1_sensed") = ((double)sensedData.swCurrData(wid).freq_domains[1].avg_freq_mhz_acc
-				/ (double) sensedData.swCurrData(wid).freq_domains[1].time_ms_acc);
-
-	int aux;
-	actuationVal<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[0],&aux);
-	trace("freq_domain0_actedRead") = aux;
-
-	trace("freq_domain1_actedRead") = actuationVal<ACT_FREQ_MHZ>(owner->info()->freq_domain_list[1]);
-
-	if((self->_sampleCnt > 50) && (wid == self->sensingWindow_fine->wid)){
-		if(self->_freqAct.frameworkMode()==false) self->_freqAct.setFrameworkMode();
-
-		if((self->_sampleCnt % 2)==0){
-			actuate<ACT_FREQ_MHZ>(
-					owner->info()->freq_domain_list[0],
-					self->_freqAct.freqMax(owner->info()->freq_domain_list[0]));
-			trace("freq_domain0_actedWrite") = self->_freqAct.freqMax(owner->info()->freq_domain_list[0]);
-			actuate<ACT_FREQ_MHZ>(
-					owner->info()->freq_domain_list[1],
-					self->_freqAct.freqMin(owner->info()->freq_domain_list[1]));
-			trace("freq_domain1_actedWrite") = self->_freqAct.freqMin(owner->info()->freq_domain_list[1]);
-		}
-		else{
-			actuate<ACT_FREQ_MHZ>(
-					owner->info()->freq_domain_list[0],
-					self->_freqAct.freqMin(owner->info()->freq_domain_list[0]));
-			trace("freq_domain0_actedWrite") = self->_freqAct.freqMin(owner->info()->freq_domain_list[0]);
-			actuate<ACT_FREQ_MHZ>(
-					owner->info()->freq_domain_list[1],
-					self->_freqAct.freqMax(owner->info()->freq_domain_list[1]));
-			trace("freq_domain1_actedWrite") = self->_freqAct.freqMax(owner->info()->freq_domain_list[1]);
-		}
+	for(int core = 0; core < owner->info()->core_list_size; ++core){
+		totalInsts += sensedData.getPerfcntVal(sensedData.swCurrData(wid).cpus[core].perfcnt,PERFCNT_INSTR_EXE);
+		totalCPUTime += sensedData.swCurrData(wid).cpus[core].perfcnt.time_busy_ms / 1000.0;
 	}
+	trace("total_cpu_time_s") = totalCPUTime;
+	trace("total_instr") = totalInsts;
 
-	if(wid == self->sensingWindow_fine->wid)
-		self->_sampleCnt += 1;
+	for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
+		freq_domain_info_t &fd = owner->info()->freq_domain_list[i];
+
+		trace(formatstr("freq_domain%d_sensed",i)) = ((double)sensedData.swCurrData(wid).freq_domains[i].avg_freq_mhz_acc
+					/ (double) sensedData.swCurrData(wid).freq_domains[i].time_ms_acc);
+
+		int curr = actuationVal<ACT_FREQ_MHZ>(fd);
+
+		trace(formatstr("freq_domain%d_set",i)) = curr;
+
+		//reached max and we were increassing freq
+		if((curr >= self->_freqAct.freqMax(fd)) && self->_fd_state[i])
+			self->_fd_state[i] = false;//now we decrease
+		//reached min and we were decreassing freq
+		else if((curr <= self->_freqAct.freqMin(fd)) && !self->_fd_state[i])
+			self->_fd_state[i] = true;//now we increase
+
+		if(self->_fd_state[i])
+			actuate<ACT_FREQ_MHZ>(fd,curr+100);
+		else
+			actuate<ACT_FREQ_MHZ>(fd,curr-100);
+	}
+}
+
+void InterfaceTest::coarse_window_handler(int wid,System *owner)
+{
+	InterfaceTest *self =  dynamic_cast<InterfaceTest*>(owner);
+
+	auto sensedData = self->sensingModule()->data();
+	auto trace = self->_execTrace_coarse.getHandle(sensedData,wid);
+
+	//save total power
+	double totalPowerW = 0;
+	for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
+		totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
+	}
+	trace("total_power_w") = totalPowerW;
+
+	uint64_t totalInsts = 0;
+	double totalCPUTime = 0;
+
+	for(int core = 0; core < owner->info()->core_list_size; ++core){
+		totalInsts += sensedData.getPerfcntVal(sensedData.swCurrData(wid).cpus[core].perfcnt,PERFCNT_INSTR_EXE);
+		totalCPUTime += sensedData.swCurrData(wid).cpus[core].perfcnt.time_busy_ms / 1000.0;
+	}
+	trace("total_cpu_time_s") = totalCPUTime;
+	trace("total_instr") = totalInsts;
+
+	for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
+		trace(formatstr("freq_domain%d_sensed",i)) = ((double)sensedData.swCurrData(wid).freq_domains[i].avg_freq_mhz_acc
+				/ (double) sensedData.swCurrData(wid).freq_domains[i].time_ms_acc);
+	}
 }
 
 void InterfaceTest::report()

@@ -86,20 +86,21 @@ protected:
 	const SensingWindowManager::WindowInfo *sensingWindow_fine;
 	const SensingWindowManager::WindowInfo *sensingWindow_coarse;
 
-	static void window_handler(int wid,System *owner);
+	static void fine_window_handler(int wid,System *owner);
+	static void coarse_window_handler(int wid,System *owner);
 
 	ExecutionTrace _execTrace_fine;
 	ExecutionTrace _execTrace_coarse;
 
-	int _sampleCnt;
-
 	FrequencyActuator _freqAct;
+
+	//is freq increassing or decreassing ?
+	std::map<int,bool> _fd_state;
 
 public:
 	InterfaceTest() :System(),
 		sensingWindow_fine(nullptr),sensingWindow_coarse(nullptr),
 		_execTrace_fine("execTraceFine"),_execTrace_coarse("execTraceCoarse"),
-		_sampleCnt(0),
 		_freqAct(*info()){};
 
 };
