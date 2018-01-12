@@ -15,7 +15,7 @@ class LinuxSensingModule
 {
   private:
 
-	static bool _attached;
+	static LinuxSensingModule* _attached;
 
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
@@ -32,6 +32,13 @@ class LinuxSensingModule
 	//disconnects this object from the module without checks
 	//will make this object invalid
 	void forceDetach();
+
+	static LinuxSensingModule& get()
+	{
+		if((_attached == nullptr))
+			arm_throw(LinuxSensingModuleException,"Sensing module not attached");
+		return *_attached;
+	}
 
   public:
 

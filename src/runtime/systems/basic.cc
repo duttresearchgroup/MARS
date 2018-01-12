@@ -234,9 +234,10 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
 	uint64_t totalInsts = 0;
 	double totalCPUTime = 0;
 
-	for(int core = 0; core < owner->info()->core_list_size; ++core){
-		totalInsts += sensedData.getPerfcntVal(sensedData.swCurrData(wid).cpus[core].perfcnt,PERFCNT_INSTR_EXE);
-		totalCPUTime += sensedData.swCurrData(wid).cpus[core].perfcnt.time_busy_ms / 1000.0;
+	for(int i = 0; i < owner->info()->core_list_size; ++i){
+	    core_info_t &core = owner->info()->core_list[i];
+	    totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,core,wid);
+		totalCPUTime += sense<SEN_BUSYTIME_S>(core,wid);
 	}
 	trace("total_cpu_time_s") = totalCPUTime;
 	trace("total_instr") = totalInsts;
@@ -244,8 +245,7 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
 	for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
 		freq_domain_info_t &fd = owner->info()->freq_domain_list[i];
 
-		trace(formatstr("freq_domain%d_sensed",i)) = ((double)sensedData.swCurrData(wid).freq_domains[i].avg_freq_mhz_acc
-					/ (double) sensedData.swCurrData(wid).freq_domains[i].time_ms_acc);
+		trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(fd,wid);
 
 		int curr = actuationVal<ACT_FREQ_MHZ>(fd);
 
@@ -272,26 +272,28 @@ void InterfaceTest::coarse_window_handler(int wid,System *owner)
 	auto sensedData = self->sensingModule()->data();
 	auto trace = self->_execTrace_coarse.getHandle(sensedData,wid);
 
-	//save total power
-	double totalPowerW = 0;
-	for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-		totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
-	}
-	trace("total_power_w") = totalPowerW;
+    //save total power
+    double totalPowerW = 0;
+    for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
+        totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
+    }
+    trace("total_power_w") = totalPowerW;
 
-	uint64_t totalInsts = 0;
-	double totalCPUTime = 0;
+    uint64_t totalInsts = 0;
+    double totalCPUTime = 0;
 
-	for(int core = 0; core < owner->info()->core_list_size; ++core){
-		totalInsts += sensedData.getPerfcntVal(sensedData.swCurrData(wid).cpus[core].perfcnt,PERFCNT_INSTR_EXE);
-		totalCPUTime += sensedData.swCurrData(wid).cpus[core].perfcnt.time_busy_ms / 1000.0;
-	}
-	trace("total_cpu_time_s") = totalCPUTime;
-	trace("total_instr") = totalInsts;
+    for(int i = 0; i < owner->info()->core_list_size; ++i){
+        core_info_t &core = owner->info()->core_list[i];
+        totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,core,wid);
+        totalCPUTime += sense<SEN_BUSYTIME_S>(core,wid);
+    }
+    trace("total_cpu_time_s") = totalCPUTime;
+    trace("total_instr") = totalInsts;
 
-	for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
-		trace(formatstr("freq_domain%d_sensed",i)) = ((double)sensedData.swCurrData(wid).freq_domains[i].avg_freq_mhz_acc
-				/ (double) sensedData.swCurrData(wid).freq_domains[i].time_ms_acc);
+    for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
+        freq_domain_info_t &fd = owner->info()->freq_domain_list[i];
+
+        trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(fd,wid);
 	}
 }
 

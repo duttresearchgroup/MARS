@@ -28,14 +28,15 @@
 
 #include <runtime/common/rt_config_params.h>
 
-bool LinuxSensingModule::_attached = false;
+LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 
 LinuxSensingModule::LinuxSensingModule()
 	:_module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
 	 _sensingRunning(false),
 	 _numCreatedWindows(0)
 {
-	if(_attached) arm_throw(LinuxSensingModuleException,"There can be only one connection with the sensing module");
+	if(_attached != nullptr)
+		arm_throw(LinuxSensingModuleException,"There can be only one connection with the sensing module and instance of LinuxSensingModule");
 
 	_module_file_if = open(MODULE_SYSFS_PATH, O_RDWR);
     if(_module_file_if < 0)
@@ -52,13 +53,13 @@ LinuxSensingModule::LinuxSensingModule()
     //setup the platform sensors
     pal_sensing_setup(this);
 
-    _attached = true;
+    _attached = this;
 
 }
 
 LinuxSensingModule::~LinuxSensingModule()
 {
-    _attached = false;
+    _attached = nullptr;
 
 	if(_sensingRunning)
     	sensingStop();

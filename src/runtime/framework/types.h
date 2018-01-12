@@ -89,7 +89,8 @@ struct SensingTypeInfo {
     using ValType = double;
 
     // ParamType. Used by SEN_PERFCNT to
-    // specify which counter we are reading.
+    // specify which counter we are reading,
+    // and by SEN_BEATS to specify beats domain.
     // For most SEN_* this won't be used and
     // is void
     using ParamType = void;
@@ -101,12 +102,7 @@ template <> struct SensingTypeInfo<SIZE_SEN_TYPES>;
 
 template <> struct SensingTypeInfo<SEN_PERFCNT>{
     using ValType = uint64_t; //number of events
-    using ParamType = perfcnt_t;
-};
-
-template <> struct SensingTypeInfo<SEN_IPS>{
-    using ValType = double; // instr. per sec
-    using ParamType = void;
+    using ParamType = perfcnt_t; //which perf. counter
 };
 
 template <> struct SensingTypeInfo<SEN_TOTALTIME_S>{
@@ -121,7 +117,7 @@ template <> struct SensingTypeInfo<SEN_BUSYTIME_S>{
 
 template <> struct SensingTypeInfo<SEN_BEATS>{
     using ValType = unsigned int; // number of heartbeats issued
-    using ParamType = void;
+    using ParamType = unsigned int; //beats domain
 };
 
 template <> struct SensingTypeInfo<SEN_POWER_W>{
