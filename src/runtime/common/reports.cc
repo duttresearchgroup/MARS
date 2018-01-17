@@ -43,8 +43,9 @@ void SensingDataTracer::init_counters_names(std::initializer_list<std::string> a
 	data_names.push_back("util"); data_agg_att.push_back(traced_data::AGG_SUM);
 	data_names.push_back("power_w"); data_agg_att.push_back(traced_data::AGG_SUM);
 	data_names.push_back("freq_mhz"); data_agg_att.push_back(traced_data::AGG_NOPE);
-	for(int i = 0; i < _data.numMappedPerfcnts(); ++i) {
-		data_names.push_back(perfcnt_str(_data.perfcntFromIdx(i)));
+	const PerformanceData &data = SensingModule::get().data();
+	for(int i = 0; i < data.numMappedPerfcnts(); ++i) {
+		data_names.push_back(perfcnt_str(data.perfcntFromIdx(i)));
 		data_agg_att.push_back(traced_data::AGG_SUM);
 	}
 	data_names.push_back("nivcsw"); data_agg_att.push_back(traced_data::AGG_SUM);
@@ -56,41 +57,43 @@ void SensingDataTracer::init_counters_names(std::initializer_list<std::string> a
 		data_names.push_back(i); data_agg_att.push_back(traced_data::AGG_NOPE);
 	}
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_cpu_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const core_info_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
-	data_vals.push_back(_total_time_s(sd.perfcnt));
-	data_vals.push_back(_busy_time_s(sd.perfcnt));
-	data_vals.push_back(_total_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_busy_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_util(sd.perfcnt));
+	data_vals.push_back(_total_time_s(sd,wid,isAgg));
+	data_vals.push_back(_busy_time_s(sd,wid,isAgg));
+	data_vals.push_back(_total_ips(sd,wid,isAgg));
+	data_vals.push_back(_busy_ips(sd,wid,isAgg));
+	data_vals.push_back(_util(sd,wid,isAgg));
 	data_vals.push_back(traced_data::NO_DATA);//power
 	data_vals.push_back(traced_data::NO_DATA);//freq
-	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
-		data_vals.push_back(sd.perfcnt.perfcnts[j]);
-	data_vals.push_back(sd.perfcnt.nivcsw);
-	data_vals.push_back(sd.perfcnt.nvcsw);
-	for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(sd.beats[j]);
+	const PerformanceData &data = SensingModule::get().data();
+	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
+		data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
+	data_vals.push_back(_nivcsw(sd,wid,isAgg));
+	data_vals.push_back(_nvcsw(sd,wid,isAgg));
+	for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(_beats(sd,j,wid,isAgg));
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const tracked_task_data_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
-	data_vals.push_back(_total_time_s(sd.perfcnt));
-	data_vals.push_back(_busy_time_s(sd.perfcnt));
-	data_vals.push_back(_total_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_busy_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_util(sd.perfcnt));
-	data_vals.push_back(traced_data::NO_DATA);//power
-	data_vals.push_back(traced_data::NO_DATA);//freq
-	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
-		data_vals.push_back(sd.perfcnt.perfcnts[j]);
-	data_vals.push_back(sd.perfcnt.nivcsw);
-	data_vals.push_back(sd.perfcnt.nvcsw);
-	for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(sd.beats[j]);//beats
-	for (auto i: a_args) data_vals.push_back(i);//additional data
-	assert_false(data_vals.size()!=tracer.data_names.size());
+    data_vals.push_back(_total_time_s(sd,wid,isAgg));
+    data_vals.push_back(_busy_time_s(sd,wid,isAgg));
+    data_vals.push_back(_total_ips(sd,wid,isAgg));
+    data_vals.push_back(_busy_ips(sd,wid,isAgg));
+    data_vals.push_back(_util(sd,wid,isAgg));
+    data_vals.push_back(traced_data::NO_DATA);//power
+    data_vals.push_back(traced_data::NO_DATA);//freq
+    const PerformanceData &data = SensingModule::get().data();
+    for(int j = 0; j < data.numMappedPerfcnts(); ++j)
+        data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
+    data_vals.push_back(_nivcsw(sd,wid,isAgg));
+    data_vals.push_back(_nvcsw(sd,wid,isAgg));
+    for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(_beats(sd,j,wid,isAgg));
+    for (auto i: a_args) data_vals.push_back(i);//additional data
+    assert_false(data_vals.size()!=tracer.data_names.size());
 }
 SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const power_domain_info_t &sd, int wid, bool isAgg, std::initializer_list<double> &a_args)
 	:_tracer(tracer)
@@ -102,7 +105,8 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(traced_data::NO_DATA);//util
 	data_vals.push_back(_power_w(sd,wid,isAgg));//power
 	data_vals.push_back(traced_data::NO_DATA);//freq
-	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
+	const PerformanceData &data = SensingModule::get().data();
+	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(traced_data::NO_DATA);
 	data_vals.push_back(traced_data::NO_DATA);//nivcsw
 	data_vals.push_back(traced_data::NO_DATA);//nvcsw
@@ -110,7 +114,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_freq_domain_t &sd,std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const freq_domain_info_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
 	data_vals.push_back(traced_data::NO_DATA);//total_time
@@ -119,8 +123,9 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(traced_data::NO_DATA);//busy_ips
 	data_vals.push_back(traced_data::NO_DATA);//util
 	data_vals.push_back(traced_data::NO_DATA);//power
-	data_vals.push_back(_freq_mhz(sd));//freq
-	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
+	data_vals.push_back(_freq_mhz(sd,wid,isAgg));//freq
+	const PerformanceData &data = SensingModule::get().data();
+	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(traced_data::NO_DATA);
 	data_vals.push_back(traced_data::NO_DATA);//nivcsw
 	data_vals.push_back(traced_data::NO_DATA);//nvcsw
@@ -129,21 +134,22 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
 //adds the core freq domain and power domain info to task
-SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,const perf_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg, std::initializer_list<double> &a_args)
+SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,const tracked_task_data_t &sd,const freq_domain_info_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg, std::initializer_list<double> &a_args)
 	:_tracer(tracer)
 {
-	data_vals.push_back(_total_time_s(sd.perfcnt));
-	data_vals.push_back(_busy_time_s(sd.perfcnt));
-	data_vals.push_back(_total_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_busy_ips(tracer._data,sd.perfcnt));
-	data_vals.push_back(_util(sd.perfcnt));
+    data_vals.push_back(_total_time_s(sd,wid,isAgg));
+    data_vals.push_back(_busy_time_s(sd,wid,isAgg));
+    data_vals.push_back(_total_ips(sd,wid,isAgg));
+    data_vals.push_back(_busy_ips(sd,wid,isAgg));
+    data_vals.push_back(_util(sd,wid,isAgg));
 	data_vals.push_back(_power_w(sd_power,wid,isAgg));
-	data_vals.push_back(_freq_mhz(sd_freq));
-	for(int j = 0; j < tracer._data.numMappedPerfcnts(); ++j)
-		data_vals.push_back(sd.perfcnt.perfcnts[j]);
-	data_vals.push_back(sd.perfcnt.nivcsw);
-	data_vals.push_back(sd.perfcnt.nvcsw);
-	for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(sd.beats[j]);//beats
+	data_vals.push_back(_freq_mhz(sd_freq,wid,isAgg));
+	const PerformanceData &data = SensingModule::get().data();
+	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
+	    data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
+	data_vals.push_back(_nivcsw(sd,wid,isAgg));
+	data_vals.push_back(_nvcsw(sd,wid,isAgg));
+	for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) data_vals.push_back(_beats(sd,j,wid,isAgg));
 	for (auto i: a_args) data_vals.push_back(i);//additional data
 	assert_false(data_vals.size()!=tracer.data_names.size());
 }
@@ -191,8 +197,8 @@ void SensingDataTracer::_init_counters(database_type &data,int num_of_components
 	}
 }
 
-SensingDataTracer::SensingDataTracer(sys_info_t *sys,const PerformanceData &data)
-	:_sys(sys),_data(data),_time_series_size(0),_wid(-1),_doneCalled(false)
+SensingDataTracer::SensingDataTracer(sys_info_t *sys)
+	:_sys(sys),_time_series_size(0),_wid(-1),_doneCalled(false)
 {
 	_init_counters(_d_sys,1);
 	_init_counters(_d_cpu,_sys->core_list_size);
@@ -261,23 +267,23 @@ void ExecutionSummary::record(std::initializer_list<double> a_args)
 	if(data_names.size() == 0)
 		init_counters_names();
 
-	assert_false(_wid < 0);
-	_timestamps.push_back((double)(_data.sensingStopTimeMS() - _data.sensingStartTimeMS())/1000.0);
+	const PerformanceData &data = SensingModule::get().data();
 
-	const perf_window_data_t& sw = _data.swAggrData(_wid);
+	assert_false(_wid < 0);
+	_timestamps.push_back((double)(data.sensingStopTimeMS() - data.sensingStartTimeMS())/1000.0);
 
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu){
-		_d_cpu[cpu].push_back(new traced_data(*this,sw.cpus[cpu],a_args));
+		_d_cpu[cpu].push_back(new traced_data(*this,_sys->core_list[cpu],_wid,true,a_args));
 	}
 	for(int power_domain = 0; power_domain < _sys->power_domain_list_size; ++power_domain){
 		_d_pd[power_domain].push_back(new traced_data(*this,_sys->power_domain_list[power_domain],_wid,true,a_args));
 	}
 	for(int freq_domain = 0; freq_domain < _sys->freq_domain_list_size; ++freq_domain){
-		_d_fd[freq_domain].push_back(new traced_data(*this,sw.freq_domains[freq_domain],a_args));
+		_d_fd[freq_domain].push_back(new traced_data(*this,_sys->freq_domain_list[freq_domain],_wid,true,a_args));
 	}
-	for(int p = 0; p < _data.numCreatedTasks(); ++p){
+	for(int p = 0; p < data.numCreatedTasks(); ++p){
 		_d_task.push_back(timeseries_data());
-		_d_task[p].push_back(new traced_data(*this,sw.tasks[p],a_args));
+		_d_task[p].push_back(new traced_data(*this,data.task(p),_wid,true,a_args));
 	}
 	++_time_series_size;
 }
@@ -315,9 +321,10 @@ void ExecutionSummary::dump()
 			}
 		}
 	}
+	const PerformanceData &data = SensingModule::get().data();
 
-	for(int p = 0; p < _data.numCreatedTasks(); ++p)
-		_dumpTotalPrintLine(of,"",_data.task(p),_d_task,p);
+	for(int p = 0; p < data.numCreatedTasks(); ++p)
+		_dumpTotalPrintLine(of,"",data.task(p),_d_task,p);
 
 	of.close();
 }
@@ -347,28 +354,30 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 	if(data_names.size() == 0)
 		init_counters_names();
 
-	assert_false(_wid < 0);
-	_timestamps.push_back((double)(_data.swCurrSampleTimeMS(_wid) - _data.sensingStartTimeMS())/1000.0);
+	const PerformanceData &data = SensingModule::get().data();
 
-	const perf_window_data_t& sw = _data.swCurrData(_wid);
+	assert_false(_wid < 0);
+	_timestamps.push_back((double)(data.swCurrSampleTimeMS(_wid) - data.sensingStartTimeMS())/1000.0);
 
 	//in the time trace we copy the core's domain data to its own data to make it easier to analyse later
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu){
 		//int power_domain = _sys->core_list[cpu].power->domain_id;
 		//int freq_domain = _sys->core_list[cpu].freq->domain_id;
 		//_d_cpu[cpu].push_back(new traced_data(_data,sw.cpus[cpu],sw.power_domains[power_domain],sw.freq_domains[freq_domain]));
-		_d_cpu[cpu].push_back(new traced_data(*this,sw.cpus[cpu],a_args));
+		_d_cpu[cpu].push_back(new traced_data(*this,_sys->core_list[cpu],_wid,false,a_args));
 	}
 	for(int power_domain = 0; power_domain < _sys->power_domain_list_size; ++power_domain){
 		_d_pd[power_domain].push_back(new traced_data(*this,_sys->power_domain_list[power_domain],_wid,false,a_args));
 	}
 	for(int freq_domain = 0; freq_domain < _sys->freq_domain_list_size; ++freq_domain){
-		_d_fd[freq_domain].push_back(new traced_data(*this,sw.freq_domains[freq_domain],a_args));
+		_d_fd[freq_domain].push_back(new traced_data(*this,_sys->freq_domain_list[freq_domain],_wid,false,a_args));
 	}
-	for(int p = 0; p < _data.numCreatedTasks(); ++p){
+	for(int p = 0; p < data.numCreatedTasks(); ++p){
 		//has the task executed in this epoch ?
-		const tracked_task_data_t &task = _data.task(p);
-		if(sw.tasks[p].last_cpu_used == -1) continue; //task have not executed yet
+		const tracked_task_data_t &task = data.task(p);
+		int last_cpu_used = SensingInterface::sense<SEN_LASTCPU>(&task,_wid);
+
+		if(last_cpu_used == -1) continue; //task have not executed yet
 		{
 			//check we have data for this task
 			if(_task_id2idx.find(task.this_task_pid)==_task_id2idx.end()){
@@ -383,9 +392,9 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 			assert_false(_d_task[idx].size() > _time_series_size);
 
 			//data for this epoch
-			int fd = _sys->core_list[sw.tasks[p].last_cpu_used].freq->domain_id;
-			int pd = _sys->core_list[sw.tasks[p].last_cpu_used].power->domain_id;
-			traced_data *aux = new traced_data(*this,sw.tasks[p],sw.freq_domains[fd],_sys->power_domain_list[pd],_wid,false,a_args);
+			int fd = _sys->core_list[last_cpu_used].freq->domain_id;
+			int pd = _sys->core_list[last_cpu_used].power->domain_id;
+			traced_data *aux = new traced_data(*this,task,_sys->freq_domain_list[fd],_sys->power_domain_list[pd],_wid,false,a_args);
 			_d_task[idx].push_back(aux);
 		}
 	}
@@ -397,7 +406,9 @@ void TimeTracer::dump()
 {
 	//one file per component
 
-	assert_false(_timestamps.size() != _time_series_size);
+    const PerformanceData &data = SensingModule::get().data();
+
+    assert_false(_timestamps.size() != _time_series_size);
 
 	pinfo("TimeTracer - dumping to %s\n", rt_param_outdir().c_str());
 
@@ -412,12 +423,12 @@ void TimeTracer::dump()
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu)
 		_dumpComponentTimeSeries(_sys->core_list[cpu],_d_cpu[cpu]);
 
-	for(int p = 0; p < _data.numCreatedTasks(); ++p){
-		if(_task_id2idx.find(_data.task(p).this_task_pid)==_task_id2idx.end()){
+	for(int p = 0; p < data.numCreatedTasks(); ++p){
+		if(_task_id2idx.find(data.task(p).this_task_pid)==_task_id2idx.end()){
 			//pinfo("No data for dumping trace of task %d\n",_data.created_tasks[p].this_task_pid);
 			continue;
 		}
-		_dumpComponentTimeSeries(_data.task(p),_d_task[_task_id2idx[_data.task(p).this_task_pid]]);
+		_dumpComponentTimeSeries(data.task(p),_d_task[_task_id2idx[data.task(p).this_task_pid]]);
 	}
 
 }
@@ -445,13 +456,14 @@ void ExecutionSummaryWithTracedTask::dump()
 	ExecutionSummary::dump();
 
 	if(_traced_task != nullptr){
+	    const PerformanceData &data = SensingModule::get().data();
 		//reappend the traced task to the output file
 		std::string path = _pathNameTotal();
 		std::ofstream of(path,std::ios::app);
 		of.precision(17);
 
-		for(int p = 0; p < _data.numCreatedTasks(); ++p)
-			if(_data.task(p).this_task_pid == _traced_task->this_task_pid){
+		for(int p = 0; p < data.numCreatedTasks(); ++p)
+			if(data.task(p).this_task_pid == _traced_task->this_task_pid){
 				//adds domain power and freq to the traced task only
 				int pd = _sys->core_list[rt_param_trace_core()].power->domain_id;
 				int fd = _sys->core_list[rt_param_trace_core()].freq->domain_id;
@@ -459,7 +471,7 @@ void ExecutionSummaryWithTracedTask::dump()
 				_d_task[p][0]->data_vals[D_IDX_FREQ] = _d_fd[fd][0]->data_vals[D_IDX_FREQ];
 
 				of << "traced.";
-				_dumpTotalPrintLine(of,"",_data.task(p),_d_task,p);
+				_dumpTotalPrintLine(of,"",data.task(p),_d_task,p);
 				break;
 			}
 
@@ -476,18 +488,18 @@ void ExecutionSummaryWithTracedTask::wrapUp()
 	const tracked_task_data_t *traced_task = nullptr;
 	_traced_task = nullptr;
 
-	const perf_window_data_t& sw = _data.swAggrData(_wid);
+	const PerformanceData &data = SensingModule::get().data();
 
-	for(int i = 0; i < _data.numCreatedTasks(); ++i){
-		const tracked_task_data_t &task = _data.task(i);
-		if((sw.tasks[i].last_cpu_used == rt_param_trace_core()) &&
-		   (_data.getPerfcntVal(sw.tasks[i].perfcnt,PERFCNT_INSTR_EXE) > 0) &&
-		   (_data.getPerfcntVal(sw.tasks[i].perfcnt,PERFCNT_BUSY_CY) > 0) &&
-		   (sw.tasks[i].perfcnt.time_busy_ms > 0)){
-
+	for(int i = 0; i < data.numCreatedTasks(); ++i){
+	    const tracked_task_data_t &task = data.task(i);
+	    int last_cpu_used = SensingInterface::senseAgg<SEN_LASTCPU>(&task,_wid);
+	    auto instr = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,_wid);
+	    auto busycy = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_BUSY_CY,&task,_wid);
+	    auto busytime = SensingInterface::senseAgg<SEN_BUSYTIME_S>(&task,_wid);
+		if((last_cpu_used == rt_param_trace_core()) &&
+		   (instr > 0) && (busycy > 0) && (busytime > 0)){
 			if(traced_task == nullptr) traced_task = &task;
-			else if(_data.getPerfcntVal(sw.tasks[i].perfcnt,PERFCNT_INSTR_EXE)
-			     > _data.getPerfcntVal(sw.tasks[traced_task->task_idx].perfcnt,PERFCNT_INSTR_EXE)){
+			else if(instr > SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,traced_task,_wid)){
 				traced_task = &task;
 			}
 		}
@@ -500,18 +512,19 @@ void ExecutionSummaryWithTracedTask::wrapUp()
 	else {
 		uint64_t instr_sum = 0;
 		core_info_t *core;
+		int last_cpu_used = SensingInterface::senseAgg<SEN_LASTCPU>(traced_task,_wid);
 		//sums up the total ammount of instructions executed by all cores in this core's freq/power domain
-		for_each_in_internal_list(_sys->core_list[sw.tasks[traced_task->task_idx].last_cpu_used].power,cores,core,power_domain){
-			instr_sum += _data.getPerfcntVal(sw.cpus[core->position].perfcnt,PERFCNT_INSTR_EXE);
+		for_each_in_internal_list(_sys->core_list[last_cpu_used].power,cores,core,power_domain){
+			instr_sum += SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,core,_wid);
 		}
-		double rate = _data.getPerfcntVal(sw.tasks[traced_task->task_idx].perfcnt,PERFCNT_INSTR_EXE)
+		double rate = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,traced_task,_wid)
 		              / (double) instr_sum;
 		if(rate < 0.7){
 			pinfo("Task %d is the traced task, but apparently too many other tasks executed in core %d's cluster (rate = %f). Too much interference\n",traced_task->this_task_pid,rt_param_trace_core(),rate);
 			pinfo("Retrying might fix this\n");
 		}
-		else if(sw.tasks[traced_task->task_idx].last_cpu_used != rt_param_trace_core()){
-			pinfo("Task %d is the traced task, but apparently it ran on core %d. It should run in the traced core %d.",traced_task->this_task_pid,sw.tasks[traced_task->task_idx].last_cpu_used,rt_param_trace_core());
+		else if(last_cpu_used != rt_param_trace_core()){
+			pinfo("Task %d is the traced task, but apparently it ran on core %d. It should run in the traced core %d.",traced_task->this_task_pid,last_cpu_used,rt_param_trace_core());
 			pinfo("Retrying might fix this\n");
 		}
 		else{

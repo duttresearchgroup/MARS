@@ -10,6 +10,7 @@
 #include <runtime/common/rt_config_params.h>
 #include <runtime/framework/sensing_interface.h>
 #include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/sensing_module.h>
 
 inline std::ostream& operator<< (std::ostream& os, const sys_info_t& obj){
 	os << "sys"; return os;
@@ -34,33 +35,62 @@ protected:
 	struct traced_data{
 		const SensingDataTracer &_tracer;
 
-		traced_data(const SensingDataTracer &tracer,const perf_data_cpu_t &sd,std::initializer_list<double> &a_args);
-		traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const core_info_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const tracked_task_data_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args);
 		traced_data(const SensingDataTracer &tracer,const power_domain_info_t &sd, int wid, bool isAgg, std::initializer_list<double> &a_args);
-		traced_data(const SensingDataTracer &tracer,const perf_data_freq_domain_t &sd,std::initializer_list<double> &a_args);
-		traced_data(const SensingDataTracer &tracer,const perf_data_task_t &sd,const perf_data_freq_domain_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const freq_domain_info_t &sd,int wid, bool isAgg,std::initializer_list<double> &a_args);
+		traced_data(const SensingDataTracer &tracer,const tracked_task_data_t &sd,const freq_domain_info_t &sd_freq,const power_domain_info_t &sd_power, int wid, bool isAgg,std::initializer_list<double> &a_args);
 		traced_data(const SensingDataTracer &tracer);
 
-		inline double _total_time_s(const perf_data_perf_counters_t &counters){
-			return (double)counters.time_total_ms / (double)1000;
+		template<typename Resource>
+		inline double _total_time_s(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_TOTALTIME_S>(&r,wid) : SensingInterface::sense<SEN_TOTALTIME_S>(&r,wid);
 		}
-		inline double _busy_time_s(const perf_data_perf_counters_t &counters){
-			return (double)counters.time_busy_ms / (double)1000;
+		template<typename Resource>
+		inline double _busy_time_s(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_BUSYTIME_S>(&r,wid) : SensingInterface::sense<SEN_BUSYTIME_S>(&r,wid);
 		}
-		inline double _total_ips(const PerformanceData &data,const perf_data_perf_counters_t &counters){
-			return (double) data.getPerfcntVal(counters,PERFCNT_INSTR_EXE) / _total_time_s(counters);
+		template<typename Resource>
+		inline uint64_t _total_intr(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&r,wid) :  SensingInterface::sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&r,wid);
 		}
-		inline double _busy_ips(const PerformanceData &data,const perf_data_perf_counters_t &counters){
-			return (counters.time_busy_ms == 0) ? 0 : (double) data.getPerfcntVal(counters,PERFCNT_INSTR_EXE) / _busy_time_s(counters);
+		template<typename Resource>
+		inline double _total_ips(const Resource &r, int wid, bool isAgg){
+			return (double) _total_intr(r,wid,isAgg) / _total_time_s(r,wid,isAgg);
 		}
-		inline double _util(const perf_data_perf_counters_t &counters){
-			return (double)counters.time_busy_ms / (double) counters.time_total_ms;
+		template<typename Resource>
+		inline double _busy_ips(const Resource &r, int wid, bool isAgg){
+		    return (double) _total_intr(r,wid,isAgg) / _busy_time_s(r,wid,isAgg);
 		}
-		inline double _power_w(const power_domain_info_t &pd, int wid, bool isAgg){
-			return isAgg ? SensingInterface::senseAgg<SEN_POWER_W>(pd,wid) : SensingInterface::sense<SEN_POWER_W>(pd,wid);
+		template<typename Resource>
+		inline double _util(const Resource &r, int wid, bool isAgg){
+			return _busy_time_s(r,wid,isAgg) / _total_time_s(r,wid,isAgg);
 		}
-		inline double _freq_mhz(const perf_data_freq_domain_t &counters){
-			return ((double)counters.avg_freq_mhz_acc / (double) counters.time_ms_acc);
+		template<typename Resource>
+		inline double _power_w(const Resource &r, int wid, bool isAgg){
+			return isAgg ? SensingInterface::senseAgg<SEN_POWER_W>(&r,wid) : SensingInterface::sense<SEN_POWER_W>(&r,wid);
+		}
+		template<typename Resource>
+		inline double _freq_mhz(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_FREQ_MHZ>(&r,wid) : SensingInterface::sense<SEN_FREQ_MHZ>(&r,wid);
+		}
+		template<typename Resource>
+		inline double _nivcsw(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_NIVCSW>(&r,wid) : SensingInterface::sense<SEN_NIVCSW>(&r,wid);
+		}
+		template<typename Resource>
+		inline double _nvcsw(const Resource &r, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_NVCSW>(&r,wid) : SensingInterface::sense<SEN_NVCSW>(&r,wid);
+		}
+		template<typename Resource>
+		inline double _beats(const Resource &r, int domain, int wid, bool isAgg){
+		    return isAgg ? SensingInterface::senseAgg<SEN_BEATS>(domain,&r,wid) : SensingInterface::sense<SEN_BEATS>(domain,&r,wid);
+		}
+		template<typename Resource>
+		inline double _perfcnt(const Resource &r, int pindex, int wid, bool isAgg){
+		    const PerformanceData &data = SensingModule::get().data();
+		    perfcnt_t cnt = data.perfcntFromIdx(pindex);
+		    return isAgg ? SensingInterface::senseAgg<SEN_PERFCNT>(cnt,&r,wid) : SensingInterface::sense<SEN_PERFCNT>(cnt,&r,wid);
 		}
 
 		typedef enum {
@@ -90,7 +120,6 @@ protected:
 	};
 
 	sys_info_t *_sys;
-	const PerformanceData &_data;
 
 	//number of samples stored
 	unsigned _time_series_size;
@@ -136,7 +165,7 @@ protected:
 	}
 
 public:
-	SensingDataTracer(sys_info_t *sys,const PerformanceData &data);
+	SensingDataTracer(sys_info_t *sys);
 	virtual ~SensingDataTracer();
 
 	void init_counters_names(std::initializer_list<std::string> a_args={});
@@ -185,7 +214,7 @@ protected:
 	const int D_IDX_FREQ=6;
 
 public:
-	ExecutionSummary(sys_info_t *sys,const PerformanceData &data) :SensingDataTracer(sys,data){}
+	ExecutionSummary(sys_info_t *sys) :SensingDataTracer(sys){}
 
 	virtual ~ExecutionSummary(){ if(!_doneCalled) done(); }
 
@@ -214,7 +243,7 @@ protected:
 class TimeTracer : public SensingDataTracer {
 
 public:
-	TimeTracer(sys_info_t *sys,const PerformanceData &data) :SensingDataTracer(sys,data)
+	TimeTracer(sys_info_t *sys) :SensingDataTracer(sys)
 	{
 		pinfo("WARNING: \"TimeTracer\" is deprecated. Use \"ExecutionTrace\" instead.\n");
 	}
@@ -259,8 +288,8 @@ class ExecutionSummaryWithTracedTask : public ExecutionSummary {
 	const tracked_task_data_t *_traced_task;
 
 public:
-	ExecutionSummaryWithTracedTask(sys_info_t *sys,const PerformanceData &data)
-		:ExecutionSummary(sys,data), _traced_task(nullptr){}
+	ExecutionSummaryWithTracedTask(sys_info_t *sys)
+		:ExecutionSummary(sys), _traced_task(nullptr){}
 
 	virtual ~ExecutionSummaryWithTracedTask(){ if(!_doneCalled) done(); }
 

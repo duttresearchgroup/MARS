@@ -48,21 +48,23 @@ public:
 
 	//sums-up the beats of all tasks and their respective ips
 	//updates a beats->ips mapping using an average filter
-	void sampleTasks(const PerformanceData& data, int wid)
+	void sampleTasks(int wid)
 	{
 		_currBeats = 0;
 		uint64_t instr = 0;
 		//pinfo("\n");
+		const PerformanceData& data = SensingModule::get().data();
 		for(int i = 0; i < data.numCreatedTasks(); ++i){
 			if(data.task(i).num_beat_domains > 0){
 				assert_true(data.task(i).num_beat_domains==1);
-				if (data.swCurrData(wid).tasks[i].beats[0] < (data.swRawData(wid).curr_sample_time_ms - data.swRawData(wid).prev_sample_time_ms)*1000.0)
-					_currBeats += data.swCurrData(wid).tasks[i].beats[0];
-				instr += data.getPerfcntVal(data.swCurrData(wid).tasks[i].perfcnt, PERFCNT_INSTR_EXE);
+				auto beats = SensingInterface::sense<SEN_BEATS>(0,&data.task(i),wid);
+				if (beats < (data.swRawData(wid).curr_sample_time_ms - data.swRawData(wid).prev_sample_time_ms)*1000.0)
+					_currBeats += beats;
+				instr += SensingInterface::sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&data.task(i),wid);
 				//pinfo("%d - beats\n",data.task(i).this_task_pid);
 			}
 			else if(data.task(i).parent_has_beats){
-				instr += data.getPerfcntVal(data.swCurrData(wid).tasks[i].perfcnt, PERFCNT_INSTR_EXE);
+				instr += SensingInterface::sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&data.task(i),wid);
 				//pinfo("%d - parent beats\n",data.task(i).this_task_pid);
 			}
 		}

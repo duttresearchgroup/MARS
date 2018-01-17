@@ -20,9 +20,9 @@ private:
 	TimeTracer _timeTracer;
 
 public:
-	MeasuringSystem() :System(), sensingWindow(nullptr),_timeTracer(info(),sensingModule()->data()){};
+	MeasuringSystem() :System(), sensingWindow(nullptr),_timeTracer(info()){};
 
-	MeasuringSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_timeTracer(info(),sensingModule()->data()){};
+	MeasuringSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_timeTracer(info()){};
 
 };
 

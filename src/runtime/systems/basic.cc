@@ -15,7 +15,7 @@ void MeasuringSystem::window_handler(int wid,System *owner)
 
 void MeasuringSystem::report()
 {
-	ExecutionSummary db(info(),_manager->sensingModule()->data());
+	ExecutionSummary db(info());
 	db.setWid(sensingWindow->wid);
 	db.record();
 
@@ -78,7 +78,7 @@ void OverheadTestSystem::window_handler_tasksense(int wid,System *owner)
 
 void OverheadTestSystem::report()
 {
-	ExecutionSummary db(info(),_manager->sensingModule()->data());
+	ExecutionSummary db(info());
 	db.setWid(_sensingWindow->wid);
 	db.record();
 }
@@ -188,7 +188,7 @@ void TracingSystem::window_handler(int wid,System *owner)
 
 void TracingSystem::report()
 {
-	ExecutionSummaryWithTracedTask db(info(),_manager->sensingModule()->data());
+	ExecutionSummaryWithTracedTask db(info());
 	db.setWid(sensingWindow->wid);
 	db.record();
 
@@ -227,7 +227,7 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
 	//save total power
 	double totalPowerW = 0;
 	for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-		totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
+		totalPowerW += sense<SEN_POWER_W>(&owner->info()->power_domain_list[domain_id],wid);
 	}
 	trace("total_power_w") = totalPowerW;
 
@@ -236,8 +236,8 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
 
 	for(int i = 0; i < owner->info()->core_list_size; ++i){
 	    core_info_t &core = owner->info()->core_list[i];
-	    totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,core,wid);
-		totalCPUTime += sense<SEN_BUSYTIME_S>(core,wid);
+	    totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&core,wid);
+		totalCPUTime += sense<SEN_BUSYTIME_S>(&core,wid);
 	}
 	trace("total_cpu_time_s") = totalCPUTime;
 	trace("total_instr") = totalInsts;
@@ -245,7 +245,7 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
 	for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
 		freq_domain_info_t &fd = owner->info()->freq_domain_list[i];
 
-		trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(fd,wid);
+		trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(&fd,wid);
 
 		int curr = actuationVal<ACT_FREQ_MHZ>(fd);
 
@@ -275,7 +275,7 @@ void InterfaceTest::coarse_window_handler(int wid,System *owner)
     //save total power
     double totalPowerW = 0;
     for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-        totalPowerW += sense<SEN_POWER_W>(owner->info()->power_domain_list[domain_id],wid);
+        totalPowerW += sense<SEN_POWER_W>(&owner->info()->power_domain_list[domain_id],wid);
     }
     trace("total_power_w") = totalPowerW;
 
@@ -284,8 +284,8 @@ void InterfaceTest::coarse_window_handler(int wid,System *owner)
 
     for(int i = 0; i < owner->info()->core_list_size; ++i){
         core_info_t &core = owner->info()->core_list[i];
-        totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,core,wid);
-        totalCPUTime += sense<SEN_BUSYTIME_S>(core,wid);
+        totalInsts += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&core,wid);
+        totalCPUTime += sense<SEN_BUSYTIME_S>(&core,wid);
     }
     trace("total_cpu_time_s") = totalCPUTime;
     trace("total_instr") = totalInsts;
@@ -293,13 +293,13 @@ void InterfaceTest::coarse_window_handler(int wid,System *owner)
     for(int i = 0; i < owner->info()->freq_domain_list_size; ++i){
         freq_domain_info_t &fd = owner->info()->freq_domain_list[i];
 
-        trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(fd,wid);
+        trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(&fd,wid);
 	}
 }
 
 void InterfaceTest::report()
 {
-	ExecutionSummary db(info(),_manager->sensingModule()->data());
+	ExecutionSummary db(info());
 	db.setWid(sensingWindow_fine->wid);
 	db.record();
 }

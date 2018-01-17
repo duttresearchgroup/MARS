@@ -24,9 +24,9 @@ public:
 	void powerFilter(int window_length_ms) { _avgWeight = (window_length_ms) > 1000 ? 0 : 1-(((double)window_length_ms*1) / 1000.0);}
 
 	//reads the power from the power domain
-	void sampleSys(const PerformanceData& data, int wid)
+	void sampleSys(int wid)
 	{
-		_currPow = SensingInterface::sense<SEN_POWER_W>(_pd,wid);
+		_currPow = SensingInterface::sense<SEN_POWER_W>(&_pd,wid);
 		_currPowFiltered = (_avgWeight*_currPowFiltered) + ((1-_avgWeight)*_currPow);
 	}
 };
