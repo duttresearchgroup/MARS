@@ -35,7 +35,7 @@ class LinuxSensingModule
 
 	static LinuxSensingModule& get()
 	{
-		if((_attached == nullptr))
+		if(_attached == nullptr)
 			arm_throw(LinuxSensingModuleException,"Sensing module not attached");
 		return *_attached;
 	}
