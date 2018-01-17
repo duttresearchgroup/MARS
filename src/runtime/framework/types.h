@@ -66,8 +66,11 @@ enum SensingType {
 	SEN_PERFCNT = 0,
 	SEN_TOTALTIME_S,
 	SEN_BUSYTIME_S,
+	SEN_NIVCSW,
+	SEN_NVCSW,
 	SEN_BEATS,
 	SEN_FREQ_MHZ,
+	SEN_LASTCPU,
 
 	//Other sensing data
 	SEN_POWER_W,
@@ -120,6 +123,15 @@ template <> struct SensingTypeInfo<SEN_BEATS>{
     using ParamType = unsigned int; //beats domain
 };
 
+template <> struct SensingTypeInfo<SEN_NIVCSW>{
+    using ValType = unsigned int; // number of involuntary ctx switches
+    using ParamType = void;
+};
+template <> struct SensingTypeInfo<SEN_NVCSW>{
+    using ValType = unsigned int; // number of voluntary ctx switches
+    using ParamType = void;
+};
+
 template <> struct SensingTypeInfo<SEN_POWER_W>{
     using ValType = double; // average power in W
     using ParamType = void;
@@ -132,6 +144,11 @@ template <> struct SensingTypeInfo<SEN_TEMP_C>{
 
 template <> struct SensingTypeInfo<SEN_FREQ_MHZ>{
     using ValType = double; // average frequency in MHz
+    using ParamType = void;
+};
+
+template <> struct SensingTypeInfo<SEN_LASTCPU>{
+    using ValType = int; //last cpu used by some task
     using ParamType = void;
 };
 

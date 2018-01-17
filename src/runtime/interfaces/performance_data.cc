@@ -122,6 +122,78 @@ SensingInterface::senseAgg<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_tas
 }
 
 
+
+/*
+ * SEN_NIVCSW for cores and tasks
+ */
+//cores
+template<>
+typename SensingTypeInfo<SEN_NIVCSW>::ValType
+SensingInterface::sense<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return data.swCurrData(wid).cpus[rsc->position].perfcnt.nivcsw;
+}
+template<>
+typename SensingTypeInfo<SEN_NIVCSW>::ValType
+SensingInterface::senseAgg<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.nivcsw;
+}
+
+//tasks
+template<>
+typename SensingTypeInfo<SEN_NIVCSW>::ValType
+SensingInterface::sense<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.nivcsw;
+}
+template<>
+typename SensingTypeInfo<SEN_NIVCSW>::ValType
+SensingInterface::senseAgg<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.nivcsw;
+}
+
+/*
+ * SEN_NVCSW for cores and tasks
+ */
+//cores
+template<>
+typename SensingTypeInfo<SEN_NVCSW>::ValType
+SensingInterface::sense<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return data.swCurrData(wid).cpus[rsc->position].perfcnt.nvcsw;
+}
+template<>
+typename SensingTypeInfo<SEN_NVCSW>::ValType
+SensingInterface::senseAgg<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.nvcsw;
+}
+
+//tasks
+template<>
+typename SensingTypeInfo<SEN_NVCSW>::ValType
+SensingInterface::sense<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.nvcsw;
+}
+template<>
+typename SensingTypeInfo<SEN_NVCSW>::ValType
+SensingInterface::senseAgg<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.nvcsw;
+}
+
+
 /*
  * SEN_BEATS for cores and tasks
  */
@@ -182,3 +254,23 @@ SensingInterface::senseAgg<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_in
     return (double) data.swAggrData(wid).freq_domains[rsc->domain_id].avg_freq_mhz_acc /
            (double) data.swAggrData(wid).freq_domains[rsc->domain_id].time_ms_acc;
 }
+
+
+/*
+ * SEN_LASTCPU for tasks
+ */
+template<>
+typename SensingTypeInfo<SEN_LASTCPU>::ValType
+SensingInterface::sense<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return data.swCurrData(wid).tasks[rsc->task_idx].last_cpu_used;
+}
+template<>
+typename SensingTypeInfo<SEN_LASTCPU>::ValType
+SensingInterface::senseAgg<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    const PerformanceData &data = SensingModule::get().data();
+    return data.swAggrData(wid).tasks[rsc->task_idx].last_cpu_used;
+}
+
