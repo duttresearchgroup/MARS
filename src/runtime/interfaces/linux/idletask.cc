@@ -205,7 +205,7 @@ void IdleTask::_idleTask(const tracked_task_data_t& task, double max_util, int w
 	assert_false((max_util < 0) || (max_util>1));
 
 	if(_tasksPidMap.find(task.this_task_pid)==_tasksPidMap.end()){
-		IdleTaskInfo *info = new IdleTaskInfo(task,_manager.sensingData().swRawData(wid),max_util,util_is_ratio);
+		IdleTaskInfo *info = new IdleTaskInfo(task,wid,max_util,util_is_ratio);
 		_tasksPidMap[task.this_task_pid] = info;
 		//pinfo("Iddling tsk %d(%s) max_util=%f\n",task.this_task_pid,task.this_task_name,max_util);
 		pthread_mutex_lock(&_mutex);
@@ -213,7 +213,7 @@ void IdleTask::_idleTask(const tracked_task_data_t& task, double max_util, int w
 		pthread_mutex_unlock(&_mutex);
 	}
 	else{
-		assert_false(_tasksPidMap[task.this_task_pid]->window.wid != wid);
+		assert_false(_tasksPidMap[task.this_task_pid]->window != wid);
 		_tasksPidMap[task.this_task_pid]->updateMaxUtil(max_util,util_is_ratio);
 	}
 }

@@ -58,7 +58,7 @@ public:
 			if(data.task(i).num_beat_domains > 0){
 				assert_true(data.task(i).num_beat_domains==1);
 				auto beats = SensingInterface::sense<SEN_BEATS>(0,&data.task(i),wid);
-				if (beats < (data.swRawData(wid).curr_sample_time_ms - data.swRawData(wid).prev_sample_time_ms)*1000.0)
+				if (beats < (data.currWindowTimeMS(wid) - data.prevWindowTimeMS(wid))*1000.0)
 					_currBeats += beats;
 				instr += SensingInterface::sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&data.task(i),wid);
 				//pinfo("%d - beats\n",data.task(i).this_task_pid);
@@ -68,7 +68,7 @@ public:
 				//pinfo("%d - parent beats\n",data.task(i).this_task_pid);
 			}
 		}
-		double time = (data.swRawData(wid).curr_sample_time_ms - data.swRawData(wid).prev_sample_time_ms)/1000.0;
+		double time = (data.currWindowTimeMS(wid) - data.prevWindowTimeMS(wid))/1000.0;
 		if(time>0)
 			_currIPS = instr/time;
 		else

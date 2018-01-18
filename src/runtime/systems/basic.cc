@@ -65,9 +65,7 @@ void OverheadTestSystem::window_handler_tasksense(int wid,System *owner)
 	for(int t = 0; t < sensedData.numCreatedTasks(); ++t){
 		auto task = sensedData.task(t);
 		if((task.this_task_name[0] == 'u') && (task.this_task_name[1] == 'b') && (task.this_task_name[5] == 'h')){
-			instructions += sensedData.getPerfcntVal(
-					sensedData.swCurrData(wid).tasks[t].perfcnt,
-					PERFCNT_INSTR_EXE);
+			instructions += sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,wid);
 			tasks += 1;
 		}
 	}
@@ -105,8 +103,6 @@ void TracingSystem::window_handler(int wid,System *owner)
 	TracingSystem* self = dynamic_cast<TracingSystem*>(owner);
 	const PerformanceData& data = self->sensedData();
 	auto trace = self->_execTrace.getHandle(data,wid);
-	const perf_window_data_t& sw = data.swCurrData(wid);
-
 ///////////////////////////// this is what we record //////////////////////
 //	data_names.push_back("total_time_s"); data_agg_att.push_back(traced_data::AGG_MAX);
 //	data_names.push_back("busy_time_s"); data_agg_att.push_back(traced_data::AGG_SUM);
@@ -159,27 +155,29 @@ void TracingSystem::window_handler(int wid,System *owner)
 	for(int p = 0; p < data.numCreatedTasks(); ++p){
 		assert(p==0);
 		//has the task executed in this epoch ?
-		if(sw.tasks[p].last_cpu_used == -1) continue; //task have not executed yet
+		auto task = data.task(p);
+		auto last_cpu_used = sense<SEN_LASTCPU>(&task,wid);
+		if(last_cpu_used == -1) continue; //task have not executed yet
 		{
 			//data for this epoch
-			trace("total_time_s") = ((double)sw.tasks[p].perfcnt.time_total_ms/1000.0);
-			trace("busy_time_s") = ((double)sw.tasks[p].perfcnt.time_busy_ms/1000.0);
-			trace("total_ips") = ((double)data.getPerfcntVal(sw.tasks[p].perfcnt, PERFCNT_INSTR_EXE) / (double)sw.tasks[p].perfcnt.time_total_ms * 1000.0);
-			if (sw.tasks[p].perfcnt.time_busy_ms == 0)
+			trace("total_time_s") = sense<SEN_TOTALTIME_S>(&task,wid);
+			trace("busy_time_s") = sense<SEN_BUSYTIME_S>(&task,wid);
+			trace("total_ips") = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,wid) / sense<SEN_TOTALTIME_S>(&task,wid);
+			if (sense<SEN_BUSYTIME_S>(&task,wid) == 0)
 				trace("busy_ips") = 0;
 			else
-				trace("busy_ips") = ((double)data.getPerfcntVal(sw.tasks[p].perfcnt, PERFCNT_INSTR_EXE) / (double)sw.tasks[p].perfcnt.time_busy_ms * 1000.0);
-			trace("util") = ((double)sw.tasks[p].perfcnt.time_busy_ms / (double)sw.tasks[p].perfcnt.time_total_ms);
+				trace("busy_ips") = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,wid) / sense<SEN_BUSYTIME_S>(&task,wid);
+			trace("util") = sense<SEN_BUSYTIME_S>(&task,wid) / sense<SEN_TOTALTIME_S>(&task,wid);
 //			trace("power_w") = ((double)sw.power_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].power->domain_id].avg_power_uW_acc / (double)sw.power_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].power->domain_id].time_ms_acc / 1000.0);
-			trace("power_w") = sense<SEN_POWER_W>(self->info()->core_list[sw.tasks[p].last_cpu_used].power,wid);
-			trace("freq_mhz") = sw.freq_domains[self->info()->core_list[sw.tasks[p].last_cpu_used].freq->domain_id].avg_freq_mhz_acc;
+			trace("power_w") = sense<SEN_POWER_W>(self->info()->core_list[last_cpu_used].power,wid);
+			trace("freq_mhz") = sense<SEN_FREQ_MHZ>(self->info()->core_list[last_cpu_used].freq,wid);
 			for(int i = 0; i < data.numMappedPerfcnts(); ++i) {
-				trace(perfcnt_str(data.perfcntFromIdx(i))) = sw.tasks[p].perfcnt.perfcnts[i];
+				trace(perfcnt_str(data.perfcntFromIdx(i))) = sense<SEN_PERFCNT>(data.perfcntFromIdx(i),&task,wid);
 			}
-			trace("nivcsw") = sw.tasks[p].perfcnt.nivcsw;
-			trace("nvcsw") = sw.tasks[p].perfcnt.nvcsw;
+			trace("nivcsw") = sense<SEN_NIVCSW>(&task,wid);
+			trace("nvcsw") = sense<SEN_NVCSW>(&task,wid);
 			for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) {
-				trace("beats"+std::to_string(j)) = sw.tasks[p].beats[j];
+				trace("beats"+std::to_string(j)) = sense<SEN_BEATS>(j,&task,wid);
 			}
 		}
 	}

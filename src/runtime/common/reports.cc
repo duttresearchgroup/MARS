@@ -357,7 +357,7 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 	const PerformanceData &data = SensingModule::get().data();
 
 	assert_false(_wid < 0);
-	_timestamps.push_back((double)(data.swCurrSampleTimeMS(_wid) - data.sensingStartTimeMS())/1000.0);
+	_timestamps.push_back((double)(data.currWindowTimeMS(_wid) - data.sensingStartTimeMS())/1000.0);
 
 	//in the time trace we copy the core's domain data to its own data to make it easier to analyse later
 	for(int cpu = 0; cpu < _sys->core_list_size; ++cpu){
@@ -545,7 +545,7 @@ void ExecutionSummaryWithTracedTask::showReport()
 
 ExecutionTrace::ExecutionTraceHandle& ExecutionTrace::getHandle(const PerformanceData &sensedData, int wid)
 {
-	uint64_t timestampMS = sensedData.swCurrSampleTimeMS(wid) - sensedData.sensingStartTimeMS();
+	uint64_t timestampMS = sensedData.currWindowTimeMS(wid) - sensedData.sensingStartTimeMS();
 
 	//have we called getHandle for the same sample ?
 	if(!_timestampsMS.empty() && (_timestampsMS.back()==timestampMS)){

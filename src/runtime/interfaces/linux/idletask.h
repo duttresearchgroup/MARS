@@ -22,7 +22,7 @@ class IdleTask
 	};
 
 	struct IdleTaskInfo {
-		IdleTaskInfo(const tracked_task_data_t& t, const perf_window_t& w, double mu, bool util_is_ratio)
+		IdleTaskInfo(const tracked_task_data_t& t, int w, double mu, bool util_is_ratio)
 			:task(t),window(w),max_util_or_ratio(mu),
 			 running_periods(0),_running_periods_left(0),idle_periods(0),_idle_periods_left(0),_curr_period_idx(0),
 			 state(RUNNING),skip(false){
@@ -50,7 +50,7 @@ class IdleTask
 		}
 
 		const tracked_task_data_t& task;//task being idled
-		const perf_window_t& window;//sensing window to use
+		int window;//sensing window to use
 		double max_util_or_ratio;//idle until max util
 
 		int running_periods;
@@ -62,7 +62,10 @@ class IdleTask
 		task_state state;//check to see if the task is currently suspended
 		bool skip;//set to true if a signal fails for this task
 
-		double _latestWindowUtil(){ return (double)window.curr.tasks[task.task_idx].perfcnt.time_busy_ms / (double)window.curr.tasks[task.task_idx].perfcnt.time_total_ms; }
+		double _latestWindowUtil()
+		{
+		    return SensingInterface::sense<SEN_BUSYTIME_S>(&task,window) / SensingInterface::sense<SEN_TOTALTIME_S>(&task,window);
+		}
 
 		void _updatePeriodsUtil();
 
