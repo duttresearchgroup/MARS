@@ -9,6 +9,7 @@
 #   EXTRAFLAGS: Extra GCC options. Set based on the value for ARCH if undefined
 #   KERNEL_SRC: Path to kernel source used when compiling linux kernel modules. Set based on the value for ARCH if undefined
 #   MODULE: linux module to compile when running 'make exp_module'. No default value.
+#   UBENCH: specify a specific target when running 'make ubench'
 
 
 #Options not set when calling make are set to the values defined in the 'makefile.buildopts'
@@ -52,6 +53,7 @@ $(info CROSS_COMPILE_krn = ${CROSS_COMPILE_krn})
 $(info EXTRAFLAGS = ${EXTRAFLAGS})
 $(info KERNEL_SRC = ${KERNEL_SRC})
 $(info MODULE = ${MODULE})
+$(info UBENCH = ${UBENCH})
 
 #####################################
 #####################################
@@ -68,7 +70,8 @@ all:
 	@printf "\tuapi_tests/uapi_tests_clean:\n\t\tbuilds/cleans tests for the daemons<->app interfaces\n"
 	@printf "\tlin_sensing_module/lin_sensing_module_clean:\n\t\tbuilds/cleans the sensing kernel module used by the daemons\n"
 	@printf "\truntime:\n\t\tdoes targets daemons lin_sensing_module uapi_tests\n"
-	@printf "\texp_module/exp_module_clean:\n\t\tbuilds/cleans experimental kernel modules (specify using param)\n"
+	@printf "\texp_module/exp_module_clean:\n\t\tbuilds/cleans experimental kernel modules (specify using the MODULE parameter)\n"
+	@printf "\tubench:\n\t\tbuilds ubenchmarks. Specify specific targets for the ubenchmarks makefile using the UBENCH parameter\n"
 	@printf "\texternal_clean:\n\t\tcleans external dependencies\n"
 	@printf "\tvery_clean:\n\t\tcleans everything very nicely\n"
 	@exit
@@ -140,6 +143,10 @@ clean:
 .PHONY: external_clean
 external_clean:
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) -C . -f src/vitamins.mk external_clean
+
+.PHONY: ubench
+ubench:
+	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/ubenchmarks/makefile $(UBENCH)
 
 .PHONY: veryclean
 veryclean:
