@@ -6,6 +6,9 @@
 # Common defs
 source $SPARTA_SCRIPTDIR/runtime/common.sh
 
+#Checks if we run this command as root (needed to insert and interface with the module)
+if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit ; fi
+
 #stops the deamon and waits
 if [ -f  "$RTS_DAEMON_PID" ]; then
     pid=$(cat $RTS_DAEMON_PID)

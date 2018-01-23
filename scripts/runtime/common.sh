@@ -29,15 +29,6 @@ RTS_DAEMON_BIN_DIR=$RTS_BINS_PATH/daemons
 # daemon when running
 RTS_DAEMON_PID=$RTS_DAEMON_BIN_DIR/.current_active_daemon.pid
 
-echo SPARTA_SCRIPTDIR=$SPARTA_SCRIPTDIR
-echo SPARTA_ROOT=$SPARTA_ROOT
-echo RTS_BINS_PATH=$RTS_BINS_PATH
-echo RTS_MODULE_NAME=$RTS_MODULE_NAME
-echo RTS_MODULE_PATH=$RTS_MODULE_PATH
-echo RTS_DAEMON_OUTDIR=$RTS_DAEMON_OUTDIR
-echo RTS_DAEMON_BIN_DIR=$RTS_DAEMON_BIN_DIR
-echo RTS_DAEMON_PID=$RTS_DAEMON_PID
-
 ######################################################
 # Helper functions
 ######################################################
