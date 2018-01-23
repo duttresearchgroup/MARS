@@ -3,20 +3,8 @@
 # kernel sensing module
 ######################################################
 
-######################################################
-# First Extracts the script folder from the current
-# script path and includes the common defs
-######################################################
-__SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$__SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  __DIR="$( cd -P "$( dirname "$__SOURCE" )" && pwd )"
-  __SOURCE="$(readlink "$__SOURCE")"
-  [[ $__SOURCE != /* ]] && __SOURCE="$__DIR/$__SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && cd .. && pwd )"
 # Common defs
-source $SCRIPTDIR/runtime/common.sh
-####################################################
+source $SPARTA_SCRIPTDIR/runtime/common.sh
 
 #stops the deamon and waits
 if [ -f  "$RTS_DAEMON_PID" ]; then

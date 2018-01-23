@@ -5,18 +5,6 @@
 ######################################################
 
 ######################################################
-# Extracts the script folder from the current script
-######################################################
-
-__SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$__SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  __DIR="$( cd -P "$( dirname "$__SOURCE" )" && pwd )"
-  __SOURCE="$(readlink "$__SOURCE")"
-  [[ $__SOURCE != /* ]] && __SOURCE="$__DIR/$__SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && cd .. && pwd )"
-
-######################################################
 # Checks if the remote file conf exists. If it does
 # not, creates one with default information at
 # scripts/common/remote_conf.sh
@@ -24,8 +12,8 @@ SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && cd .. && pwd )"
 # info
 ######################################################
 
-__R_CONF=$SCRIPTDIR/common/remote_conf.sh
-__R_CONFDEFAULT=$SCRIPTDIR/common/.remote_conf.sh
+__R_CONF=$SPARTA_SCRIPTDIR/common/remote_conf.sh
+__R_CONFDEFAULT=$SPARTA_SCRIPTDIR/common/.remote_conf.sh
 if [ -e $__R_CONF ]
 then
     source $__R_CONF
