@@ -44,5 +44,4 @@
 /src/external/hotspot/hotspot
 /src/external/hotspot/test
 
-/scripts/common/remote_conf.sh
-/scripts/common/runtime_conf.sh
+/scripts/confs.sh

@@ -4,25 +4,8 @@
 # This script connects with the device using ssh
 ######################################################
 
-######################################################
-# Checks if the remote file conf exists. If it does
-# not, creates one with default information at
-# scripts/common/remote_conf.sh
-# Edit the generated file with the correct remote host
-# info
-######################################################
-
-__R_CONF=$SPARTA_SCRIPTDIR/common/remote_conf.sh
-__R_CONFDEFAULT=$SPARTA_SCRIPTDIR/common/.remote_conf.sh
-if [ -e $__R_CONF ]
-then
-    source $__R_CONF
-else
-    echo "$__R_CONF not found. Creating default file..."
-    cp $__R_CONFDEFAULT $__R_CONF
-    echo "Please edit $__R_CONF with your remote host info and rerun this script"
-    exit
-fi
+# Includes the confs
+source $SPARTA_SCRIPTDIR/confs.sh
 
 
 ######################################################

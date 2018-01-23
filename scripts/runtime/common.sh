@@ -3,24 +3,8 @@
 # other runtime scripts
 ######################################################
 
-######################################################
-# Checks if the conf file exists. If it does
-# not, creates one with default information at
-# scripts/runtime/runtime_conf.sh
-# Edit the generated file with the correct remote host
-# info
-######################################################
-__RTS_CONF=$SPARTA_SCRIPTDIR/runtime/runtime_conf.sh
-__RTS_CONFDEFAULT=$SPARTA_SCRIPTDIR/runtime/.runtime_conf.sh
-if [ -e $__RTS_CONF ]
-then
-    source $__RTS_CONF
-else
-    echo "$__RTS_CONF not found. Creating default file..."
-    cp $__RTS_CONFDEFAULT $__RTS_CONF
-    echo "Please edit $__RTS_CONF with your remote host info and rerun this script"
-    exit
-fi
+# Includes the confs
+source $SPARTA_SCRIPTDIR/confs.sh
 
 ######################################################
 # Common definitions

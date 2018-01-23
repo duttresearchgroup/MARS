@@ -2,7 +2,7 @@
 # Start the specified daemon. 
 # The first argument is the binary name of the 
 # daemon (without path). The binary must be available
-# at the binaries folder defined at runtime_conf.sh
+# at the binaries folder defined at confs.sh
 # Remaining arguments will be forwarded to the daemon
 ######################################################
 
