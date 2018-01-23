@@ -14,7 +14,7 @@ source $SPARTA_SCRIPTDIR/confs.sh
 
 function R_SHELL(){
     if [ -n "$1" ]; then
-        sshpass $R_VERBOSE -p $R_PASS ssh $R_USER@$R_HOST $@
+        sshpass $R_VERBOSE -p $R_PASS ssh -o StrictHostKeyChecking=no $R_USER@$R_HOST $@
     fi
 }
 export -f R_SHELL
@@ -42,9 +42,9 @@ function R_PULL(){
     __SRC=$1
     __DEST=$2
     if [ -n "$__DEST" ]; then
-        sshpass $R_VERBOSE -p $R_PASS scp $R_USER@$R_HOST:$__SRC $__DEST
+        sshpass $R_VERBOSE -p $R_PASS scp -o StrictHostKeyChecking=no $R_USER@$R_HOST:$__SRC $__DEST
     else
-        sshpass $R_VERBOSE -p $R_PASS scp $R_USER@$R_HOST:$__SRC .
+        sshpass $R_VERBOSE -p $R_PASS scp -o StrictHostKeyChecking=no $R_USER@$R_HOST:$__SRC .
     fi
     
 }
@@ -60,7 +60,7 @@ function R_SYNCH(){
     __SRC=$1
     __DEST=$2
     if [ -e "$__SRC" ]; then
-        sshpass $R_VERBOSE -p $R_PASS rsync --progress -avz $__SRC/ $R_USER@$R_HOST:$__DEST/
+        sshpass $R_VERBOSE -p $R_PASS rsync --progress -avze "ssh -o StrictHostKeyChecking=no" $__SRC/ $R_USER@$R_HOST:$__DEST/
     else
         echo $__SRC does not exist
         exit
