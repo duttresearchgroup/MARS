@@ -1,0 +1,11 @@
+#!/bin/bash
+
+########################################################
+# Calls sh for in a root shell that preserves the 
+# variables set by env.sh
+########################################################
+
+
+sudo SPARTA_SCRIPTDIR=$SPARTA_SCRIPTDIR SPARTA_ROOT=$SPARTA_ROOT sh $@
+
+

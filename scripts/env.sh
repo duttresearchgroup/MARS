@@ -14,6 +14,10 @@ export SPARTA_SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && pwd )"
 export SPARTA_ROOT=$(readlink -f $SPARTA_SCRIPTDIR/..)
 
 ######################################################
+# The new path
+export PATH=$SPARTA_SCRIPTDIR:$PATH
+
+######################################################
 # Checks if the remote confs exists. If it does
 # not, creates one with default information at
 # scripts/confs.sh
