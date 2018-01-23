@@ -356,6 +356,11 @@ public:
 
 	ExecutionTraceHandle& getHandle(const PerformanceData &sensedData, int wid);
 
+	ExecutionTraceHandle& getHandle(int wid)
+	{
+	    return getHandle(SensingModule::get().data(),wid);
+	}
+
 	void dump()
 	{
 		if(_headerDumped && _headerModified){

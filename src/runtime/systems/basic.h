@@ -4,6 +4,7 @@
 #include <runtime/framework/system.h>
 #include <runtime/framework/actuator.h>
 #include <runtime/interfaces/actuation_interface.h>
+#include <unordered_map>
 
 class MeasuringSystem : public System {
 protected:
@@ -60,18 +61,32 @@ class TracingSystem : public System {
 	static void window_handler(int wid,System *owner);
 
 private:
-	ExecutionTrace _execTrace;
+	std::unordered_map<int,ExecutionTrace*> _execTraces;
+
+	ExecutionTrace::ExecutionTraceHandle& getHandleForTask(const tracked_task_data_t &task, int wid)
+	{
+	    auto iter = _execTraces.find(task.this_task_pid);
+	    if(iter != _execTraces.end())
+	        return iter->second->getHandle(wid);
+	    else{
+	        ExecutionTrace *execTrace = new ExecutionTrace("trace.pid"+std::to_string(task.this_task_pid)+"."+task.this_task_name);
+	        _execTraces[task.this_task_pid] = execTrace;
+	        return execTrace->getHandle(wid);
+	    }
+	}
 
   	void _init();
 
 public:
-  	TracingSystem() :System(), sensingWindow(nullptr),_execTrace("trace.pid0"){
-  		_init();
+  	TracingSystem() :System(), sensingWindow(nullptr){
+  	    _init();
   	};
 
-  	TracingSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_execTrace("trace.pid0"){
-  	  		_init();
-  	  	};
+  	TracingSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr){
+  	    _init();
+  	};
+
+  	virtual ~TracingSystem();
 };
 
 
