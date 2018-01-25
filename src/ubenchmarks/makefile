@@ -74,8 +74,8 @@ $(BINDIR)/ubenchmark_timed: $(OBJDIR)/ubenchmark_timed.o $(OBJDIR)/ubenchmark_ti
 	$(CC) $(OBJFLAGS) $^ -o $@	
 
 $(BINDIR)/predictor_test: $(OBJDIR)/predictor.o $(KERN_OBJS)
-	$(CC) $(CFLAGS) -static -DITER_PRINT -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 $(SRCDIR)/predictor_main.cc $^ -o $@
-	$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 $(SRCDIR)/predictor_main.cc $^ -o $(BINDIR)/predictor_test_noprint
+	$(CC) $(CFLAGS) -static -DITER_PRINT -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/predictor_main.cc $^ -o $@
+	$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/predictor_main.cc $^ -o $(BINDIR)/predictor_test_noprint
 
 predictors: $(OBJDIR)/predictor.o $(KERN_OBJS) $(OBJDIR)/makefile.predictors
 	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_PRED) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.predictors predictors

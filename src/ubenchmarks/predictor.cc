@@ -38,5 +38,8 @@ void low_ilp_icache_bad(int numIterations){
 void low_ilp_branches_deep(int numIterations){
     vitamins_bm_branches_deep_limited(&(workbuffer_int[0]),WORK_BUFFER_SIZE,&work_out,numIterations);
 }
+void matrix_mult(int numIterations){
+    vitamins_bm_matrix_mult_limited(&(workbuffer_int[0]),WORK_BUFFER_SIZE,&work_out,numIterations);
+}
 
 

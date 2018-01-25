@@ -206,3 +206,55 @@ void vitamins_bm_high_ilp_cache_bad_int(int *workbuffer, int workbufferS, int *o
     vitamins_bm_high_ilp_cache_bad_int_limited(workbuffer, workbufferS, out,256);
 }
 
+
+static inline unsigned int _squareroot(unsigned int a_nInput)
+{
+    unsigned int op  = a_nInput;
+    unsigned int res = 0;
+    unsigned int one = 1uL << ((sizeof(int)*8)-2); // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
+
+
+    // "one" starts at the highest power of four <= than the argument.
+    while (one > op)
+    {
+        one >>= 2;
+    }
+
+    while (one != 0)
+    {
+        if (op >= res + one)
+        {
+            op = op - (res + one);
+            res = res +  2 * one;
+        }
+        res >>= 1;
+        one >>= 2;
+    }
+    return res;
+}
+
+#include <cstdio>
+
+static void inline matrix_mult_acc(int *acc, int *c, int *a, int *b, const int rows, const int cols){
+    for (int i=0; i < rows; ++i)
+        for(int j=0; j < cols; ++j)
+            for(int k=0; k < cols; ++k)
+                c[(rows*i)+j] += a[(rows*i)+k]*b[(rows*k)+j];
+    for (int i=0; i < rows; ++i)
+        for(int j=0; j < cols; ++j)
+            *acc += c[(rows*i)+j];
+}
+
+
+void vitamins_bm_matrix_mult_limited(int *workbuffer, int workbufferS, int *out,int numIterations){
+    int matrixBufferSize = workbufferS / 3;
+    int matrixSize = _squareroot(matrixBufferSize);
+    if(matrixSize > 256) matrixSize = 256;//too big will fuck things up
+    int *matrixABuffer = workbuffer;
+    int *matrixBBuffer = &(workbuffer[matrixBufferSize]);
+    int *matrixCBuffer = &(workbuffer[matrixBufferSize*2]);
+
+    for(int i = 0; i < numIterations; ++i)
+        matrix_mult_acc(out,matrixCBuffer,matrixABuffer,matrixBBuffer,matrixSize,matrixSize);
+
+}

@@ -17,6 +17,7 @@ void vitamins_bm_branches_limited(int *workbuffer, int workbufferS, int *out,int
 void vitamins_bm_branches_deep_limited(int *workbuffer, int workbufferS, int *out,int numIterations);
 void vitamins_bm_low_ilp_icache_bad(int *workbuffer, int workbufferS, int *out);
 void vitamins_bm_low_ilp_icache_bad_limited(int *workbuffer, int workbufferS, int *out,int numIterations);
+void vitamins_bm_matrix_mult_limited(int *workbuffer, int workbufferS, int *out,int numIterations);
 
 //Floating point
 void vitamins_bm_low_ilp_cache_good_float(float *workbuffer, int workbufferS, int *out);
