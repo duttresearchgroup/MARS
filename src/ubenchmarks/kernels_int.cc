@@ -237,7 +237,7 @@ static inline unsigned int _squareroot(unsigned int a_nInput)
 
 static void inline matrix_mult_acc(int *acc, int *c, int *a, int *b, const int rows, const int cols){
     for (int i=0; i < rows; ++i)
-        for(int j=0; j < cols; ++j)
+        for(int j=0; j < cols; j+=64)//do 1/64 here to reduce to overall rt while keeping cache issue
             for(int k=0; k < cols; ++k)
                 c[(rows*i)+j] += a[(rows*i)+k]*b[(rows*k)+j];
     for (int i=0; i < rows; ++i)
@@ -249,7 +249,7 @@ static void inline matrix_mult_acc(int *acc, int *c, int *a, int *b, const int r
 void vitamins_bm_matrix_mult_limited(int *workbuffer, int workbufferS, int *out,int numIterations){
     int matrixBufferSize = workbufferS / 3;
     int matrixSize = _squareroot(matrixBufferSize);
-    if(matrixSize > 256) matrixSize = 256;//too big will fuck things up
+    if(matrixSize > 512) matrixSize = 512;//too big will fuck things up
     int *matrixABuffer = workbuffer;
     int *matrixBBuffer = &(workbuffer[matrixBufferSize]);
     int *matrixCBuffer = &(workbuffer[matrixBufferSize*2]);

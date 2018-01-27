@@ -11,7 +11,7 @@ predNameTemplate="$(BINDIR)/XXpredictornameXX "
 makePredTemplate=(
 "\n"
 "$(BINDIR)/XXpredictornameXX: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_main.cc\n"
-"\t$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=XXhigh_ilp_cache_good_intXX -DITER_high_ilp_cache_bad_int=XXhigh_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_int=XXlow_ilp_cache_good_intXX -DITER_low_ilp_cache_bad_int=XXlow_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_float=XXlow_ilp_cache_good_floatXX -DITER_low_ilp_cache_bad_float=XXlow_ilp_cache_bad_floatXX -DITER_high_ilp_cache_good_float=XXhigh_ilp_cache_good_floatXX -DITER_high_ilp_cache_bad_float=XXhigh_ilp_cache_bad_floatXX -DITER_low_ilp_icache_bad=XXlow_ilp_icache_badXX -DITER_low_ilp_branches_deep=XXlow_ilp_branches_deepXX $(SRCDIR)/predictor_main.cc $(OBJDIR)/predictor.o $(KERN_OBJS) -o $(BINDIR)/XXpredictornameXX\n"
+"\t$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=XXhigh_ilp_cache_good_intXX -DITER_high_ilp_cache_bad_int=XXhigh_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_int=XXlow_ilp_cache_good_intXX -DITER_low_ilp_cache_bad_int=XXlow_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_float=XXlow_ilp_cache_good_floatXX -DITER_low_ilp_cache_bad_float=XXlow_ilp_cache_bad_floatXX -DITER_high_ilp_cache_good_float=XXhigh_ilp_cache_good_floatXX -DITER_high_ilp_cache_bad_float=XXhigh_ilp_cache_bad_floatXX -DITER_low_ilp_icache_bad=XXlow_ilp_icache_badXX -DITER_low_ilp_branches_deep=XXlow_ilp_branches_deepXX -DITER_matrix_mult=0 $(SRCDIR)/predictor_main.cc $(OBJDIR)/predictor.o $(KERN_OBJS) -o $(BINDIR)/XXpredictornameXX\n"
 )
 
 make  = "\n"
