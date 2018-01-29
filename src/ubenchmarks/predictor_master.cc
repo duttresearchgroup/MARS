@@ -11,6 +11,10 @@
 
 constexpr double TARGET_UBENCH_RT_MS = 100.0;
 
+constexpr double CALIB_TOLERANCE_MS = 5.0;
+
+constexpr int CALIB_MAX_ITERS = 10;
+
 typedef void (*ubench_func)(int);
 
 std::vector<ubench_func> benchname;
@@ -72,10 +76,11 @@ static bool calibrate(){
             iters *= 10; //try again with more if original iterations was not enough for at least 1ms
         }
         double newIters = (TARGET_UBENCH_RT_MS * iters) / time;
-        printf("bench %d: time=%f ms , old iters=%d , new iter=%d\n",
-                i, time, (int)iters, (int)newIters);
+        //printf("bench %d: time=%f ms , old iters=%d , new iter=%d\n",
+        //        i, time, (int)iters, round_closest<int>(newIters));
         benchIters[i] = round_closest<int>(newIters);
-        if((time > (TARGET_UBENCH_RT_MS+5)) || (time < (TARGET_UBENCH_RT_MS-5)))
+        if(benchIters[i]==0) benchIters[i] = 1;
+        if((time > (TARGET_UBENCH_RT_MS+CALIB_TOLERANCE_MS)) || (time < (TARGET_UBENCH_RT_MS-CALIB_TOLERANCE_MS)))
             all_ok = false;
     }
     return all_ok;
@@ -83,7 +88,7 @@ static bool calibrate(){
 
 static void calibration(){
     printf("Calibration mode\n");
-    while(!calibrate());
+    for(int i = 0; i < CALIB_MAX_ITERS; ++i) if(calibrate()) break;
     //print the args to be passed when actually running shit
     printf("calibration_args ");
     for(unsigned i = 0; i < benchname.size();++i){

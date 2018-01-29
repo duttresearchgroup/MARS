@@ -237,7 +237,7 @@ static inline unsigned int _squareroot(unsigned int a_nInput)
 
 static void inline matrix_mult_acc(int *acc, int *c, int *a, int *b, const int rows, const int cols){
     for (int i=0; i < rows; ++i)
-        for(int j=0; j < cols; j+=64)//do 1/64 here to reduce to overall rt while keeping cache issue
+        for(int j=0; j < cols; j+=128)//do 1/128 here to reduce to overall rt while keeping cache issue
             for(int k=0; k < cols; ++k)
                 c[(rows*i)+j] += a[(rows*i)+k]*b[(rows*k)+j];
     for (int i=0; i < rows; ++i)
