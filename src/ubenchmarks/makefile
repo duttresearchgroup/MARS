@@ -10,7 +10,7 @@ OBJDIR=obj_$(ARCH)_$(PLAT)/ubenchmarks
 CFLAGS=-O2 -Wall -Werror -std=c++11 $(EXTRAFLAGS)
 OBJFLAGS=-static -pthread $(CFLAGS)
 
-.PHONY: all clean veryclean predictors_clean predictors
+.PHONY: all clean veryclean predictors_clean predictors_multiapp predictors_singleapp
 
 all: test
 
@@ -80,8 +80,10 @@ $(BINDIR)/predictor_test: $(OBJDIR)/predictor.o $(KERN_OBJS)
 $(BINDIR)/predictor_master: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_master.cc
 	$(CC) $(CFLAGS) -static $^ -o $@
 
-predictors: $(OBJDIR)/predictor.o $(KERN_OBJS) $(OBJDIR)/makefile.predictors $(BINDIR)/predictor_master
+predictors_multiapp: $(OBJDIR)/predictor.o $(KERN_OBJS) $(OBJDIR)/makefile.predictors
 	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_PRED) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.predictors predictors
+
+predictors_singleapp: $(BINDIR)/predictor_master
 
 $(OBJDIR)/makefile.predictors: $(SRCDIR)/predictor_gen_makefile.py | dirs
 	python $(SRCDIR)/predictor_gen_makefile.py > $(OBJDIR)/makefile.predictors 
