@@ -35,9 +35,7 @@ rm -rf $TRACE_OUTPUT_DIR/*.txt
 rm -rf $TRACE_OUTPUT_DIR/*.csv
 
 # Set the governor of all cores to ondemand and the governor of the core we need to the given frequency
-echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor >/dev/null
-echo userspace | tee /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/scaling_governor >/dev/null
-echo $TRACE_FREQUENCY | tee /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/scaling_setspeed >/dev/null
+$SPARTA_SCRIPTDIR/tracing/trace_set_freq.sh $TRACED_CORE $TRACE_FREQUENCY ondemand
 
 echo "Tracing " $TRACED_PROGRAM " at core " $TRACED_CORE " at freq " $(cat /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/cpuinfo_cur_freq)
 dmesg -c > $PREV_DMESG
@@ -97,7 +95,7 @@ done
 echo "DONE" > $STATUS_FILE
 
 # Makes sure all cores are ondemand
-echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor >/dev/null
+$SPARTA_SCRIPTDIR/tracing/trace_setgov.sh ondemand
 
 
 
