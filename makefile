@@ -10,6 +10,7 @@
 #   KERNEL_SRC: Path to kernel source used when compiling linux kernel modules. Set based on the value for ARCH if undefined
 #   MODULE: linux module to compile when running 'make exp_module'. No default value.
 #   UBENCH: specify a specific target when running 'make ubench'
+#   DAEMONS: specify specific daemons to build when running 'make daemons'. If blank all daemons are built. Use "," to separate multiple values
 
 
 #Options not set when calling make are set to the values defined in the 'makefile.buildopts'
@@ -54,6 +55,7 @@ $(info EXTRAFLAGS = ${EXTRAFLAGS})
 $(info KERNEL_SRC = ${KERNEL_SRC})
 $(info MODULE = ${MODULE})
 $(info UBENCH = ${UBENCH})
+$(info DAEMONS = ${DAEMONS})
 
 #####################################
 #####################################
@@ -65,7 +67,7 @@ ALLMODULES := $(wildcard $(MODULEDIR)/*/.)
 all:
 	@printf "\nSpecify one of the following targets\n"
 	@printf "\tapps:\n\t\tbuilds host applications (offline simulation apps, tools, etc)\n"
-	@printf "\tdeamons:\n\t\tbuilds the runtime daemons\n"
+	@printf "\tdaemons:\n\t\tbuilds the runtime daemons\n"
 	@printf "\tclean:\n\t\tcleans daemons and apps\n"
 	@printf "\tuapi_tests/uapi_tests_clean:\n\t\tbuilds/cleans tests for the daemons<->app interfaces\n"
 	@printf "\tlin_sensing_module/lin_sensing_module_clean:\n\t\tbuilds/cleans the sensing kernel module used by the daemons\n"
@@ -123,7 +125,7 @@ endif
 
 .PHONY: daemons
 daemons: src/vitamins.mk
-	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/vitamins.mk daemons
+	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) DAEMONS=$(DAEMONS) -C . -f src/vitamins.mk daemons
 
 .PHONY: uapi_tests
 uapi_tests: src/vitamins.mk
