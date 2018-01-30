@@ -1,4 +1,0 @@
-ampl: model best.mod;
-ampl: data best.dat;
-ampl: solve;
-ampl: display Map > result.txt
