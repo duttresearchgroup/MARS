@@ -1,4 +1,3 @@
-
 /*
  * Displays linux /proc/pid/stat in human-readable format
  *
