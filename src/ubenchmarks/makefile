@@ -80,10 +80,13 @@ $(BINDIR)/predictor_test: $(OBJDIR)/predictor.o $(KERN_OBJS)
 $(BINDIR)/predictor_master: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_master.cc
 	$(CC) $(CFLAGS) -static $^ -o $@
 
+$(BINDIR)/predictor_master_lite: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_master.cc
+	$(CC) $(CFLAGS) -D__ISLITE -static $^ -o $@
+
 predictors_multiapp: $(OBJDIR)/predictor.o $(KERN_OBJS) $(OBJDIR)/makefile.predictors
 	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_PRED) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.predictors predictors
 
-predictors_singleapp: $(BINDIR)/predictor_master
+predictors_singleapp: $(BINDIR)/predictor_master $(BINDIR)/predictor_master_lite
 
 $(OBJDIR)/makefile.predictors: $(SRCDIR)/predictor_gen_makefile.py | dirs
 	python $(SRCDIR)/predictor_gen_makefile.py > $(OBJDIR)/makefile.predictors 

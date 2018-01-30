@@ -8,6 +8,12 @@
 
 #include "predictor.h"
 
+//__ISLITE should be passed using the -D flag
+#ifdef __ISLITE
+    constexpr bool IS_LITE = true;
+#else
+    constexpr bool IS_LITE = false;
+#endif
 
 constexpr double TARGET_UBENCH_RT_MS = 100.0;
 
@@ -76,8 +82,8 @@ static bool calibrate(){
             iters *= 10; //try again with more if original iterations was not enough for at least 1ms
         }
         double newIters = (TARGET_UBENCH_RT_MS * iters) / time;
-        //printf("bench %d: time=%f ms , old iters=%d , new iter=%d\n",
-        //        i, time, (int)iters, round_closest<int>(newIters));
+        printf("bench %d: time=%f ms , old iters=%d , new iter=%d\n",
+                i, time, (int)iters, round_closest<int>(newIters));
         benchIters[i] = round_closest<int>(newIters);
         if(benchIters[i]==0) benchIters[i] = 1;
         if((time > (TARGET_UBENCH_RT_MS+CALIB_TOLERANCE_MS)) || (time < (TARGET_UBENCH_RT_MS-CALIB_TOLERANCE_MS)))
@@ -110,6 +116,8 @@ static inline void idle_wait_us(long int time){
 
 static inline void run_combination(int r, int *data)
 {
+    if((r > 2) && IS_LITE) return;//runs only a few iterations for testing
+
     //auto time = vitamins_bm_time_us();
     for(int i = 0; i < r; ++i){
         int benchIdx = data[i];
