@@ -31,7 +31,8 @@ TRAINING_FREQUENCY=$2
 source $SPARTA_SCRIPTDIR/ubenchmarks/common.sh
 
 
-PRED_BIN=$UBENCH_BIN_DIR/predictor_master
+#PRED_BIN=$UBENCH_BIN_DIR/predictor_master
+PRED_BIN=$UBENCH_BIN_DIR/predictor_master_lite
 
 #Calibration if not available
 CALIB_FILE=$PRED_BIN.calib.$RTS_ARCH.$RTS_PLAT.$CALIB_CORE.$CALIB_FREQUENCY
@@ -49,11 +50,27 @@ else
 fi
 echo "Calibration args $CALIBRATION_ARGS"
 
-echo "Training on core $TRAINING_CORE @ $TRAINING_FREQUENCY kHz"
 
-# TODO enable tracing. Put result on a different file
-# Add a test script for the odroid that runs the training set
-taskset -c $TRAINING_CORE $PRED_BIN $CALIBRATION_ARGS
+# do the trace_one-run.sh + trace_one-parse.sh but sanitize the periodic traces in between
+
+echo "Training on core $TRAINING_CORE @ $TRAINING_FREQUENCY kHz"
+sh $SPARTA_SCRIPTDIR/tracing/trace_one-run.sh $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
+
+echo "Sanitizing periodic traces"
+PERIDIC_TRACES=$(ls $TRACE_OUTPUT_DIR/periodic_trace_result*.csv | xargs)
+
+for trace in $PERIDIC_TRACES
+do
+    #creates a backup for db
+    cp $trace $trace.presanitizedcsv
+    #overwrite current file with sanitized one
+    python3 $SPARTA_SCRIPTDIR/training/sanitize.py --srcfile $trace --destfile $trace
+done
+
+echo "Parsing periodic traces"
+
+sh $SPARTA_SCRIPTDIR/tracing/trace_one-parse.sh $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
+
 
 
 

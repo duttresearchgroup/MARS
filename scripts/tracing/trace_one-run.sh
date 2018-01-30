@@ -52,10 +52,10 @@ rm -rf $TRACE_OUTPUT_DIR/*.txt
 rm -rf $TRACE_OUTPUT_DIR/*.csv
 
 # Set the governor of all cores to ondemand and the governor of the core we need to the given frequency
-$SPARTA_SCRIPTDIR/tracing/trace_set_freq.sh $TRACED_CORE $TRACE_FREQUENCY ondemand
+sudosh $SPARTA_SCRIPTDIR/tracing/trace_set_freq.sh $TRACED_CORE $TRACE_FREQUENCY ondemand
 
-echo "Tracing " $TRACED_PROGRAM " at core " $TRACED_CORE " at freq " $(cat /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/cpuinfo_cur_freq)
-dmesg -c > $PREV_DMESG
+echo "Tracing " $TRACED_PROGRAM " at core " $TRACED_CORE " at freq " $(sudo cat /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/cpuinfo_cur_freq)
+sudo dmesg -c > $PREV_DMESG
 
 echo "RUNNING" > $STATUS_FILE
 
@@ -84,10 +84,10 @@ do
         for retry in $(seq 1 10)
         do            
             echo "perfcnt run $cntRun (iter $iter out of $_TRACE_RUNITERS)"
-            sh $SPARTA_SCRIPTDIR/runtime/start.sh tracing trace_core=$TRACED_CORE $ACTUAL_TRACE_PERFCNTS
+            sudosh $SPARTA_SCRIPTDIR/runtime/start.sh tracing trace_core=$TRACED_CORE $ACTUAL_TRACE_PERFCNTS
             $TRACED_PROGRAM $TRACED_PROGRAM_ARGS >$TRACED_PROGRAM_OUT 2>&1 
-            sh $SPARTA_SCRIPTDIR/runtime/stop.sh
-            dmesg -c > $CURR_DMESG
+            sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+            sudo dmesg -c > $CURR_DMESG
            
             grep -q "traced.pid" $DAEMON_OUTFILE
             RET="$?"
@@ -112,7 +112,7 @@ done
 echo "DONE" > $STATUS_FILE
 
 # Makes sure all cores are ondemand
-$SPARTA_SCRIPTDIR/tracing/trace_setgov.sh ondemand
+sudosh $SPARTA_SCRIPTDIR/tracing/trace_setgov.sh ondemand
 
 
 

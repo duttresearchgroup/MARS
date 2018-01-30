@@ -72,3 +72,12 @@ export TRACE_RUNITERS=4
 export TRACE_OUTPUT_DIR=$SPARTA_ROOT/traces
 export R_TRACE_OUTPUT_DIR=$R_SPARTA_ROOT/traces
 
+
+###########################################
+# Confs for training scripts
+
+# Core where calibration ubench is executed before training
+export CALIB_CORE=6
+# Frequency to be used when calibrating
+export CALIB_FREQUENCY=1800000
+

@@ -20,6 +20,6 @@
 # together.
 ###########################################################
 
-sudosh $SPARTA_SCRIPTDIR/tracing/trace_one-run.sh $@
+sh $SPARTA_SCRIPTDIR/tracing/trace_one-run.sh $@
 sh $SPARTA_SCRIPTDIR/tracing/trace_one-parse.sh $@
 
