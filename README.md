@@ -1,7 +1,16 @@
 # Overview
-Code base for the VITAMINS framework
+Code base for Sparta framework
 
 This repository contain mostly the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included.
+
+# Background
+This is a middleware which is composed of modules and daemons. 
+* *Modules*: Modules are loadable kernel extensions, that enables some of the features that are required by the user level daemons. Modules are tightly coupled with the kernel and we have two options if we want to build them.
+  * *Directly on target*: We can build the modules on the target platform directly. <Need instructions>
+  * *Cross compile*: If we have the source code of the kernel, we can compile the kernel modules on the host system and deploy the binaries on the target.
+
+We need to specify our default architecture (ARCH_DEFAULT) in the .makefile.buildopts file.
+Ex: If we are cross compiling for ODROID, we need to change the `ARCH_DEFAULT=arm`.
 
 # Organization
 
