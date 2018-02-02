@@ -137,5 +137,28 @@ public:
 
 };
 
+class IdlePowerChecker : public System {
+protected:
+    static const int WINDOW_LENGTH_MS = 200;
+
+    virtual void setup();
+
+    const SensingWindowManager::WindowInfo *sensingWindow;
+
+    static void window_handler(int wid,System *owner);
+
+    ExecutionTrace _execTrace;
+
+    FrequencyActuator _freqAct;
+
+
+public:
+    IdlePowerChecker() :System(),
+        sensingWindow(nullptr),_execTrace("idle_trace"),
+        _freqAct(*info()){};
+
+};
+
+
 #endif
 

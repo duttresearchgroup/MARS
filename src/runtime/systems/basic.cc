@@ -276,3 +276,35 @@ void InterfaceTest::report()
 	db.record();
 }
 
+
+
+void IdlePowerChecker::setup()
+{
+    sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+
+    _freqAct.setFrameworkMode();
+    for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
+        actuate<ACT_FREQ_MHZ>(
+                            info()->freq_domain_list[domain_id],
+                            _freqAct.freqMin(info()->freq_domain_list[domain_id]));
+    }
+}
+
+
+void IdlePowerChecker::window_handler(int wid,System *owner)
+{
+    IdlePowerChecker *self =  dynamic_cast<IdlePowerChecker*>(owner);
+
+    auto sensedData = self->sensingModule()->data();
+    auto trace = self->_execTrace.getHandle(sensedData,wid);
+
+    //save total power
+    double totalPowerW = 0;
+    for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
+        totalPowerW += sense<SEN_POWER_W>(&owner->info()->power_domain_list[domain_id],wid);
+    }
+    trace("total_power_w") = totalPowerW;
+
+    self->quit();
+}
+
