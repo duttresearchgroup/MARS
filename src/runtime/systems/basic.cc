@@ -137,14 +137,6 @@ void TracingSystem::window_handler(int wid,System *owner)
 		    //data for this epoch
 			trace("total_time_s") = sense<SEN_TOTALTIME_S>(&task,wid);
 			trace("busy_time_s") = sense<SEN_BUSYTIME_S>(&task,wid);
-			trace("total_ips") = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,wid) / sense<SEN_TOTALTIME_S>(&task,wid);
-
-			if (sense<SEN_BUSYTIME_S>(&task,wid) == 0)
-				trace("busy_ips") = 0;
-			else
-				trace("busy_ips") = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,wid) / sense<SEN_BUSYTIME_S>(&task,wid);
-
-			trace("util") = sense<SEN_BUSYTIME_S>(&task,wid) / sense<SEN_TOTALTIME_S>(&task,wid);
 
 			trace("power_w") = sense<SEN_POWER_W>(self->info()->core_list[last_cpu_used].power,wid);
 
@@ -159,6 +151,10 @@ void TracingSystem::window_handler(int wid,System *owner)
 			for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) {
 				trace("beats"+std::to_string(j)) = sense<SEN_BEATS>(j,&task,wid);
 			}
+
+			trace("core") = last_cpu_used;
+			trace("freq_domain") = self->info()->core_list[last_cpu_used].freq->domain_id;
+			trace("pow_domain") = self->info()->core_list[last_cpu_used].power->domain_id;
 		}
 	}
 
