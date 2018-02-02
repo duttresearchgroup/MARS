@@ -1,16 +1,67 @@
 # Overview
 Code base for Sparta framework
 
-This repository contain mostly the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included.
+This repository contain mostly the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included. 
 
 # Background
-This is a middleware which is composed of modules and daemons. 
-* *Modules*: Modules are loadable kernel extensions, that enables some of the features that are required by the user level daemons. Modules are tightly coupled with the kernel and we have two options if we want to build them.
-  * *Directly on target*: We can build the modules on the target platform directly. <Need instructions>
-  * *Cross compile*: If we have the source code of the kernel, we can compile the kernel modules on the host system and deploy the binaries on the target.
+## Preparing your SD Card
+ Install the Linux image on the target platform.
+ If you are planning to cross-compile, instead of compiling our program on the target itself, you will also need the source code for the kernel.
 
-We need to specify our default architecture (ARCH_DEFAULT) in the .makefile.buildopts file.
-Ex: If we are cross compiling for ODROID, we need to change the `ARCH_DEFAULT=arm`.
+If you are using Odroid XU3/XU4, you can find the images in [odroid site](https://wiki.odroid.com/odroid-xu4/os_images/linux/ubuntu/ubuntu).
+
+## Components
+This is a middleware which is composed of kernel modules, user daemons and tests. 
+* *Modules*: Modules are loadable kernel extensions, that enables some of the features that are required by the user level daemons.
+* *Daemons*: Daemons are the user-level processes which need the modules to be loaded.
+* *Tests*: It has tests which check if our code is working. The source files are located in /runtime/uapi.
+
+# Compiling
+## Cross compiling (Recommended)
+We can cross-compiling the code in our host system (or on our docker if want to get started quickly), and then deploy it in the target platform.
+
+Before we make, we must configure *.makefile.buildopts* correctly. These settings will be used for the build process. Important fields are 
+* *ARCH_DEFAULT* : Specify the architecture of target platform. Ex: arm
+* *PLAT_DEFAULT* : Given an architecture, which platform are we using. 
+Ex: for odroid, PLAT_DEFAULT_arm=exynos5422
+* *CROSS_COMPILE_usr*: Cross compiler to use for compiling the daemons. Ex:CROSS_COMPILE_usr_DEFAULT_arm_exynos5422=arm-linux-gnueabihf-
+* *CROSS_COMPILE_krn*: Cross compiler to use for compiling the modules
+Ex: CROSS_COMPILE_krn_DEFAULT_arm_exynos5422=arm-none-eabi-<br>
+Modules are tightly coupled with the kernel and if we want to cross compile, we need the linux source code of the target platform. The next parameter will be used to specify that src path.
+* *KERNEL_SRC_DEFAULT*: Specify the kernel source code if cross compiling modules.
+
+Once you have set these values based on your target platform, we are ready for building. Please ensure that the compilers specified above are actually isnstalled on the system.
+
+To build the binaries, we can use the following commands:
+* Generate daemons: 
+  * *make daemons*
+* Generate modules
+  * *make lin_sensing_module*
+* Generate tests
+  * *make ubench*
+* Generate all binaries including tests
+  * *make runtime*
+
+## Directly on board
+  Coming soon
+
+# Deployment
+After the binaries are built, it is time to deploy them to the target platform.
+The steps in this phase require bash shell. You can execute `ls -l /bin/sh` to verify if default shell points to `/bin/bash`. The current procedure involves transferring the binaries from the host to the target platform using *rsync*. Please install `rsync` in the host as well as target platform. Additionaly `sshpass` is also required in the host system.
+The steps are as follows:
+* *Clone repo in the target platform*
+* *env .sh*: Run `source scripts/env.sh` in the host machine
+* *confs .sh*: Modify the entries in `scripts/confs.sh` which we need to specify in order to ssh into the target. 
+
+  * Remote user credentials: *R_USER*, *R_PASS*
+  * Remote host ip address: *R_HOST*
+  * Build dir in the remote host: *R_SPARTA_ROOT*
+  
+* *remote_synch.sh*: run `sh scripts/common/remote_synch.sh` to copy cross-compile binaries to the target
+* *env .sh*: Run `source scripts/env.sh` in the target platform
+
+# Running
+Test if the code is working properly by executing `sh scripts/tests/interface_test.sh`. If successful, you can see the results in *outdir*.
 
 # Organization
 
@@ -24,14 +75,3 @@ Ex: If we are cross compiling for ODROID, we need to change the `ARCH_DEFAULT=ar
   * *sa_solver*: Simulated annealing algorithm for task mapping. Must be linked with core library if it is to be used
   * *linsched*, *mcpat*, *heartbeat*, *linux-modules/heartbeat*: Open source code developed by others required by the trace simulator or for other purposes
     
-# Usage
-
-Check makefile and vitamins.mk for details. Some useful commands:
-
-* Generate separate libraries for each module: 
-  * *make lib*
-* Compile all applications at src/app
-  * *make all*
-* Cross-compiling a kernel module for ARM
-  * *make linux_module ARCH=arm PLAT=exynos5422 MODULE=vitamins*
-

@@ -4,7 +4,7 @@ MAINTAINER Biswadip Maity <biswadip.maity@gmail.com>
 # get dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential git-core python-dev python vim \
-    g++-arm-linux-gnueabihf gcc-arm-none-eabi bc
+    g++-arm-linux-gnueabihf gcc-arm-none-eabi bc sshpass
 RUN apt-get clean
 
 RUN mkdir -p /workspace
