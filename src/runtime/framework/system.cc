@@ -27,6 +27,8 @@
 #include <runtime/interfaces/common/pal/pal_setup.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 
+#include <signal.h>
+
 bool System::_system_created = false;
 
 System::System()
@@ -54,7 +56,8 @@ System::System()
 		if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
 	}
 
-    _system_ready_file = rt_param_daemon_file() + ".ready";
+    _system_pid = getpid();
+	_system_ready_file = rt_param_daemon_file() + ".ready";
 }
 
 System::System(simulation_t *sim)
@@ -155,7 +158,7 @@ void System::start()
 	//creates a file that users can check to see if the daemon is ready
 	//also stores the daemon pid
     std::ofstream fs(_system_ready_file);
-    fs << getpid();
+    fs << _system_pid;
     fs.close();
 }
 
@@ -165,5 +168,10 @@ void System::stop()
 	report();
 	//removes the file created by start
 	std::remove(_system_ready_file.c_str());
+}
+
+void System::quit()
+{
+    kill(_system_pid,SIGQUIT);
 }
 

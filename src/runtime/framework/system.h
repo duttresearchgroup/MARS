@@ -39,6 +39,7 @@ class System : public ActuationInterface, public SensingInterface {
 	void _init_info(simulation_t *sim);
 	void _sensing_setup_common();
 
+	int _system_pid;
 	std::string _system_ready_file;
 
   protected:
@@ -59,6 +60,9 @@ class System : public ActuationInterface, public SensingInterface {
 	 * Override to print execution repots and/or dump files with data
 	 */
 	virtual void report() {};
+
+  protected:
+	void quit();
 
   public:
 	virtual ~System();
