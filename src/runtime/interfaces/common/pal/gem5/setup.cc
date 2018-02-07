@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/basic.h>
+#include "_common.h"
 
-int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<MeasuringSystem>();
-    return 0;
+//TODO: this whole file is legacy BS that should be removed
+// not used for this plat
+void model_setup_freq_domains(sys_info_t *sys)
+{
+}
+
+void model_setup_power_domains(sys_info_t *sys)
+{
+}
+
+
+void model_setup_overheads(model_sys_t *sys)
+{
 }

@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/basic.h>
+#ifndef __common_pal_gem5_defs_h
+#define __common_pal_gem5_defs_h
 
-int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<MeasuringSystem>();
-    return 0;
-}
+#define IS_LINUX_PLAT
+
+#define MAX_NR_CPUS 64
+#define MAX_CREATED_TASKS 64
+
+#define MAX_PERFCNTS 64//maximum number of counters
+
+
+#endif

@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/basic.h>
+#include <runtime/interfaces/common/pal/sensing_setup.h>
+#include <runtime/interfaces/sensing_module.h>
 
-int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<MeasuringSystem>();
-    return 0;
+
+template<>
+void pal_sensing_setup<SensingModule>(SensingModule *m){
+    // no sensors implemented yet
+}
+
+template<>
+void pal_sensing_teardown<SensingModule>(SensingModule *m){
+    // no sensors implemented yet
+}
+
+/*
+ * Sensing interface functions implementation
+ */
+
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+{
+	return 0;
+}
+
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+{
+	return 0;
 }

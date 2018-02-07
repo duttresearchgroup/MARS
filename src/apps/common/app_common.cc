@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

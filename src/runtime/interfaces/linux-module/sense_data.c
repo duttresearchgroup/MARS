@@ -17,7 +17,6 @@
 
 #include "../linux-module/sense_data.h"
 
-
 #include <linux/slab.h>
 
 #include "../common/sense_defs.h"
