@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,19 +46,18 @@ void daemon_setup(int argc, char * argv[]) {
 
 void daemon_run_sys(System* sys) {
 	try {
+        daemon_start(sys);
 
-		daemon_start(sys);
-
-		//sensing window threads are running. Quits from signal handler
-		for (;;) pause();
+        //sensing window threads are running. Quits from signal handler
+        for (;;) pause();
 
 		//should not reach here
-		pinfo("Very unnexpected error at %s:%d\n",__FILE__,__LINE__);
+        pinfo("Very unnexpected error at %s:%d\n",__FILE__,__LINE__);
 
-	} arm_catch(ARM_CATCH_NO_EXIT);
+    } arm_catch(ARM_CATCH_NO_EXIT);
 
-	//should not reach here, unless exiting from exception
-	exit(EXIT_FAILURE);
+    //should not reach here, unless exiting from exception
+    exit(EXIT_FAILURE);
 }
 
 
@@ -143,7 +143,7 @@ static void daemonize() {
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
     if(chdir("/")!=0) arm_throw(DaemonInitException,"chdir error. errno = %d",errno);
-
+#if (PLAT==gem5)
     /* Close all open file descriptors */
     int x;
     for (x = sysconf(_SC_OPEN_MAX); x>0; x--)
@@ -159,7 +159,7 @@ static void daemonize() {
     stderr = fopen("/dev/kmsg","w");
     if(stderr == NULL)
     	arm_throw(DaemonInitException,"Couldn't point stderr to /dev/ksmg errno=%d",errno);
-
+#endif
     pinfo("Process deamoninzed. pid %d\n",getpid());
 }
 
