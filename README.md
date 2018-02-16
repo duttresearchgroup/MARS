@@ -5,8 +5,7 @@ This repository contains mostly the implementation of the prediction, task mappi
 
 # Background
 ## Preparing your SD Card
- Install the Linux image on the target platform.
- If you are planning to cross-compile, instead of compiling our program on the target itself, you will also need the source code for the kernel.
+ Install the Linux image on the target platform. You will also need the source code of the kernel currently installed to compile.
 
 If you are using Odroid XU3/XU4, you can find the images at [odroid site](https://wiki.odroid.com/odroid-xu4/os_images/linux/ubuntu/ubuntu).
 
@@ -16,21 +15,32 @@ This is a middleware which is composed of kernel modules, user daemons and tests
 * *Daemons*: Daemons are the user-level processes which need the modules to be loaded.
 * *Tests*: Test programs to check if the framework is working. The source files are located in /runtime/uapi.
 
-# Compiling
-## Cross compiling (Recommended)
-We can cross-compile the framework on our host system (or on our docker if want to get started quickly), and then deploy it on the target platform.
+# Compiling 
+## Cross Compiling (Recommended)
+### **Compiling step**
+This method uses two separate systems, a **host** machine (which can be your PC) and a **target** platform (Ex: Ordroid) to run the program. We can cross-compile the framework on our host system (or on our docker if want to get started quickly), and then deploy it on the target platform.
 
-Before we make, we must configure *.makefile.buildopts* correctly. These settings will be used for the build process. Important fields are 
-* *ARCH_DEFAULT* : Specify the architecture of target platform. Ex: arm
-* *PLAT_DEFAULT* : Given an architecture, which platform are we using. 
-Ex: for odroid, PLAT_DEFAULT_arm=exynos5422
-* *CROSS_COMPILE_usr*: Cross compiler to use for compiling the daemons. Ex:CROSS_COMPILE_usr_DEFAULT_arm_exynos5422=arm-linux-gnueabihf-
-* *CROSS_COMPILE_krn*: Cross compiler to use for compiling the modules
-Ex: CROSS_COMPILE_krn_DEFAULT_arm_exynos5422=arm-none-eabi-<br>
+Some of the important parameters that we need to specify during compile time are:
+
+* *ARCH: ISA used for compiling. Affects the GCC being used. Default is `ARCH=host` if undefined*
+* *PLAT: platform to use when compiling modules with platform-specific code. Set based on the value for ARCH if undefined. Ex: for odroid, `PLAT_DEFAULT_arm=exynos5422`*
+* *CROSS_COMPILE_usr: Which GCC to use for user space applications. Set based on the value for ARCH if undefined*
+* *CROSS_COMPILE_krn: Which GCC to use for kernel modules. Set based on the value for ARCH if undefined.*
+* *EXTRAFLAGS: Extra GCC options. Set based on the value for ARCH if undefined*
+* *KERNEL_SRC: Path to kernel source used when compiling linux kernel modules. Set based on the value for ARCH if undefined*
+* *MODULE: linux module to compile when running 'make exp_module'. No default value.*
+* *UBENCH: specify a specific target when running 'make ubench'*
+* *DAEMONS: specify specific daemons to build when running 'make daemons'. If blank all daemons are built. Use "," to separate multiple values*
+
 Modules are tightly coupled with the kernel and if we want to cross compile, we need the linux source code of the target platform. The next parameter will be used to specify that src path.
 * *KERNEL_SRC_DEFAULT*: Specify the kernel source code if cross compiling modules.
 
-Once you have set these values based on your target platform, we are ready for building. Please ensure that the compilers specified above are actually isnstalled on the system.
+Compiling for the first time :
+When you run `make` for the first time, it will show the list of targets that we have and generate a makefile.buildopts file. Before start compiling, you must configure `makefile.buildopts` correctly for your setup. These settings will be used for the build process. 
+
+Once you have set these values based on your target platform, we are ready for building. Please ensure that the compilers specified above are actually installed on the system.
+
+Running make always prints the set values of all build parameters. Running "make all" or just "make" will print a help message listing the valid targets
 
 To build the binaries, we can use the following commands:
 * Generate daemons: 
@@ -38,14 +48,14 @@ To build the binaries, we can use the following commands:
 * Generate modules
   * *make lin_sensing_module*
 * Generate tests
-  * *make ubench*
+  * *make uapi_tests*
 * Generate all binaries including tests
   * *make runtime*
 
-## Directly on board
-  Coming soon
+Generate ubenchmarks
+  * *make ubench*: Though the ubenchmarks are necessary for some of the test scripts, the ubenchmarks themselves are not tests for the framework and can be built and used independently from the framework. 
 
-# Deployment
+### **Deployment step** (Only required if you are cross compiling)
 After the binaries are built, it is time to deploy them on the target platform.
 The steps in this phase require bash shell. You can execute `ls -l /bin/sh` to verify if default shell points to `/bin/bash`. The current procedure involves transferring the binaries from the host to the target platform using *rsync*. Please install `rsync` in the host as well as target platform. Additionaly `sshpass` is also required in the host system.
 The steps are as follows:
@@ -60,8 +70,15 @@ The steps are as follows:
 * *remote_synch.sh*: run `sh scripts/common/remote_synch.sh` to copy cross-compile binaries to the target
 * *env .sh*: Run `source scripts/env.sh` in the target platform
 
-# Running
-Test if the code is working properly by executing `sh scripts/tests/interface_test.sh`. If successful, you can see the results in *outdir*.
+
+## Compiling directly on board
+  Coming soon
+
+# Running on target platform
+Test if the code is working properly in the target platform. 
+* *The steps in this phase also require bash shell. Execute `ls -l /bin/sh` to verify*
+* *Run `source scripts/env.sh`*
+* *Execute `sh scripts/tests/interface_test.sh`. If successful, you can see the results in `outdir`.*
 
 # Organization
 

@@ -22,3 +22,4 @@ ENTRYPOINT bash
 WORKDIR /workspace/sparta
 RUN sed -i '0,/=host/s//=arm/' .makefile.buildopts
 RUN make daemons
+RUN ln -sf /bin/bash /bin/sh
