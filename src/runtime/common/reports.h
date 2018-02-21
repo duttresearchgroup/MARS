@@ -398,5 +398,36 @@ public:
 };
 
 
+class SysInfoPrinter {
+
+private:
+
+    inline std::string _pathName(){
+        std::stringstream ss;
+        ss << rt_param_outdir() << "/sys_info.json";
+        return ss.str();
+    }
+
+    void _print(std::ostream &os);
+
+    sys_info_t &_sys_info;
+
+public:
+
+    SysInfoPrinter(sys_info_t &sys_info) :_sys_info(sys_info){}
+
+    void printToOutdirFile(){
+        std::ofstream of(_pathName());
+        _print(of);
+    }
+
+    std::string toString(){
+        std::stringstream ss;
+        _print(ss);
+        return ss.str();
+    }
+
+};
+
 #endif
 

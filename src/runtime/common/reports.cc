@@ -27,6 +27,8 @@
 #include <runtime/interfaces/sensing_module.h>
 #include <sstream>
 
+#include <external/minijson_writer/minijson_writer.hpp>
+
 #define IDENT_l0 "  "
 #define IDENT_l1 "    "
 
@@ -634,4 +636,74 @@ double& ExecutionTrace::ExecutionTraceHandle::operator()(const std::string &entr
 	return entryData[_sampleIdx];
 }
 
+void SysInfoPrinter::_print(std::ostream &os)
+{
+    minijson::object_writer writer(os,
+            minijson::writer_configuration().pretty_printing(true));
 
+    writer.write("core_list_size", _sys_info.core_list_size);
+    {
+      minijson::array_writer list_writer = writer.nested_array("core_list");
+      for(int i = 0; i < _sys_info.core_list_size; ++i){
+          minijson::object_writer entry_writer = list_writer.nested_object();
+          assert_true(i == _sys_info.core_list[i].position);
+          entry_writer.write("arch",archToString(_sys_info.core_list[i].arch));
+          entry_writer.write("core_id",_sys_info.core_list[i].position);
+          entry_writer.write("freq_domain_id",_sys_info.core_list[i].freq->domain_id);
+          entry_writer.write("power_domain_id",_sys_info.core_list[i].freq->domain_id);
+          entry_writer.close();
+      }
+      list_writer.close();
+    }
+
+    writer.write("freq_domain_list_size", _sys_info.freq_domain_list_size);
+    {
+      minijson::array_writer list_writer = writer.nested_array("freq_domain_list");
+      for(int i = 0; i < _sys_info.freq_domain_list_size; ++i){
+          minijson::object_writer entry_writer = list_writer.nested_object();
+          assert_true(i == _sys_info.freq_domain_list[i].domain_id);
+          entry_writer.write("domain_id",_sys_info.freq_domain_list[i].domain_id);
+          entry_writer.write("core_cnt",_sys_info.freq_domain_list[i].core_cnt);
+          {
+              minijson::array_writer core_writer = entry_writer.nested_array("cores");
+              for(int j = 0; j < _sys_info.core_list_size; ++j)
+                  if(_sys_info.core_list[j].freq->domain_id == i)
+                      core_writer.write(j);
+              core_writer.close();
+          }
+          entry_writer.write("power_domain_cnt",_sys_info.freq_domain_list[i].power_domain_cnt);
+          {
+              minijson::array_writer pd_writer = entry_writer.nested_array("power_domains");
+              for(int j = 0; j < _sys_info.power_domain_list_size; ++j)
+                  if(_sys_info.power_domain_list[j].freq_domain->domain_id == i)
+                      pd_writer.write(j);
+              pd_writer.close();
+          }
+          entry_writer.close();
+      }
+      list_writer.close();
+    }
+
+    writer.write("power_domain_list_size", _sys_info.power_domain_list_size);
+    {
+      minijson::array_writer list_writer = writer.nested_array("power_domain_list");
+      for(int i = 0; i < _sys_info.power_domain_list_size; ++i){
+          minijson::object_writer entry_writer = list_writer.nested_object();
+          assert_true(i == _sys_info.power_domain_list[i].domain_id);
+          entry_writer.write("domain_id",_sys_info.power_domain_list[i].domain_id);
+          entry_writer.write("core_cnt",_sys_info.power_domain_list[i].core_cnt);
+          {
+              minijson::array_writer core_writer = entry_writer.nested_array("cores");
+              for(int j = 0; j < _sys_info.core_list_size; ++j)
+                  if(_sys_info.core_list[j].power->domain_id == i)
+                      core_writer.write(j);
+              core_writer.close();
+          }
+          entry_writer.close();
+      }
+      list_writer.close();
+    }
+
+
+    writer.close();
+}

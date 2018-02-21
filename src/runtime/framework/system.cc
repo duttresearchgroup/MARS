@@ -153,6 +153,10 @@ void System::start()
 {
 	_sensing_setup_common();
 	setup();
+
+	//saves the sys_info
+	SysInfoPrinter sip(_sys_info); sip.printToOutdirFile();
+
 	_manager->startSensing();
 
 	//creates a file that users can check to see if the daemon is ready
