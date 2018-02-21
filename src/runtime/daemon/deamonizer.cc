@@ -143,7 +143,7 @@ static void daemonize() {
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
     if(chdir("/")!=0) arm_throw(DaemonInitException,"chdir error. errno = %d",errno);
-#if (PLAT==gem5)
+
     /* Close all open file descriptors */
     int x;
     for (x = sysconf(_SC_OPEN_MAX); x>0; x--)
@@ -159,7 +159,7 @@ static void daemonize() {
     stderr = fopen("/dev/kmsg","w");
     if(stderr == NULL)
     	arm_throw(DaemonInitException,"Couldn't point stderr to /dev/ksmg errno=%d",errno);
-#endif
+
     pinfo("Process deamoninzed. pid %d\n",getpid());
 }
 
