@@ -153,8 +153,6 @@ void TracingSystem::window_handler(int wid,System *owner)
 			}
 
 			trace("core") = last_cpu_used;
-			trace("freq_domain") = self->info()->core_list[last_cpu_used].freq->domain_id;
-			trace("pow_domain") = self->info()->core_list[last_cpu_used].power->domain_id;
 		}
 	}
 
