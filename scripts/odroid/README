@@ -1,0 +1,3 @@
+This directory has some helper scritps for the Odroid board.
+Currently tested with the OdroidXU3 only. Scripts might 
+work on other models with minor changes.
