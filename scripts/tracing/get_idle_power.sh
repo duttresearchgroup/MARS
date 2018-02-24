@@ -15,11 +15,27 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-######################################################
+#######################################################
 # Runs the IdlePowerChecker daemon to collect a trace
 # with power measuments when the system is idle across
-# multiple frequencies
-#####################################################
+# multiple frequencies.
+# Takes as input the directory where the idle power
+# is to be saved (save to the curr. dir if not given)
+#######################################################
+
+source $SPARTA_SCRIPTDIR/runtime/common.sh
+
+if [ ! -z "$1" ]; then
+    IDLE_POWER_DIR=$1
+else
+    IDLE_POWER_DIR=idle_power-$RTS_ARCH-$RTS_PLAT
+fi
 
 sudosh $SPARTA_SCRIPTDIR/runtime/start.sh idlepowerchecker
 sudosh $SPARTA_SCRIPTDIR/runtime/wait_for_stop.sh
+
+echo "Saving idle power traces to $IDLE_POWER_DIR"
+mkdir -p $IDLE_POWER_DIR
+cp $RTS_DAEMON_OUTDIR/idle_trace.* $IDLE_POWER_DIR/
+cp $RTS_DAEMON_OUTDIR/sys_info.json $IDLE_POWER_DIR/
+

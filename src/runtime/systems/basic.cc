@@ -321,14 +321,14 @@ void IdlePowerChecker::window_handler(int wid,System *owner)
     for(int i = 0; i < self->info()->freq_domain_list_size; ++i){
         freq_domain_info_t &fd = self->info()->freq_domain_list[i];
         auto val = actuationVal<ACT_FREQ_MHZ>(fd);
-        if((self->_state == INCREASING_1)||(self->_state == INCREASING_2)){
+        if(self->_state == INCREASING){
             val += 100;
             if(val <= self->_freqAct.freqMax(fd)) {
                 actuate<ACT_FREQ_MHZ>(fd, val);
                 changed = true;
             }
         }
-        else if((self->_state == DECREASING_1)||(self->_state == DECREASING_2)){
+        else if(self->_state == DECREASING){
             val -= 100;
             if(val >= self->_freqAct.freqMin(fd)) {
                 actuate<ACT_FREQ_MHZ>(fd, val);
@@ -338,11 +338,13 @@ void IdlePowerChecker::window_handler(int wid,System *owner)
     }
 
     if(!changed){
-        if(self->_state==INCREASING_1) self->_state=DECREASING_1;
-        else if(self->_state==DECREASING_1) self->_state=INCREASING_2;
-        else if(self->_state==INCREASING_2) self->_state=DECREASING_2;
-        else if(self->_state==DECREASING_2) self->quit();
-
+        if(self->_state==INCREASING) self->_state=DECREASING;
+        else if(self->_state==DECREASING){
+            self->_state=INCREASING;
+            self->_iterations += 1;
+        }
+        if(self->_iterations >= ITERATIONS)
+            self->quit();
     }
 }
 

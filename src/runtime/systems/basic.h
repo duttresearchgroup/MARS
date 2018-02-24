@@ -143,6 +143,8 @@ protected:
 
     static const int FREQ_STEPS_MHZ = 100;
 
+    static const int ITERATIONS = 4;
+
     virtual void setup();
 
     const SensingWindowManager::WindowInfo *sensingWindow;
@@ -152,13 +154,12 @@ protected:
     FrequencyActuator _freqAct;
 
     enum state {
-        INCREASING_1,
-        DECREASING_1,
-        INCREASING_2,
-        DECREASING_2
+        INCREASING,
+        DECREASING
     };
 
     state _state;
+    int _iterations;
 
     std::unordered_map<void*,ExecutionTrace*> _execTraces;
 
@@ -178,7 +179,7 @@ protected:
 public:
     IdlePowerChecker() :System(),
         sensingWindow(nullptr),
-        _freqAct(*info()),_state(INCREASING_1){};
+        _freqAct(*info()),_state(INCREASING),_iterations(0){};
 
     virtual ~IdlePowerChecker(){
         for(auto iter : _execTraces){
