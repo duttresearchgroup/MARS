@@ -24,6 +24,6 @@
 
 source $SPARTA_SCRIPTDIR/ubenchmarks/common.sh
 
-sh $SPARTA_SCRIPTDIR/training/run_training.sh $UBENCH_BIN_DIR/predictor_master_lite $@
+sh $SPARTA_SCRIPTDIR/training/run_training.sh $UBENCH_BIN_DIR/training_singleapp_test $@
 
 

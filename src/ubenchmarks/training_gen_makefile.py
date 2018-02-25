@@ -18,17 +18,17 @@
 
 import sys
 
-predictors=(
+training_apps=(
 "\n"
-".PHONY: predictors\n"
-"predictors: "
+".PHONY: training_apps\n"
+"training_apps: "
 )
 
-predNameTemplate="$(BINDIR)/XXpredictornameXX "
+predNameTemplate="$(BINDIR)/XXtrainingnameXX "
 makePredTemplate=(
 "\n"
-"$(BINDIR)/XXpredictornameXX: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_main.cc\n"
-"\t$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=XXhigh_ilp_cache_good_intXX -DITER_high_ilp_cache_bad_int=XXhigh_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_int=XXlow_ilp_cache_good_intXX -DITER_low_ilp_cache_bad_int=XXlow_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_float=XXlow_ilp_cache_good_floatXX -DITER_low_ilp_cache_bad_float=XXlow_ilp_cache_bad_floatXX -DITER_high_ilp_cache_good_float=XXhigh_ilp_cache_good_floatXX -DITER_high_ilp_cache_bad_float=XXhigh_ilp_cache_bad_floatXX -DITER_low_ilp_icache_bad=XXlow_ilp_icache_badXX -DITER_low_ilp_branches_deep=XXlow_ilp_branches_deepXX -DITER_matrix_mult=0 $(SRCDIR)/predictor_main.cc $(OBJDIR)/predictor.o $(KERN_OBJS) -o $(BINDIR)/XXpredictornameXX\n"
+"$(BINDIR)/XXtrainingnameXX: $(OBJDIR)/training.o $(KERN_OBJS) $(SRCDIR)/training_singleapp.cc\n"
+"\t$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=XXhigh_ilp_cache_good_intXX -DITER_high_ilp_cache_bad_int=XXhigh_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_int=XXlow_ilp_cache_good_intXX -DITER_low_ilp_cache_bad_int=XXlow_ilp_cache_bad_intXX -DITER_low_ilp_cache_good_float=XXlow_ilp_cache_good_floatXX -DITER_low_ilp_cache_bad_float=XXlow_ilp_cache_bad_floatXX -DITER_high_ilp_cache_good_float=XXhigh_ilp_cache_good_floatXX -DITER_high_ilp_cache_bad_float=XXhigh_ilp_cache_bad_floatXX -DITER_low_ilp_icache_bad=XXlow_ilp_icache_badXX -DITER_low_ilp_branches_deep=XXlow_ilp_branches_deepXX -DITER_matrix_mult=0 $(SRCDIR)/training_singleapp.cc $(OBJDIR)/training.o $(KERN_OBJS) -o $(BINDIR)/XXtrainingnameXX\n"
 )
 
 make  = "\n"
@@ -69,14 +69,14 @@ benchIters.append(["0","3500000"])
 predIdx = 0
 def combine(benchIdx,template):
     if(benchIdx >= len(benchname)):
-        global predictors
+        global training_apps
         global predIdx
         global predNameTemplate
         global make
-        predName = "predictor{:04d}".format(predIdx)
-        template = template.replace("XXpredictornameXX", predName)
+        predName = "training{:04d}".format(predIdx)
+        template = template.replace("XXtrainingnameXX", predName)
         make += template
-        predictors += predNameTemplate.replace("XXpredictornameXX", predName)
+        training_apps += predNameTemplate.replace("XXtrainingnameXX", predName)
         predIdx += 1
     else:
         for nIter in benchIters[benchIdx]:
@@ -86,7 +86,7 @@ def combine(benchIdx,template):
 
 combine(0,makePredTemplate)
 
-make = predictors + make
+make = training_apps + make
 
 print(make)            
 

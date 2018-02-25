@@ -21,31 +21,31 @@ LD=$(CROSS_COMPILE)ld
 
 SRCDIR=src/ubenchmarks
 BINDIR=bin_$(ARCH)_$(PLAT)/ubenchmarks
-BINDIR_PRED=$(BINDIR)/predictors
+BINDIR_TRAIN=$(BINDIR)/training
 OBJDIR=obj_$(ARCH)_$(PLAT)/ubenchmarks
 
 CFLAGS=-O2 -Wall -Werror -std=c++11 $(EXTRAFLAGS)
 OBJFLAGS=-static -pthread $(CFLAGS)
 
-.PHONY: all clean veryclean predictors_clean predictors_multiapp predictors_singleapp
+.PHONY: all clean veryclean trainingapps_clean training_test training_multiapp training_singleapp
 
 all: test
 
 clean:
 	rm -rf $(BINDIR) $(OBJDIR)
 	
-predictors_clean:
-	rm -rf $(BINDIR_PRED)
+trainingapps_clean:
+	rm -rf $(BINDIR_TRAIN)
 
-veryclean: predictors_clean clean
+veryclean: trainingapps_clean clean
 
-dirs: $(BINDIR) $(OBJDIR) $(BINDIR_PRED)
+dirs: $(BINDIR) $(OBJDIR) $(BINDIR_TRAIN)
 $(BINDIR):
 	mkdir -p $(BINDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
-$(BINDIR_PRED):
-	mkdir -p $(BINDIR_PRED)
+$(BINDIR_TRAIN):
+	mkdir -p $(BINDIR_TRAIN)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc | dirs
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -65,12 +65,12 @@ KERN_INT_OBJ=$(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(KERN_INT_SRC))
 KERN_FLOAT_OBJ=$(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(KERN_FLOAT_SRC))
 KERN_TIMED_OBJ=$(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(KERN_TIMED_SRC))
 KERN_ICACHE_OBJ=$(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(KERN_ICACHE_SRC))
-export KERN_OBJS=$(KERN_ICACHE_OBJ) #needed by makefile.predictors and we cannot pass as param so we use export
+export KERN_OBJS=$(KERN_ICACHE_OBJ) #needed by makefile.training_multiapp and we cannot pass as param so we use export
 
-test: $(BINDIR)/mem_test $(BINDIR)/ubenchmark_periodic $(BINDIR)/ubenchmark_timed $(BINDIR)/predictor_test
+test: $(BINDIR)/mem_test $(BINDIR)/ubenchmark_periodic $(BINDIR)/ubenchmark_timed $(BINDIR)/training_test
 
-predictor_test: $(BINDIR)/predictor_test
-	perf stat -e cycles,instructions,cache-references,cache-misses,branches,branch-misses -r 10 $(BINDIR)/predictor_test_noprint
+training_test: $(BINDIR)/training_test
+	perf stat -e cycles,instructions,cache-references,cache-misses,branches,branch-misses -r 10 $(BINDIR)/training_test_noprint
 
 $(BINDIR)/mem_test: $(OBJDIR)/mem_test.o
 	$(CC) $(OBJFLAGS) $^ -o $@
@@ -90,21 +90,21 @@ $(BINDIR)/ubenchmark_periodic_beats: $(SRCDIR)/ubenchmark_periodic.cc $(OBJDIR)/
 $(BINDIR)/ubenchmark_timed: $(OBJDIR)/ubenchmark_timed.o $(OBJDIR)/ubenchmark_timed_main.o $(OBJDIR)/ubenchmark_funcs.o $(KERN_INT_OBJ)
 	$(CC) $(OBJFLAGS) $^ -o $@	
 
-$(BINDIR)/predictor_test: $(OBJDIR)/predictor.o $(KERN_OBJS)
-	$(CC) $(CFLAGS) -static -DITER_PRINT -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/predictor_main.cc $^ -o $@
-	$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/predictor_main.cc $^ -o $(BINDIR)/predictor_test_noprint
+$(BINDIR)/training_test: $(OBJDIR)/training.o $(KERN_OBJS)
+	$(CC) $(CFLAGS) -static -DITER_PRINT -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/training_multiapp.cc $^ -o $@
+	$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/training_multiapp.cc $^ -o $(BINDIR)/training_test_noprint
 
-$(BINDIR)/predictor_master: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_master.cc
+$(BINDIR)/training_singleapp: $(OBJDIR)/training.o $(KERN_OBJS) $(SRCDIR)/training_singleapp.cc
 	$(CC) $(CFLAGS) -static $^ -o $@
 
-$(BINDIR)/predictor_master_lite: $(OBJDIR)/predictor.o $(KERN_OBJS) $(SRCDIR)/predictor_master.cc
+$(BINDIR)/training_singleapp_test: $(OBJDIR)/training.o $(KERN_OBJS) $(SRCDIR)/training_singleapp.cc
 	$(CC) $(CFLAGS) -D__ISLITE -static $^ -o $@
 
-predictors_multiapp: $(OBJDIR)/predictor.o $(KERN_OBJS) $(OBJDIR)/makefile.predictors
-	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_PRED) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.predictors predictors
+training_multiapp: $(OBJDIR)/training.o $(KERN_OBJS) $(OBJDIR)/makefile.training_multiapp
+	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_TRAIN) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.training_multiapp training_apps
 
-predictors_singleapp: $(BINDIR)/predictor_master $(BINDIR)/predictor_master_lite
+training_singleapp: $(BINDIR)/training_singleapp $(BINDIR)/training_singleapp_test
 
-$(OBJDIR)/makefile.predictors: $(SRCDIR)/predictor_gen_makefile.py | dirs
-	python $(SRCDIR)/predictor_gen_makefile.py > $(OBJDIR)/makefile.predictors 
+$(OBJDIR)/makefile.training_multiapp: $(SRCDIR)/training_gen_makefile.py | dirs
+	python $(SRCDIR)/training_gen_makefile.py > $(OBJDIR)/makefile.training_multiapp 
 

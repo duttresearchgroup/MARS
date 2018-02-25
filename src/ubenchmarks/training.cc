@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "predictor.h"
 #include "kernels.h"
+#include "training.h"
 
 const int WORK_BUFFER_SIZE = (1*1024*1024);
 
