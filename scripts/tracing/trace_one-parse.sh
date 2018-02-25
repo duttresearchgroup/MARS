@@ -40,11 +40,10 @@ OUTPUT_NAME=$(basename $TRACED_PROGRAM)
 
 PARSED_TRACES_DIR=$TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT
 mkdir -p $PARSED_TRACES_DIR
-RAW_OUTPUT_DIR=$PARSED_TRACES_DIR/$OUTPUT_NAME--raw--$TRACED_CORE--$TRACE_FREQUENCY.csv
+RAW_OUTPUT_DIR=$PARSED_TRACES_DIR/$OUTPUT_NAME--$TRACED_CORE--$TRACE_FREQUENCY.raw
 mkdir -p $RAW_OUTPUT_DIR
 
-OUTPUT_NAME_TOTAL=$PARSED_TRACES_DIR/$OUTPUT_NAME--trace_total--$TRACED_CORE--$TRACE_FREQUENCY.csv
-OUTPUT_NAME_PERIODIC=$PARSED_TRACES_DIR/$OUTPUT_NAME--trace_periodic--$TRACED_CORE--$TRACE_FREQUENCY.csv
+OUTPUT_TRACE_NAME=$PARSED_TRACES_DIR/$OUTPUT_NAME--$TRACED_CORE--$TRACE_FREQUENCY.csv
 
 #copies (presanitizedcsv are generated only by training scripts)
 cp $TRACE_OUTPUT_DIR/*.txt $RAW_OUTPUT_DIR
@@ -76,5 +75,12 @@ done
 
 #aggregates the files from multiples runs
 FILES=$(ls $RAW_OUTPUT_DIR/periodic_trace_result*.csv | xargs)
-python3 $SPARTA_SCRIPTDIR/tracing/trace_agg-periodic.py --srcfiles $FILES --destfile $OUTPUT_NAME_PERIODIC
+python3 $SPARTA_SCRIPTDIR/tracing/trace_agg-periodic.py --srcfiles $FILES --destfile $OUTPUT_TRACE_NAME
+
+#rename files
+NEW_NAME=$(python3 $SPARTA_SCRIPTDIR/tracing/trace_name.py --input_file $OUTPUT_TRACE_NAME --sysinfo $IDLE_POWER_DIR/sys_info.json)
+mv $OUTPUT_TRACE_NAME $NEW_NAME
+
+NEW_NAME=$(python3 $SPARTA_SCRIPTDIR/tracing/trace_name.py --input_file $RAW_OUTPUT_DIR --sysinfo $IDLE_POWER_DIR/sys_info.json)
+mv $RAW_OUTPUT_DIR $NEW_NAME
 
