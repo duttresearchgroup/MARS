@@ -42,11 +42,6 @@ struct perf_window_data_struct {
 typedef struct perf_window_data_struct perf_window_data_t;
 
 struct perf_window_struct {
-	//continuously incremented during the sensing period
-	//unsafe to read from user-level
-	//changed by the sensing module only
-	perf_window_data_t _acc;
-
 	//sensing window data
 	//updated before when the sensing window period is done
 	//user interface accesses these for all counter data
@@ -72,6 +67,11 @@ struct perf_data_struct {
 	//sensing window global sensed data
 	//the tasks' sensed data for each window is inside each task hook data
 	perf_window_t sensing_windows[MAX_WINDOW_CNT];
+
+	//continuously incremented during the sensing period and use to compute the windows above
+    //unsafe to read from user-level
+    //changed by the sensing module only. Unsafe to read/write without the proper locks
+    perf_window_data_t __sensing_windows_acc;
 
 	// list of created tasks. Stores sensing info for each task
 	//as of now there is no dealloc because we keep al the sensed info even

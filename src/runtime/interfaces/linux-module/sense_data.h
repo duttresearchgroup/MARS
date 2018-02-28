@@ -79,20 +79,22 @@ static inline private_hook_data_t* __hook_hashmap_get(int idx,pid_t pid){
 }
 static inline private_hook_data_t* hook_hashmap_get_pid(pid_t pid){
 	private_hook_data_t *result;
+	unsigned long flags;
 	int idx = pid % hook_data_hashmap_struct_size;
-	read_lock(&(hook_hashmap_lock[idx]));
+	read_lock_irqsave(&(hook_hashmap_lock[idx]),flags);
 		result = __hook_hashmap_get(idx,pid);
-	read_unlock(&(hook_hashmap_lock[idx]));
+	read_unlock_irqrestore(&(hook_hashmap_lock[idx]),flags);
     return result;
 }
 static inline private_hook_data_t* hook_hashmap_get(struct task_struct *tsk){ return hook_hashmap_get_pid(tsk->pid); }
 //
 static inline void hook_hashmap_add(struct task_struct *tsk, private_hook_data_t *hookdata){
-	int idx = tsk->pid % hook_data_hashmap_struct_size;
+    unsigned long flags;
+    int idx = tsk->pid % hook_data_hashmap_struct_size;
 	BUG_ON(hook_hashmap_get(tsk)!=nullptr);
-	write_lock(&(hook_hashmap_lock[idx]));
+	write_lock_irqsave(&(hook_hashmap_lock[idx]),flags);
 		add_to_list(hook_hashmap[idx],hookdata,hashmap);
-	write_unlock(&(hook_hashmap_lock[idx]));
+	write_unlock_irqrestore(&(hook_hashmap_lock[idx]),flags);
 }
 
 #endif
