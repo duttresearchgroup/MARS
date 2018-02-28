@@ -20,7 +20,10 @@
 # input for generating predictors and for the offline sim
 # Produces an output in the format: app_name--core_arch--freq_mhz
 # Takes various different options as parameters
-# See trace_one-parse.sh for use
+# See trace_one-parse.sh for an use case.
+# Usage:
+#   Execute 'trace_name.py -h' for usage info
+#
 
 import sys
 import os
@@ -30,12 +33,12 @@ import json
 
 parser = argparse.ArgumentParser(description='Gives canonical name for trace file: app_name--core_arch--freq_mhz.csv')             
 parser.add_argument('--input_file', help='Tries to extract the program name, core, and freq from input file. Input name is in the format: app_name--core_id--freq_khz.csv', default='')
-parser.add_argument('--input_core_id', default=-1 )
-parser.add_argument('--input_freq_khz', default=-1 )
-parser.add_argument('--app_name', default='' )
-parser.add_argument('--output_core_arch', default='' )
-parser.add_argument('--output_freq_mhz', default=-1 )
-parser.add_argument('--sysinfo', default='' )
+parser.add_argument('--input_core_id', help='Core ID to be used when extracting the architecture. Replaces the id parsed from --input_file if both provided.', default=-1 )
+parser.add_argument('--input_freq_khz', help='kHz value to be converted to MHz. Replaces the value parsed from --input_file if both provided.', default=-1 )
+parser.add_argument('--app_name', help='app name to use. Replaces the value parsed from --input_file if both provided.', default='' )
+parser.add_argument('--output_core_arch', help='Core architecture to use in the output file name. Replaces the value from the JSON file if --sysinfo is provided.', default='')
+parser.add_argument('--output_freq_mhz', help='Freq. value to use in the output file name. Replaces the value converted from kHz if provided.', default=-1 )
+parser.add_argument('--sysinfo', help='Path to JSON file containing the system description. If not provided, the architecture must given using --output_core_arch', default='' )
 args = parser.parse_args()
 
 app_name = ''

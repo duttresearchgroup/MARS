@@ -22,8 +22,11 @@
 # cores.
 # This script takes idle power measurements and deducts the idle power from 
 # the 'power_w' in the traced file so it includes only the power consumed by
-# the core used by the traced application
-# See scripts/training/get_idle_power.sh to obtain idle powers
+# the core used by the traced application.
+# See scripts/training/get_idle_power.sh to obtain idle powers.
+#
+# Usage:
+#   remove_idle_power.py --srcfile <src_trace_csv> --destfile <dest_trace_csv> --idlepowerdir <idle_power_dir>
 
 import sys
 import argparse

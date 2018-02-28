@@ -17,10 +17,13 @@
 
 #######################################################
 # Runs the IdlePowerChecker daemon to collect a trace
-# with power measuments when the system is idle across
+# with power measurements when the system is idle across
 # multiple frequencies.
 # Takes as input the directory where the idle power
-# is to be saved (save to the curr. dir if not given)
+# is to be saved (save to the curr. dir if not given).
+# Usage:
+#   get_idle_power.sh <idle_power_dir>
+#   get_idle_power.sh
 #######################################################
 
 source $SPARTA_SCRIPTDIR/runtime/common.sh

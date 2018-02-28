@@ -21,6 +21,9 @@
 # Parameters
 #    - The core to be used for training
 #    - The frequency in kHz
+#
+# Usage:
+#   run_training-all.sh <training_core> <training_core_freq>
 #####################################################
 
 source $SPARTA_SCRIPTDIR/ubenchmarks/common.sh

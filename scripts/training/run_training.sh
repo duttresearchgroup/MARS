@@ -26,6 +26,10 @@
 #         See run_training-all.sh and run_training-test.sh
 #    - The core to be used for training
 #    - The frequency in kHz
+#
+# Usage:
+#   Always called from run_training-all.sh and run_training-test.sh
+#   Check those scripts for usage
 ################################################
 
 PRED_BIN=$1

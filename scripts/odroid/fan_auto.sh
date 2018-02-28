@@ -16,8 +16,8 @@
 #-------------------------------------------------------------------------------
 
 ###########################################
-# Sets board fan to auto mode 
-# (RPM set according to temperature
+# Sets board fan to auto mode.
+# (RPM set according to temperature)
 ###########################################
 
 if [ -f /sys/devices/odroid_fan.13/fan_mode ]; then

@@ -17,8 +17,10 @@
 
 ##############################################
 # Makes sure dumping of core files is enabled
-# and sets tthe core dump location to the given
-# path
+# and sets the core dump location to the given
+# path.
+# Usage:
+#   enablecoredump.sh <new_core_dump_dir>
 ##############################################
 
 CORE_DUMP_DIR=$1
