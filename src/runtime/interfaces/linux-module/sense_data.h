@@ -45,7 +45,8 @@ void dealloc_sensed_data(void);
 //wrapper for the task hook data with the kernel-only stuff
 struct private_hook_data_struct {
 	tracked_task_data_t *hook_data;
-    spinlock_t                  sen_data_lock;
+	//task counters are double-buffered so we have one lock per buffer
+    spinlock_t                  sen_data_lock[2];
     //kernel task info
     struct task_struct *this_task;
     //link for the hash that maps pid to this object

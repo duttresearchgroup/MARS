@@ -68,10 +68,17 @@ struct perf_data_struct {
 	//the tasks' sensed data for each window is inside each task hook data
 	perf_window_t sensing_windows[MAX_WINDOW_CNT];
 
-	//continuously incremented during the sensing period and use to compute the windows above
-    //unsafe to read from user-level
-    //changed by the sensing module only. Unsafe to read/write without the proper locks
-    perf_window_data_t __sensing_windows_acc;
+	//Accumulated counters used to compute the windows above
+	//Counters in __acc_cpus and __acc_tasks are continuously incremented every
+	//context switch, while __acc_freq_domains is incremented every minimum_sensing_window().
+    //Unsafe to read from user-level and private to the sensing module only.
+	//Unsafe to read/write without the proper locks by anyone.
+	//Notice __acc_cpus and __acc_tasks are double-buffered to avoid blocking
+	//during context switches
+    perf_data_cpu_t         __acc_cpus[MAX_NR_CPUS][2];
+    perf_data_cpu_t         __acc_tasks[MAX_CREATED_TASKS][2];
+    int                     __acc_tasks_last_cpu[MAX_CREATED_TASKS];
+    perf_data_freq_domain_t __acc_freq_domains[MAX_NR_CPUS];
 
 	// list of created tasks. Stores sensing info for each task
 	//as of now there is no dealloc because we keep al the sensed info even
