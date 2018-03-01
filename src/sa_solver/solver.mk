@@ -16,11 +16,9 @@
 #-------------------------------------------------------------------------------
 
 TARGET = sasolver
-TARGET_LIB_HOST = lib$(TARGET)host.a
-TARGET_LIB_ALPHA = lib$(TARGET)alpha.a
-TARGET_LIB_ARM = lib$(TARGET)arm.a
+TARGET_LIB = lib$(TARGET)$(ARCH).a
 SHELL = /bin/sh
-.PHONY: all depend clean
+.PHONY: all depend clean library
 .SUFFIXES: .cc .o
 
 ifeq ($(TAG),dbg)
@@ -67,25 +65,15 @@ OBJS_MAIN = $(patsubst %.cc,obj_$(ARCH)_$(TAG)/%.o,$(SRCS_MAIN))
 
 all: $(TARGET)
 
-library_host: lib/$(TARGET_LIB_HOST)
+library: lib/$(TARGET_LIB)
 
-library_alpha: lib/$(TARGET_LIB_ALPHA)
-
-library_arm: lib/$(TARGET_LIB_ARM)
-
-$(TARGET) : $(OBJS_MAIN) lib/$(TARGET_LIB_HOST) $(HEADERS)
-	$(CXX) $(OBJS_MAIN) -o $@ $(CXXFLAGS) -L./lib -l$(TARGET)host -pthread
+$(TARGET) : $(OBJS_MAIN) lib/$(TARGET_LIB) $(HEADERS)
+	$(CXX) $(OBJS_MAIN) lib/$(TARGET_LIB) -o $@ $(CXXFLAGS) -pthread
 
 lib:
 	mkdir lib
 
-lib/$(TARGET_LIB_HOST) : $(OBJS) $(HEADERS) lib
-	$(AR) rvs $@ $(OBJS)
-	
-lib/$(TARGET_LIB_ALPHA) : $(OBJS) $(HEADERS) lib
-	$(AR) rvs $@ $(OBJS)
-
-lib/$(TARGET_LIB_ARM) : $(OBJS) $(HEADERS) lib
+lib/$(TARGET_LIB) : $(OBJS) $(HEADERS) lib
 	$(AR) rvs $@ $(OBJS)
 
 obj_$(ARCH)_$(TAG)/%.o : %.cc
@@ -93,7 +81,6 @@ obj_$(ARCH)_$(TAG)/%.o : %.cc
 
 clean:
 	-rm -f *.o $(TARGET)
-	rm -f lib/$(TARGET_LIB_HOST)
-	rm -f lib/$(TARGET_LIB_ALPHA)
+	rm -f lib/$(TARGET_LIB)
 
 

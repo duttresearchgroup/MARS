@@ -18,10 +18,10 @@
 TAR = solver
 
 ifndef ARCH
- $(error ARCH not defined, pass ARCH=alpha|arm|host to makefile)
+ $(error ARCH not defined, pass ARCH=alpha|arm|x86 to makefile)
 endif
 
-.PHONY: all dbg opt depend clean clean_dbg clean_opt kernel_lib_alpha
+.PHONY: all dbg opt depend clean clean_dbg clean_opt kernel_lib
 
 all: opt
 
@@ -31,23 +31,12 @@ dbg: $(TAR).mk obj_$(ARCH)_dbg
 opt: $(TAR).mk obj_$(ARCH)_opt
 	@$(MAKE) EXTRAFLAGS=-std=c++11 TAG=opt -C . -f $(TAR).mk
 
-kernel_lib_alpha: $(TAR).mk obj_$(ARCH)_opt
-	@$(MAKE) CROSS_COMPILE=alphaev67-unknown-linux-gnu- EXTRAFLAGS='-mcpu=ev67 -mtune=ev67' TAG=opt -C . -f $(TAR).mk library_alpha
+kernel_lib: $(TAR).mk obj_$(ARCH)_opt
+	@$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) EXTRAFLAGS=$(EXTRAFLAGS) TAG=opt -C . -f $(TAR).mk library
+
+kernel_lib_dbg: $(TAR).mk obj_$(ARCH)_dbg
+	@$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) EXTRAFLAGS=$(EXTRAFLAGS) TAG=dbg -C . -f $(TAR).mk library
 	
-kernel_lib_arm: $(TAR).mk obj_$(ARCH)_opt
-	@$(MAKE) CROSS_COMPILE=arm-linux-gnueabi- TAG=opt -C . -f $(TAR).mk library_arm
-	
-kernel_lib_host: $(TAR).mk obj_$(ARCH)_opt
-	@$(MAKE) EXTRAFLAGS=-std=c++11 TAG=opt -C . -f $(TAR).mk library_host
-
-kernel_lib_alpha_dbg: $(TAR).mk obj_$(ARCH)_dbg
-	@$(MAKE) CROSS_COMPILE=alphaev67-unknown-linux-gnu- TAG=dbg -C . -f $(TAR).mk library_alpha
-	
-kernel_lib_arm_dbg: $(TAR).mk obj_$(ARCH)_dbg
-	@$(MAKE) CROSS_COMPILE=arm-linux-gnueabi- TAG=opt -C . -f $(TAR).mk library_arm
-
-
-
 obj_$(ARCH)_dbg:
 	mkdir $@
 

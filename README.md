@@ -22,7 +22,7 @@ This method uses two separate systems, a **host** machine (which can be your PC)
 
 Some of the important parameters that we need to specify during compile time are:
 
-* *ARCH: ISA used for compiling. Affects the GCC being used. Default is `ARCH=host` if undefined*
+* *ARCH: ISA used for compiling. Affects the GCC being used. Default is `ARCH=x86` if undefined*
 * *PLAT: platform to use when compiling modules with platform-specific code. Set based on the value for ARCH if undefined. Ex: for odroid, `PLAT_DEFAULT_arm=exynos5422`*
 * *CROSS_COMPILE_usr: Which GCC to use for user space applications. Set based on the value for ARCH if undefined*
 * *CROSS_COMPILE_krn: Which GCC to use for kernel modules. Set based on the value for ARCH if undefined.*
