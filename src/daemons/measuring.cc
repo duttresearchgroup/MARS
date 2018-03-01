@@ -16,7 +16,50 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/basic.h>
+
+class MeasuringSystem : public System {
+protected:
+    static const int WINDOW_LENGTH_MS = 50;
+
+    virtual void setup();
+    virtual void report();
+
+    const SensingWindowManager::WindowInfo *sensingWindow;
+
+    static void window_handler(int wid,System *owner);
+
+private:
+    TimeTracer _timeTracer;
+
+public:
+    MeasuringSystem() :System(), sensingWindow(nullptr),_timeTracer(info()){};
+
+    MeasuringSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_timeTracer(info()){};
+
+};
+
+void MeasuringSystem::setup()
+{
+    _manager->sensingModule()->enablePerTaskSensing();
+    sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+    _timeTracer.setWid(sensingWindow->wid);
+}
+
+void MeasuringSystem::window_handler(int wid,System *owner)
+{
+    dynamic_cast<MeasuringSystem*>(owner)->_timeTracer.record();
+}
+
+void MeasuringSystem::report()
+{
+    ExecutionSummary db(info());
+    db.setWid(sensingWindow->wid);
+    db.record();
+
+    db.done();
+
+    _timeTracer.done();
+}
 
 int main(int argc, char * argv[]){
     daemon_setup(argc,argv);
