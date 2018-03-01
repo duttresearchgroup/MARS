@@ -32,7 +32,6 @@ function do_test() {
     wait
     sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
 
-    cp $RTS_DAEMON_OUTDIR/total.csv interface_test-total$1.csv
     cp $RTS_DAEMON_OUTDIR/execTraceFine.csv interface_test-fine_trace$1.csv
     cp $RTS_DAEMON_OUTDIR/execTraceCoarse.csv interface_test-coarse_trace$1.csv
 }

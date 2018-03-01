@@ -28,7 +28,6 @@ taskset 0x04 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
 wait
 sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
 
-cp $RTS_DAEMON_OUTDIR/total.csv interface_test-total.csv
 cp $RTS_DAEMON_OUTDIR/execTraceFine.csv interface_test-fine_trace.csv
 cp $RTS_DAEMON_OUTDIR/execTraceCoarse.csv interface_test-coarse_trace.csv
 

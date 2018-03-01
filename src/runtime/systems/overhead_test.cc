@@ -17,6 +17,8 @@
 
 #include "overhead_test.h"
 
+#include <runtime/common/reports_deprecated.h>
+
 void OverheadTestSystem::setup()
 {
 	if(_mode == "overhead_test_notasksense"){

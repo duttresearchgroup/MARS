@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
+#include <runtime/common/reports_deprecated.h>
 
 class MeasuringSystem : public System {
 protected:

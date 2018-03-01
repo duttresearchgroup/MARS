@@ -25,7 +25,6 @@ protected:
     static const int WINDOW_LENGTH_COARSE_MS = 200;
 
     virtual void setup();
-    virtual void report();
 
     const SensingWindowManager::WindowInfo *sensingWindow_fine;
     const SensingWindowManager::WindowInfo *sensingWindow_coarse;
@@ -149,13 +148,6 @@ void InterfaceTest::coarse_window_handler(int wid,System *owner)
 
         trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(&fd,wid);
     }
-}
-
-void InterfaceTest::report()
-{
-    ExecutionSummary db(info());
-    db.setWid(sensingWindow_fine->wid);
-    db.record();
 }
 
 int main(int argc, char * argv[]){
