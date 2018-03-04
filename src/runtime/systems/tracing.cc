@@ -104,7 +104,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
         }
         double rate = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,traced_task,_wid)
                       / (double) instr_sum;
-        if(rate < 0.6){
+        if(rate < 0.5){
             pinfo("Task %d is the traced task, but apparently too many other tasks\n",traced_task->this_task_pid);
             pinfo("executed in core %d's cluster (rate = %f). Too much interference!\n",rt_param_trace_core(),rate);
             pinfo("Retrying might fix this\n");
