@@ -528,7 +528,9 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
         if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][0]),flags)) break;
         acc_buffer = 1;
         if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][1]),flags)) break;
-        pinfo("c%d: __acc_cpus[%d] should never be unavailable!\n",cpu,cpu);
+        acc_buffer = 0; //should definitely get it this time
+        if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][0]),flags)) break;
+        pinfo("c%d: unexpected contention at __acc_cpus!\n",cpu);
     }
 
     data_cnt = &(vitsdata->__acc_cpus[cpu][acc_buffer]);
@@ -551,7 +553,9 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
             if(spin_trylock_irqsave(&(p->sen_data_lock[0]),flags)) break;
             acc_buffer = 1;
             if(spin_trylock_irqsave(&(p->sen_data_lock[1]),flags)) break;
-            pinfo("c%d: __acc_tasks[%d/%s] should never be unavailable!\n",cpu,tsk->pid,tsk->comm);
+            acc_buffer = 0;//should definitely get it this time
+            if(spin_trylock_irqsave(&(p->sen_data_lock[0]),flags)) break;
+            pinfo("c%d: unexpected contention at __acc_tasks[%d/%s]!\n",cpu,tsk->pid,tsk->comm);
         }
 
         data_cnt = &(vitsdata->__acc_tasks[p->hook_data->task_idx][acc_buffer]);
