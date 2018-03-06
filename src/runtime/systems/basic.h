@@ -141,21 +141,51 @@ class IdlePowerChecker : public System {
 protected:
     static const int WINDOW_LENGTH_MS = 200;
 
+    static const int FREQ_STEPS_MHZ = 100;
+
+    static const int ITERATIONS = 4;
+
     virtual void setup();
 
     const SensingWindowManager::WindowInfo *sensingWindow;
 
     static void window_handler(int wid,System *owner);
 
-    ExecutionTrace _execTrace;
-
     FrequencyActuator _freqAct;
 
+    enum state {
+        INCREASING,
+        DECREASING
+    };
+
+    state _state;
+    int _iterations;
+
+    std::unordered_map<void*,ExecutionTrace*> _execTraces;
+
+    template<typename Rsc>
+    ExecutionTrace::ExecutionTraceHandle& _getTraceHandle(const std::string &type, const Rsc &rsc, int wid)
+    {
+        auto iter = _execTraces.find((void*)&rsc);
+        if(iter != _execTraces.end())
+            return iter->second->getHandle(wid);
+        else{
+            ExecutionTrace *execTrace = new ExecutionTrace("idle_trace."+type+"."+std::to_string(rsc.domain_id));
+            _execTraces[(void*)&rsc] = execTrace;
+            return execTrace->getHandle(wid);
+        }
+    }
 
 public:
     IdlePowerChecker() :System(),
-        sensingWindow(nullptr),_execTrace("idle_trace"),
-        _freqAct(*info()){};
+        sensingWindow(nullptr),
+        _freqAct(*info()),_state(INCREASING),_iterations(0){};
+
+    virtual ~IdlePowerChecker(){
+        for(auto iter : _execTraces){
+            delete iter.second;
+        }
+    }
 
 };
 

@@ -22,7 +22,7 @@
 #include <sstream>
 #include "time_util.h"
 
-#include "predictor.h"
+#include "training.h"
 
 //__ISLITE should be passed using the -D flag
 #ifdef __ISLITE

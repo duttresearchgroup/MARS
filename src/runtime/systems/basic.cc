@@ -153,8 +153,6 @@ void TracingSystem::window_handler(int wid,System *owner)
 			}
 
 			trace("core") = last_cpu_used;
-			trace("freq_domain") = self->info()->core_list[last_cpu_used].freq->domain_id;
-			trace("pow_domain") = self->info()->core_list[last_cpu_used].power->domain_id;
 		}
 	}
 
@@ -283,7 +281,7 @@ void IdlePowerChecker::setup()
     sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 
     _freqAct.setFrameworkMode();
-    for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
+    for(int domain_id = 0; domain_id < info()->freq_domain_list_size; ++domain_id){
         actuate<ACT_FREQ_MHZ>(
                             info()->freq_domain_list[domain_id],
                             _freqAct.freqMin(info()->freq_domain_list[domain_id]));
@@ -295,16 +293,58 @@ void IdlePowerChecker::window_handler(int wid,System *owner)
 {
     IdlePowerChecker *self =  dynamic_cast<IdlePowerChecker*>(owner);
 
-    auto sensedData = self->sensingModule()->data();
-    auto trace = self->_execTrace.getHandle(sensedData,wid);
+    for(int i = 0; i < self->info()->power_domain_list_size; ++i){
+        power_domain_info_t &pd = self->info()->power_domain_list[i];
 
-    //save total power
-    double totalPowerW = 0;
-    for(int domain_id = 0; domain_id < owner->info()->power_domain_list_size; ++domain_id){
-        totalPowerW += sense<SEN_POWER_W>(&owner->info()->power_domain_list[domain_id],wid);
+        auto trace = self->_getTraceHandle("power_domain",pd,wid);
+
+        trace("power_w") = sense<SEN_POWER_W>(&pd,wid);
+        double total_time_s = 0;
+        double busy_time_s = 0;
+        for(int core = 0; core < self->info()->core_list_size; ++core){
+            core_info_t &c = self->info()->core_list[core];
+            if(c.power->domain_id == pd.domain_id){
+                total_time_s += sense<SEN_TOTALTIME_S>(&c,wid);
+                busy_time_s += sense<SEN_BUSYTIME_S>(&c,wid);
+            }
+        }
+        trace("total_time_s") = total_time_s;
+        trace("busy_time_s") = busy_time_s;
     }
-    trace("total_power_w") = totalPowerW;
+    for(int i = 0; i < self->info()->freq_domain_list_size; ++i){
+        freq_domain_info_t &fd = self->info()->freq_domain_list[i];
+        auto trace = self->_getTraceHandle("freq_domain",fd,wid);
+        trace("freq_mhz") = sense<SEN_FREQ_MHZ>(&fd,wid);
+    }
 
-    self->quit();
+    bool changed = false;
+    for(int i = 0; i < self->info()->freq_domain_list_size; ++i){
+        freq_domain_info_t &fd = self->info()->freq_domain_list[i];
+        auto val = actuationVal<ACT_FREQ_MHZ>(fd);
+        if(self->_state == INCREASING){
+            val += 100;
+            if(val <= self->_freqAct.freqMax(fd)) {
+                actuate<ACT_FREQ_MHZ>(fd, val);
+                changed = true;
+            }
+        }
+        else if(self->_state == DECREASING){
+            val -= 100;
+            if(val >= self->_freqAct.freqMin(fd)) {
+                actuate<ACT_FREQ_MHZ>(fd, val);
+                changed = true;
+            }
+        }
+    }
+
+    if(!changed){
+        if(self->_state==INCREASING) self->_state=DECREASING;
+        else if(self->_state==DECREASING){
+            self->_state=INCREASING;
+            self->_iterations += 1;
+        }
+        if(self->_iterations >= ITERATIONS)
+            self->quit();
+    }
 }
 

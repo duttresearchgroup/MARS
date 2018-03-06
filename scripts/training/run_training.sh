@@ -20,19 +20,25 @@
 # The training application is first run in
 # calibration mode and then again to for training.
 # Parameters
+#    - The binary used for training
+#         Notice that this is a very specific binary
+#         that supports the calibrations args.
+#         See run_training-all.sh and run_training-test.sh
 #    - The core to be used for training
 #    - The frequency in kHz
+#
+# Usage:
+#   Always called from run_training-all.sh and run_training-test.sh
+#   Check those scripts for usage
 ################################################
 
-TRAINING_CORE=$1
-TRAINING_FREQUENCY=$2
+PRED_BIN=$1
+TRAINING_CORE=$2
+TRAINING_FREQUENCY=$3
 
-# Includes the confs
-source $SPARTA_SCRIPTDIR/ubenchmarks/common.sh
-
-
-#PRED_BIN=$UBENCH_BIN_DIR/predictor_master
-PRED_BIN=$UBENCH_BIN_DIR/predictor_master_lite
+if [ -z "$PRED_BIN" ]; then echo "PRED_BIN unset" && exit; fi
+if [ -z "$TRAINING_CORE" ]; then echo "TRAINING_CORE unset" && exit; fi
+if [ -z "$TRAINING_FREQUENCY" ]; then echo "TRAINING_FREQUENCY unset" && exit; fi
 
 #Calibration if not available
 CALIB_FILE=$PRED_BIN.calib.$RTS_ARCH.$RTS_PLAT.$CALIB_CORE.$CALIB_FREQUENCY

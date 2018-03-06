@@ -15,6 +15,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+# To be used together with run_training*.sh scripts.
+# The training app runs multiple ubenchs separated by a idle period. This results
+# in a trace file with series of samples separated by idle periods, in which each
+# series represents a trace for a single ubench. This script aggregates all the
+# samples in each series into a single sample and generates a trace file where each
+# sample corresponds to one ubench in the training application
+#
+# Usage:
+#   sanitize.py --srcfile <src_trace_csv> --destfile <dest_trace_csv>
+
 import sys
 import argparse
 import pandas as pd
@@ -32,16 +42,18 @@ args = parser.parse_args()
 # There is an idle period between each combination, identified by samples with 0 instructions
 # executed. We generate the aggregated sample for each combination by combining all samples
 # between these idle periods
+# This column must be present in the trace
 checkerCol = 'totalInstr'
 
 # When aggregating we sumup the values of samples for most columns,
 # except the ones listed here, which the mean value is taken
-colsToAvg = ['busy_ips','freq_mhz','power_w','total_ips','util']
+colsToAvg = ['freq_mhz','power_w',]
 
-# These columns are handled separately
-# sample_id is set by a separate counter
-# timestamp is set to the current sum of total_time_s
-specialCols = ['sample_id','timestamp','total_time_s']
+# These columns are handled separately and must all be present in the trace
+# 'sample_id' is set by a separate counter
+# 'timestamp' is set to the current sum of 'total_time_s'
+# 'core' must be the same across all samples
+specialCols = ['sample_id','timestamp','total_time_s','core']
 
 # If any detected combination has less than this number of samples,
 # ignore it
@@ -72,6 +84,19 @@ currentTimestamp = 0
 currentSampleCnt = 0
 currData = dict()
 
+currCoreVal = -1
+
+def checkDomains(row):
+    global currCoreVal
+    assert(row['core'] != -1)
+    if currCoreVal == -1:
+        currCoreVal = row['core']
+    else:
+        if currCoreVal != row['core']:
+            print('{}: task execution on core {} detected, previously detected core  {}.'.format(args.srcfile,row['core'],currCoreVal))
+            print('Tasks should be pinned to the same core while tracing !!!!!')
+            currCoreVal = row['core']
+
 def addRow(row):
     global currentSampleCnt
     global currentTimestamp
@@ -87,6 +112,8 @@ def addRow(row):
             currData[col] = row[col]
         else:
             currData[col] += row[col]
+
+    checkDomains(row)
         
 
 def commitRow(row):
@@ -110,6 +137,7 @@ def commitRow(row):
 
         currData['timestamp'] = currentTimestamp
         currData['sample_id'] = currentId
+        currData['core'] = currCoreVal
     
         sanitized_df = sanitized_df.append(currData, ignore_index=True)
     

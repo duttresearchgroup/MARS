@@ -24,7 +24,10 @@
 #      Remaining parameters are passed as the application
 #      parameters
 # As a side effect, all cores will be using the ondemand
-# dvfs governor after running this script
+# dvfs governor after running this script.
+#
+# Usage:
+#   trace_one-run.sh <traced_core> <traced_core_freq_kHz> <traced_app_bin_path> <traced_app_args ...>
 #########################################################
 
 

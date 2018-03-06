@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "time_util.h"
 
-#include "predictor.h"
+#include "training.h"
 
 const int iterations_high_ilp_cache_good_int = ITER_high_ilp_cache_good_int;
 const int iterations_high_ilp_cache_bad_int = ITER_high_ilp_cache_bad_int;

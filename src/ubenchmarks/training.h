@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef PREDICTOR_H
-#define PREDICTOR_H
+#ifndef TRAINING_H
+#define TRAINING_H
 
 void high_ilp_cache_good_int(int numIterations);
 void high_ilp_cache_bad_int(int numIterations);
