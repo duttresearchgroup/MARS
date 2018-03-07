@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef _STATISTICS_H
-#define _STATISTICS_H
+#ifndef __arm_rt_stats_h
+#define __arm_rt_stats_h
 
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <string>
 
 struct Statistics {
     std::string         sampleXName;

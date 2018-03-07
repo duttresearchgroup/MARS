@@ -32,7 +32,7 @@
 #include <random>
 #include <thread>
 
-#include "offline_sim/semaphore.h"
+#include <runtime/common/semaphore.h>
 #include "core/core.h"
 #include "offline_sim/inputparser.h"
 #include "offline_sim/exec_sim.h"

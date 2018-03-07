@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __semaphore_h
-#define __semaphore_h
+#ifndef __arm_rt_sempahore_h
+#define __arm_rt_sempahore_h
 
 #include <condition_variable>
 #include <mutex>

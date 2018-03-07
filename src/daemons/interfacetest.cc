@@ -17,6 +17,7 @@
 
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/interfaces/actuation_interface.h>
+#include <runtime/common/strings.h>
 #include <map>
 
 class InterfaceTest : public System {
@@ -61,13 +62,6 @@ void InterfaceTest::setup()
                             info()->freq_domain_list[domain_id],
                             _freqAct.freqMax(info()->freq_domain_list[domain_id]));
     }
-}
-
-static char _formatstr_buff[64];
-template<typename... Args>
-static const char * formatstr(const char *s, Args... args){
-    std::snprintf(_formatstr_buff,64,s,args...);
-    return _formatstr_buff;
 }
 
 void InterfaceTest::fine_window_handler(int wid,System *owner)

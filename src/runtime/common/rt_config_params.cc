@@ -21,6 +21,7 @@
 #include <tclap/CmdLine.h>
 
 #include <core/core.h>
+#include <runtime/common/strings.h>
 
 #include "rt_config_params.h"
 
@@ -265,20 +266,6 @@ static int sys_ctrl_sub_refs_cnt = 0;
 static std::vector<double> sys_ctrl_refs_perf;
 static std::vector<double> sys_ctrl_refs_pow;
 static std::vector<int> sys_ctrl_refs_times;
-
-template<typename T>
-static std::vector<T> splitstr(const std::string &s, char delim){
-	std::stringstream stream(s);
-	std::vector<T> vals;
-	while(true) {
-	   T aux;
-	   stream >> aux;
-	   if(!stream)break;
-	   vals.push_back(aux);
-	   stream.ignore(1,delim);
-	}
-	return vals;
-}
 
 static void parse_sys_ctrl_refs()
 {

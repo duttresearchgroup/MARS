@@ -26,7 +26,7 @@
 #include <glob.h>
 #include <mutex>
 
-#include "semaphore.h"
+#include <runtime/common/semaphore.h>
 #include "inputparser.h"
 
 class CSVRow
