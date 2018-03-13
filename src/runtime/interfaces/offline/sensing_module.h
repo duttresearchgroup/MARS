@@ -25,7 +25,7 @@ class OfflineSensingModule
 {
   private:
 
-	static bool _attached;
+	static OfflineSensingModule* _attached;
 
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
@@ -75,6 +75,13 @@ class OfflineSensingModule
 	//disconnects this object from the module without checks
 	//will make this object invalid
 	void forceDetach();
+
+    static OfflineSensingModule& get()
+    {
+        if(_attached == nullptr)
+            arm_throw(OfflineSensingModuleException,"Sensing module not attached");
+        return *_attached;
+    }
 
   public:
 
