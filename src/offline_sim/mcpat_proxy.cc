@@ -27,7 +27,7 @@
 #include "external/mcpat/XML_Parse.h"
 #include "external/mcpat/processor.h"
 
-#define MCPAT_STATIC_INIT
+//#define MCPAT_STATIC_INIT
 
 void
 mcpat_setup_platformPrivL2(int num_cores)

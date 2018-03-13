@@ -58,7 +58,7 @@ inline static bool sw_order_crit(sensing_window_ctrl_t *a, sensing_window_ctrl_t
 	return (a->time_to_ready == b->time_to_ready) ? (a->period < b->period) : (a->time_to_ready < b->time_to_ready);
 }
 
-bool OfflineSensingModule::_attached = false;
+OfflineSensingModule* OfflineSensingModule::_attached = nullptr;
 
 OfflineSensingModule::OfflineSensingModule()
 	:_module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
@@ -73,14 +73,14 @@ OfflineSensingModule::OfflineSensingModule()
 
     _sensed_data = PerformanceData(vitsdata);
 
-    _attached = true;
+    _attached = this;
 
     vit_map_perfcnt();
 }
 
 OfflineSensingModule::~OfflineSensingModule()
 {
-    _attached = false;
+    _attached = nullptr;
 
 	if(_sensingRunning)
     	sensingStop();
@@ -117,8 +117,8 @@ void OfflineSensingModule::sensingStart()
 			reset_cpu_counters(&(vitsdata->sensing_windows[ctr].aggr.cpus[i]));
 			reset_freq_counters(&(vitsdata->sensing_windows[ctr].curr.freq_domains[i]));
 			reset_freq_counters(&(vitsdata->sensing_windows[ctr].aggr.freq_domains[i]));
-			reset_power_counters(&(vitsdata->sensing_windows[ctr].curr.power_domains[i]));
-			reset_power_counters(&(vitsdata->sensing_windows[ctr].aggr.power_domains[i]));
+			//reset_power_counters(&(vitsdata->sensing_windows[ctr].curr.power_domains[i]));
+			//reset_power_counters(&(vitsdata->sensing_windows[ctr].aggr.power_domains[i]));
 		}
 	}
 
@@ -177,8 +177,8 @@ int OfflineSensingModule::createSensingWindow(int period_ms)
 			reset_cpu_counters(&(vitsdata->sensing_windows[wid].aggr.cpus[i]));
 			reset_freq_counters(&(vitsdata->sensing_windows[wid].curr.freq_domains[i]));
 			reset_freq_counters(&(vitsdata->sensing_windows[wid].aggr.freq_domains[i]));
-			reset_power_counters(&(vitsdata->sensing_windows[wid].curr.power_domains[i]));
-			reset_power_counters(&(vitsdata->sensing_windows[wid].aggr.power_domains[i]));
+			//reset_power_counters(&(vitsdata->sensing_windows[wid].curr.power_domains[i]));
+			//reset_power_counters(&(vitsdata->sensing_windows[wid].aggr.power_domains[i]));
 		}
 
 	//returned id must be either a positive integer or one of the special window IDs
@@ -365,10 +365,10 @@ void OfflineSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 	reset_perf_counters(&(sen_data->perfcnt));
 }
 
- void OfflineSensingModule::reset_power_counters(sensed_data_power_domain_t *sen_data){
-	sen_data->avg_power_uW_acc = 0;
-	sen_data->time_ms_acc = 0;
-}
+// void OfflineSensingModule::reset_power_counters(sensed_data_power_domain_t *sen_data){
+//	sen_data->avg_power_uW_acc = 0;
+//	sen_data->time_ms_acc = 0;
+//}
 
  void OfflineSensingModule::reset_freq_counters(perf_data_freq_domain_t *sen_data){
 	sen_data->avg_freq_mhz_acc = 0;
@@ -752,7 +752,7 @@ void OfflineSensingModule::sense_cpus(int wid)
     }
 
 	//power sense
-    for(i = 0; i < sys->power_domain_list_size; ++i){
+    /*for(i = 0; i < sys->power_domain_list_size; ++i){
 		sensed_data_power_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.power_domains[i]);
 		sensed_data_power_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.power_domains[i]);
 
@@ -781,7 +781,7 @@ void OfflineSensingModule::sense_cpus(int wid)
 		last_total->time_ms_acc += (active_time * 1000) - last_total->time_ms_acc;
 
 		pinfo("this pow %lu total pow %lu (%lu/%lu)\n",curr_epoch->avg_power_uW_acc,last_total->avg_power_uW_acc,curr_epoch->time_ms_acc,last_total->time_ms_acc);
-    }
+    }*/
 
 }
 
@@ -813,4 +813,19 @@ void OfflineSensingModule::setSim(simulation_t *sim) {
 //	vitsdata->perfcnt_mapped_cnt += 1;
 //	return true;
 //}
+
+
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+{
+    return 0;
+}
+
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+{
+    return 0;
+}
 
