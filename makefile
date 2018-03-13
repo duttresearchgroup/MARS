@@ -18,7 +18,7 @@
 #################################
 #Makefile build params          #
 #################################
-#   ARCH: ISA used for compiling. Affects the GCC being used. Default is ARCH=host if undefined
+#   ARCH: ISA used for compiling. Affects the GCC being used.
 #   PLAT: platform to use when compiling modules with platform-specific code. Set based on the value for ARCH if undefined
 #   CROSS_COMPILE_usr: Which GCC to use for user space applications. Set based on the value for ARCH if undefined
 #   CROSS_COMPILE_krn: Which GCC to use for kernel modules. Set based on the value for ARCH if undefined
@@ -96,48 +96,28 @@ all:
 
 .PHONY: apps
 apps: src/vitamins.mk
-ifneq ($(ARCH),host)
-	$(error 'make apps' is only valid for ARCH=host)
-	@exit
-endif
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/vitamins.mk apps
 
 .PHONY: exp_module
 exp_module:
-ifeq ($(ARCH),host)
-	@$(MAKE) ARCH=x86 PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/exp-modules/$(MODULE) all	
-else
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/exp-modules/$(MODULE) all
-endif
 
 .PHONY: exp_module_clean
 exp_module_clean: $(ALLMODULES)
 
 .PHONY: $(ALLMODULES)
 $(ALLMODULES):
-ifeq ($(ARCH),host)
-	@$(MAKE) ARCH=x86 PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C $@ clean
-else 
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C $@ clean
-endif
 
 .PHONY: lin_sensing_module
 lin_sensing_module:
-ifeq ($(ARCH),host)
-	@$(MAKE) ARCH=x86 PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module all	
-else
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module all
-endif
 	mkdir -p bin_$(ARCH)_$(PLAT)/sensing_module
 	cp src/runtime/interfaces/linux-module/vitamins.ko bin_$(ARCH)_$(PLAT)/sensing_module/
 
 .PHONY: lin_sensing_module_clean
 lin_sensing_module_clean:
-ifeq ($(ARCH),host)
-	@$(MAKE) ARCH=x86 PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module clean
-else 
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module clean
-endif
 
 .PHONY: daemons
 daemons: src/vitamins.mk
@@ -167,10 +147,7 @@ ubench:
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/ubenchmarks/makefile $(UBENCH)
 
 .PHONY: veryclean
-veryclean:
-	@$(MAKE) ARCH=host PLAT=$(PLAT) -C . clean lin_sensing_module_clean exp_module_clean external_clean
-	@$(MAKE) ARCH=arm PLAT=exynos5422 -C . clean lin_sensing_module_clean exp_module_clean external_clean
-	@$(MAKE) ARCH=arm PLAT=exynos5422 -C . clean lin_sensing_module_clean exp_module_clean external_clean
+veryclean: clean lin_sensing_module_clean exp_module_clean external_clean
 	rm -rf obj_*
 	rm -rf lib_*
 	rm -rf bin_*

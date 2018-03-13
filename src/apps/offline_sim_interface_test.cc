@@ -33,6 +33,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "../runtime/systems/tracing.h"
 #include "offline_sim/semaphore.h"
 //#include "offline_sim/sensing_module.h"
 #include "core/core.h"
@@ -43,7 +44,6 @@
 #include "common/app_common.h"
 //#include "bin_based_predictor_common.h"
 
-#include "runtime/systems/basic.h"
 //#include "runtime/framework/system.h"
 
 static System *rtsys = nullptr;

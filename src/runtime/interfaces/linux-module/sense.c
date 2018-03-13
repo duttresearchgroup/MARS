@@ -80,17 +80,18 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     sys_info_t *sys;
     int i;
     int task_idx;
+    unsigned long flags;
 
     if((unsigned)vitsdata->created_tasks_cnt >= MAX_CREATED_TASKS){
     	pinfo("Task buffer full ! New task ignored\n");
     	return;
     }
 
-    spin_lock(&new_task_created_lock);
+    spin_lock_irqsave(&new_task_created_lock,flags);
 		task_idx = vitsdata->__created_tasks_cnt_tmp;
 		vitsdata->__created_tasks_cnt_tmp += 1;
 		tasks_being_created += 1;
-    spin_unlock(&new_task_created_lock);
+    spin_unlock_irqrestore(&new_task_created_lock,flags);
 
     hooks = &(vitsdata->created_tasks[task_idx]);
     priv_hooks = &(priv_hook_created_tasks[task_idx]);
@@ -113,10 +114,13 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     	cpu_set(at_cpu, tsk->cpus_allowed);
     }
 
-    priv_hooks->sen_data_lock = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock);
+    priv_hooks->sen_data_lock[0] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[0]);
+    priv_hooks->sen_data_lock[1] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[1]);
 
+    reset_cpu_counters(&(vitsdata->__acc_tasks[task_idx][0]));
+    reset_cpu_counters(&(vitsdata->__acc_tasks[task_idx][1]));
+    vitsdata->__acc_tasks_last_cpu[task_idx] = at_cpu;
     for(i=0;i<sensing_window_cnt;++i){
-    	reset_task_counters(at_cpu,&(vitsdata->sensing_windows[i]._acc.tasks[task_idx]));
     	reset_task_counters(at_cpu,&(vitsdata->sensing_windows[i].curr.tasks[task_idx]));
     	reset_task_counters(at_cpu,&(vitsdata->sensing_windows[i].aggr.tasks[task_idx]));
     }
@@ -136,11 +140,11 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     BUG_ON(hook_hashmap_get(tsk) != priv_hooks);
 
 
-    spin_lock(&new_task_created_lock);
+    spin_lock_irqsave(&new_task_created_lock,flags);
 		tasks_being_created -= 1;
     	if(tasks_being_created==0)
     		vitsdata->created_tasks_cnt = vitsdata->__created_tasks_cnt_tmp;
-    spin_unlock(&new_task_created_lock);
+    spin_unlock_irqrestore(&new_task_created_lock,flags);
 }
 
 private_hook_data_t* add_created_task(struct task_struct *tsk)
@@ -219,18 +223,37 @@ static int vitamins_flush_tasks_kthread_create(int tgt_cpu){
 
 }
 
-//cpu counters are modified by it's own cpu when a task leaves a cpu
-//and read/reset by cpu0 at the end of the epoch
-//this spin lock protects them
-static spinlock_t vitamins_cpu_counters_acc_lock[NR_CPUS];
+//Cpu counters are modified by it's own cpu when a task leaves a cpu
+//and read/reset by cpu0 at the end of the epoch.
+//This spin lock protects them. Since those counters are double-buffered we
+//have one lock for each buffer
+static spinlock_t vitamins_cpu_counters_acc_lock[NR_CPUS][2];
+
+// Performs tgt->cnt 'op' acc->cnt, where 'op' is +=,-=,=, for all counters in
+// the structs given by 'acc' and 'tgt'
+// Note:  tgt->perfcnt.time_total_ms is not changed
+#define _perf_data_op(op,tgt,acc) \
+    do{\
+        int cnt;\
+        for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt) (tgt)->perfcnt.perfcnts[cnt] op (acc)->perfcnt.perfcnts[cnt];\
+        (tgt)->perfcnt.nvcsw op (acc)->perfcnt.nvcsw;\
+        (tgt)->perfcnt.nivcsw op (acc)->perfcnt.nivcsw;\
+        (tgt)->perfcnt.time_busy_ms op (acc)->perfcnt.time_busy_ms;\
+        for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) (tgt)->beats[cnt] op (acc)->beats[cnt];\
+    } while(0)
+
+#define perf_data_set(tgt,acc) _perf_data_op(=,tgt,acc)
+#define perf_data_inc(tgt,acc) _perf_data_op(+=,tgt,acc)
+#define perf_data_dec(tgt,acc) _perf_data_op(-=,tgt,acc)
 
 static void sense_cpus(sys_info_t *sys, int wid)
 {
-	int i,cnt;
-	uint64_t time_total_ms,curr_time_ms;
+	int i;
+	unsigned long flags;
+	perf_data_cpu_t data_cnt;
 
-	curr_time_ms = jiffies_to_msecs(jiffies);
-    time_total_ms = counter_diff_32(curr_time_ms, vitsdata->sensing_windows[wid].curr_sample_time_ms);
+	uint64_t curr_time_ms = jiffies_to_msecs(jiffies);
+	uint64_t time_elapsed_ms = counter_diff_32(curr_time_ms, vitsdata->sensing_windows[wid].curr_sample_time_ms);
 
     vitsdata->sensing_windows[wid].prev_sample_time_ms = vitsdata->sensing_windows[wid].curr_sample_time_ms;
     vitsdata->sensing_windows[wid].curr_sample_time_ms = curr_time_ms;
@@ -238,27 +261,26 @@ static void sense_cpus(sys_info_t *sys, int wid)
 	for_each_online_cpu(i){
 	    perf_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
 	    perf_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
-	    perf_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[i]);
 
-	    spin_lock(&(vitamins_cpu_counters_acc_lock[i]));
+	    //Combine data from both buffers
+	    spin_lock_irqsave(&(vitamins_cpu_counters_acc_lock[i][0]),flags);
+	    perf_data_set(&data_cnt,&(vitsdata->__acc_cpus[i][0]));
+	    spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[i][0]),flags);
 
-		for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt)
-			curr_epoch->perfcnt.perfcnts[cnt] = data_cnt->perfcnt.perfcnts[cnt] -  last_total->perfcnt.perfcnts[cnt];
+	    spin_lock_irqsave(&(vitamins_cpu_counters_acc_lock[i][1]),flags);
+	    perf_data_inc(&data_cnt,&(vitsdata->__acc_cpus[i][1]));
+	    spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[i][1]),flags);
 
-		curr_epoch->perfcnt.nvcsw = data_cnt->perfcnt.nvcsw -  last_total->perfcnt.nvcsw;
-		curr_epoch->perfcnt.nivcsw = data_cnt->perfcnt.nivcsw -  last_total->perfcnt.nivcsw;
-		curr_epoch->perfcnt.time_busy_ms = data_cnt->perfcnt.time_busy_ms -  last_total->perfcnt.time_busy_ms;
-		curr_epoch->perfcnt.time_total_ms = time_total_ms;
+	    //data from current epoch
+	    perf_data_set(curr_epoch,&data_cnt);
+	    perf_data_dec(curr_epoch,last_total);
 
-		for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt)
-			curr_epoch->beats[cnt] = data_cnt->beats[cnt] -  last_total->beats[cnt];
+	    //total acc data
+	    perf_data_set(last_total,&data_cnt);
 
-		//this is not updated at the sensing hooks
-		data_cnt->perfcnt.time_total_ms += curr_epoch->perfcnt.time_total_ms;
-
-		*last_total = *data_cnt;
-
-		spin_unlock(&(vitamins_cpu_counters_acc_lock[i]));
+	    //perfcnt.time_total_ms is not updated within data_cnt, so handled separately
+	    curr_epoch->perfcnt.time_total_ms = time_elapsed_ms;
+	    last_total->perfcnt.time_total_ms += time_elapsed_ms;
 	}
 
     //freq sense
@@ -266,7 +288,7 @@ static void sense_cpus(sys_info_t *sys, int wid)
 
     	perf_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
     	perf_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
-    	perf_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.freq_domains[i]);
+    	perf_data_freq_domain_t *data_cnt = &(vitsdata->__acc_freq_domains[i]);
 
     	curr_epoch->avg_freq_mhz_acc = data_cnt->avg_freq_mhz_acc - last_total->avg_freq_mhz_acc;
     	curr_epoch->time_ms_acc = data_cnt->time_ms_acc -  last_total->time_ms_acc;
@@ -305,37 +327,37 @@ static bool vit_map_perfcnt(perfcnt_t perfcnt)
 static inline void sense_tasks(sys_info_t *sys,int wid)
 {
 	int p;
+	unsigned long flags;
+	perf_data_cpu_t data_cnt;
 
-	uint64_t time_total_ms = counter_diff_32(jiffies_to_msecs(jiffies), vitsdata->sensing_windows[wid].prev_sample_time_ms);
+	uint64_t time_elapsed_ms = counter_diff_32(jiffies_to_msecs(jiffies), vitsdata->sensing_windows[wid].prev_sample_time_ms);
 
 	for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
-		int cnt;
 		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
 		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
 		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
-		perf_data_task_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.tasks[p]);
 
-		spin_lock(&(task_priv_hook->sen_data_lock));
-			for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt)
-				curr_epoch->perfcnt.perfcnts[cnt] = data_cnt->perfcnt.perfcnts[cnt] -  last_total->perfcnt.perfcnts[cnt];
+        //Combine data from both buffers
+        spin_lock_irqsave(&(task_priv_hook->sen_data_lock[0]),flags);
+        perf_data_set(&data_cnt,&(vitsdata->__acc_tasks[p][0]));
+        spin_unlock_irqrestore(&(task_priv_hook->sen_data_lock[0]),flags);
 
-			curr_epoch->perfcnt.nvcsw = data_cnt->perfcnt.nvcsw -  last_total->perfcnt.nvcsw;
-			curr_epoch->perfcnt.nivcsw = data_cnt->perfcnt.nivcsw -  last_total->perfcnt.nivcsw;
-			curr_epoch->perfcnt.time_busy_ms = data_cnt->perfcnt.time_busy_ms -  last_total->perfcnt.time_busy_ms;
-			curr_epoch->perfcnt.time_total_ms = time_total_ms;
+        spin_lock_irqsave(&(task_priv_hook->sen_data_lock[1]),flags);
+        perf_data_inc(&data_cnt,&(vitsdata->__acc_tasks[p][1]));
+        spin_unlock_irqrestore(&(task_priv_hook->sen_data_lock[1]),flags);
 
-			for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt)
-				curr_epoch->beats[cnt] = data_cnt->beats[cnt] -  last_total->beats[cnt];
+        //data from current epoch
+        perf_data_set(curr_epoch,&data_cnt);
+        perf_data_dec(curr_epoch,last_total);
 
-			//this is not updated at the sensing hooks
-			data_cnt->perfcnt.time_total_ms += curr_epoch->perfcnt.time_total_ms;
+        //total acc data
+        perf_data_set(last_total,&data_cnt);
 
-			*last_total = *data_cnt;
-
-			curr_epoch->last_cpu_used = data_cnt->last_cpu_used;
-			last_total->last_cpu_used = data_cnt->last_cpu_used;
-
-		spin_unlock(&(task_priv_hook->sen_data_lock));
+        //perfcnt.time_total_ms is not updated within data_cnt, so handled separately
+        curr_epoch->perfcnt.time_total_ms = time_elapsed_ms;
+        last_total->perfcnt.time_total_ms += time_elapsed_ms;
+        curr_epoch->last_cpu_used = vitsdata->__acc_tasks_last_cpu[p];
+        last_total->last_cpu_used = vitsdata->__acc_tasks_last_cpu[p];
 	}
 }
 
@@ -367,7 +389,7 @@ static bool sensing_window_tasks_flushed = false;
 //used to check the current frequency (could also be used to set a frequency)
 void minimum_sensing_window(sys_info_t *sys)
 {
-    int i,j;
+    int i;
 
     uint64_t curr_time = jiffies_to_msecs(jiffies);
     //sense freq
@@ -376,13 +398,11 @@ void minimum_sensing_window(sys_info_t *sys)
     	//TODO this is ugly
     	int curr_freq_MHz = kern_cpu_get_freq_mhz(sys->freq_domain_list[i].__vitaminslist_head_cores->position);
 
-    	for(j=0;j<sensing_window_cnt;++j){
-    		perf_data_freq_domain_t *data_cnt = &(vitsdata->sensing_windows[j]._acc.freq_domains[i]);
-    		uint64_t time_elapsed = curr_time - data_cnt->last_update_time_ms;
-    		data_cnt->last_update_time_ms = curr_time;
-    		data_cnt->time_ms_acc += time_elapsed;
-    		data_cnt->avg_freq_mhz_acc += time_elapsed * curr_freq_MHz;
-    	}
+    	perf_data_freq_domain_t *data_cnt = &(vitsdata->__acc_freq_domains[i]);
+    	uint64_t time_elapsed = curr_time - data_cnt->last_update_time_ms;
+    	data_cnt->last_update_time_ms = curr_time;
+    	data_cnt->time_ms_acc += time_elapsed;
+    	data_cnt->avg_freq_mhz_acc += time_elapsed * curr_freq_MHz;
     }
 
     sensing_window_tasks_flushed = false;
@@ -408,11 +428,8 @@ void sense_window(sys_info_t *sys, int wid)
 }
 
 static inline int is_userspace(struct task_struct *tsk){
-	//has parent and parent pid is > 1 and name does not begin with kthread or vitamins
-	return tsk->parent &&
-		  (tsk->parent->pid > 1) &&
-		  !((tsk->comm[0] == 'k') && (tsk->comm[6] == 'd')) &&
-		  !((tsk->comm[0] == 'v') && (tsk->comm[7] == 's'));
+    //tsk->mm is null for kernel-level processes
+    return tsk->mm != 0;
 }
 
 static bool per_task_sensing = false;
@@ -428,8 +445,8 @@ void set_pin_task_to_cpu(int cpu){
 static inline void vitamins_task_created_probe(struct task_struct *parent, struct task_struct *tsk)
 {
 	//the task will be sensed if:
-	//  -we are not in measuring mode
-	//  -its a user task (forked from init) && its cpu mask is not set (currently not used)
+	//  -per task sensing is enabled
+	//  -it's a user-level task
 	if(per_task_sensing && is_userspace(tsk)){
 		//does not pin if pin_task_to_cpu==-1
 		new_task_created(pin_task_to_cpu,tsk,parent);
@@ -470,11 +487,13 @@ static inline void vitamins_sensing_begin_probe(int cpu, struct task_struct *tsk
 static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 {
 	private_hook_data_t *p;
-	tracked_task_data_t *_p;
 	uint64_t perfcnts[MAX_PERFCNTS];
 	uint64_t time_busy_ms;
 	uint64_t beat_cnt[MAX_BEAT_DOMAINS];
-	int i,wid;
+	int i;
+	perf_data_cpu_t *data_cnt;
+	unsigned long flags;
+	int acc_buffer;
 
 	//true if the task is leaving the cpu voluntarly
 	bool vcsw = tsk->state && !(preempt_count() & PREEMPT_ACTIVE);
@@ -501,32 +520,52 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 
     stop_perf_sense(cpu);
 
-    spin_lock(&(vitamins_cpu_counters_acc_lock[cpu]));
-    for(wid=0;wid<sensing_window_cnt;++wid){
-    	perf_data_cpu_t *data_cnt = &(vitsdata->sensing_windows[wid]._acc.cpus[cpu]);
+
+    // Gets the avalailable _acc_cpus[cpu] buffer
+    // One of the buffers is always available so this should never really block
+    while(1){
+        acc_buffer = 0;
+        if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][0]),flags)) break;
+        acc_buffer = 1;
+        if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][1]),flags)) break;
+        acc_buffer = 0; //should definitely get it this time
+        if(spin_trylock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][0]),flags)) break;
+        pinfo("c%d: unexpected contention at __acc_cpus!\n",cpu);
+    }
+
+    data_cnt = &(vitsdata->__acc_cpus[cpu][acc_buffer]);
+    for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data_cnt->perfcnt.perfcnts[i] += perfcnts[i];
+    data_cnt->perfcnt.time_busy_ms += time_busy_ms;
+    if(vcsw) data_cnt->perfcnt.nvcsw += 1;
+    else	 data_cnt->perfcnt.nivcsw += 1;
+    for(i = 0; i < MAX_BEAT_DOMAINS; ++i) data_cnt->beats[i] += beat_cnt[i];
+
+    spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[cpu][acc_buffer]),flags);
+
+    vitsdata->num_of_csw_periods[cpu] += 1;
+
+    if (p) {
+        vitsdata->__acc_tasks_last_cpu[p->hook_data->task_idx] = cpu;
+        // Gets the avalailable __acc_tasks[cpu] buffer
+        // One of the buffers is always available so this should never really block
+        while(1){
+            acc_buffer = 0;
+            if(spin_trylock_irqsave(&(p->sen_data_lock[0]),flags)) break;
+            acc_buffer = 1;
+            if(spin_trylock_irqsave(&(p->sen_data_lock[1]),flags)) break;
+            acc_buffer = 0;//should definitely get it this time
+            if(spin_trylock_irqsave(&(p->sen_data_lock[0]),flags)) break;
+            pinfo("c%d: unexpected contention at __acc_tasks[%d/%s]!\n",cpu,tsk->pid,tsk->comm);
+        }
+
+        data_cnt = &(vitsdata->__acc_tasks[p->hook_data->task_idx][acc_buffer]);
     	for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data_cnt->perfcnt.perfcnts[i] += perfcnts[i];
     	data_cnt->perfcnt.time_busy_ms += time_busy_ms;
     	if(vcsw) data_cnt->perfcnt.nvcsw += 1;
     	else	 data_cnt->perfcnt.nivcsw += 1;
     	for(i = 0; i < MAX_BEAT_DOMAINS; ++i) data_cnt->beats[i] += beat_cnt[i];
-    }
-    spin_unlock(&(vitamins_cpu_counters_acc_lock[cpu]));
 
-    vitsdata->num_of_csw_periods[cpu] += 1;
-
-    if (p) {
-    	spin_lock(&(p->sen_data_lock));
-    	_p = p->hook_data;
-    	for(wid=0;wid<sensing_window_cnt;++wid){
-    		vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].last_cpu_used = cpu;
-    		for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i)
-    			vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].perfcnt.perfcnts[i] += perfcnts[i];
-    		vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].perfcnt.time_busy_ms += time_busy_ms;
-    		if(vcsw) vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].perfcnt.nvcsw += 1;
-    		else	 vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].perfcnt.nivcsw += 1;
-    		for(i = 0; i < MAX_BEAT_DOMAINS; ++i) vitsdata->sensing_windows[wid]._acc.tasks[_p->task_idx].beats[i] += beat_cnt[i];
-    	}
-    	spin_unlock(&(p->sen_data_lock));
+    	spin_unlock_irqrestore(&(p->sen_data_lock[acc_buffer]),flags);
     }
 
     smp_mb();
@@ -572,7 +611,8 @@ void sense_init(sys_info_t *sys)
     }
 
     for_each_online_cpu(i){
-    	vitamins_cpu_counters_acc_lock[i] = __SPIN_LOCK_UNLOCKED(vitamins_cpu_counters_acc_lock[i]);
+    	vitamins_cpu_counters_acc_lock[i][0] = __SPIN_LOCK_UNLOCKED(vitamins_cpu_counters_acc_lock[i][0]);
+    	vitamins_cpu_counters_acc_lock[i][1] = __SPIN_LOCK_UNLOCKED(vitamins_cpu_counters_acc_lock[i][1]);
     }
 
     res = trace_perf_counter_reset();
@@ -591,8 +631,9 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
     	reset_cpu_counters(&(cpu_counters_begin[i]));
     	first_sense[i] = true;
     	vitsdata->num_of_csw_periods[i] = 0;
+    	reset_cpu_counters(&(vitsdata->__acc_cpus[i][0]));
+    	reset_cpu_counters(&(vitsdata->__acc_cpus[i][1]));
     	for(wid=0;wid<sensing_window_cnt;++wid){
-    		reset_cpu_counters(&(vitsdata->sensing_windows[wid]._acc.cpus[i]));
     		reset_cpu_counters(&(vitsdata->sensing_windows[wid].curr.cpus[i]));
     		reset_cpu_counters(&(vitsdata->sensing_windows[wid].aggr.cpus[i]));
     	}
@@ -605,9 +646,9 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
 
     vitsdata->num_of_minimum_periods = 0;
 
-    for(wid=0;wid<sensing_window_cnt;++wid){
-    	for(i = 0; i < sys->freq_domain_list_size; ++i){
-    		reset_freq_counters(&(vitsdata->sensing_windows[wid]._acc.freq_domains[i]));
+    for(i = 0; i < sys->freq_domain_list_size; ++i){
+        reset_freq_counters(&(vitsdata->__acc_freq_domains[i]));
+        for(wid=0;wid<sensing_window_cnt;++wid){
     		reset_freq_counters(&(vitsdata->sensing_windows[wid].curr.freq_domains[i]));
     		reset_freq_counters(&(vitsdata->sensing_windows[wid].aggr.freq_domains[i]));
     	}

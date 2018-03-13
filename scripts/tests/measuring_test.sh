@@ -16,18 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-# Runs a couple of benchmarks using the interfacetest daemon
+# Runs a couple of benchmarks using the measuring daemon
 
 source $SPARTA_SCRIPTDIR/runtime/common.sh
 
-sudosh $SPARTA_SCRIPTDIR/runtime/start.sh interfacetest
+sudosh $SPARTA_SCRIPTDIR/runtime/start.sh measuring
 taskset 0x10 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
 taskset 0x40 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
 taskset 0x02 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
 taskset 0x04 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
 wait
 sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
-
-cp $RTS_DAEMON_OUTDIR/execTraceFine.csv interface_test-fine_trace.csv
-cp $RTS_DAEMON_OUTDIR/execTraceCoarse.csv interface_test-coarse_trace.csv
-

@@ -40,7 +40,7 @@ lib_$(ARCH)_$(PLAT)/libsasolver.a: src/sa_solver/lib/libsasolver$(ARCH).a
 	cp $< $@
 
 src/sa_solver/lib/libsasolver$(ARCH).a:
-	cd src/sa_solver; make kernel_lib_$(ARCH) ARCH=$(ARCH)
+	cd src/sa_solver; make kernel_lib ARCH=$(ARCH)
 
 .PHONY: core_lib
 core_lib: lib_$(ARCH)_$(PLAT)/libcore.a lib_$(ARCH)_$(PLAT)/libsasolver.a 

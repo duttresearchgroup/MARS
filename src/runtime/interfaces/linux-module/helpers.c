@@ -83,8 +83,9 @@ bool kern_cpu_freq_isuserspace(int core)
 int circbuf_push(circbuf_t *c, circbuf_data_t data)
 {
     int next;
+    unsigned long flags;
 
-    spin_lock(c->lock);
+    spin_lock_irqsave(c->lock, flags);
 
     next = c->head + 1;
     if (next >= c->maxLen)
@@ -92,14 +93,14 @@ int circbuf_push(circbuf_t *c, circbuf_data_t data)
 
     // Cicular buffer is full
     if (next == c->tail){
-    	spin_unlock(c->lock);
+    	spin_unlock_irqrestore(c->lock, flags);
         return -1;  // quit with an error
     }
 
     c->buffer[c->head] = data;
     c->head = next;
 
-    spin_unlock(c->lock);
+    spin_unlock_irqrestore(c->lock, flags);
 
     //notify readers
     up(c->rd_sem);
@@ -110,11 +111,12 @@ int circbuf_push(circbuf_t *c, circbuf_data_t data)
 int circbuf_pop(circbuf_t *c, circbuf_data_t *data)
 {
 	int next;
+	unsigned long flags;
 
 	//wait for data
 	down(c->rd_sem);
 
-	spin_lock(c->lock);
+	spin_lock_irqsave(c->lock, flags);
 
 	// if the head isn't ahead of the tail, we don't have any characters, which is an invalid state here
     BUG_ON(c->head == c->tail);
@@ -128,7 +130,7 @@ int circbuf_pop(circbuf_t *c, circbuf_data_t *data)
 
     c->tail = next;
 
-    spin_unlock(c->lock);
+    spin_unlock_irqrestore(c->lock, flags);
 
     return 0;
 }

@@ -15,12 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/overhead_test.h>
+#ifndef __arm_rt_system_overheadtest_h
+#define __arm_rt_system_overheadtest_h
 
-int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	const std::string& mode = rt_param_mode();
-	daemon_run_sys(new OverheadTestSystem(mode));
-	return 0;
-}
+#include <runtime/framework/system.h>
+
+class OverheadTestSystem : public System {
+protected:
+	static const int WINDOW_LENGTH_NO_TASK_SENSE_MS = 1000;
+	static const int WINDOW_LENGTH_PER_TASK_SENSE_COARSE_MS = 100;
+	static const int WINDOW_LENGTH_PER_TASK_SENSE_FINE_MS = 10;
+
+	virtual void setup();
+	virtual void report();
+
+	static void window_handler_notasksense(int wid,System *owner);
+	static void window_handler_tasksense(int wid,System *owner);
+
+private:
+	const std::string& _mode;
+	const SensingWindowManager::WindowInfo *_sensingWindow;
+	ExecutionTrace _execTrace;
+
+public:
+	OverheadTestSystem(const std::string& mode) :System(), _mode(mode), _sensingWindow(nullptr), _execTrace("trace"){};
+
+};
+
+
+#endif
+
