@@ -19,6 +19,9 @@
  * Some helper functions to work with strings
  */
 
+#ifndef __arm_rt_strings_h
+#define __arm_rt_strings_h
+
 #include <string>
 #include <sstream>
 #include <vector>
@@ -79,3 +82,4 @@ inline const char * formatstr(const char *s, Args... args){
     return __formatstr_buff;
 }
 
+#endif
