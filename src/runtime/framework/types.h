@@ -20,6 +20,7 @@
 
 #include <core/core.h>
 #include <runtime/interfaces/common/perfcnts.h>
+#include <runtime/interfaces/common/sense_defs.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // This struct should be reviewed. Proably need to get rid of this "modes".
@@ -45,6 +46,7 @@ enum ActuationType {
 	ACT_NULL = 0,
 	ACT_FREQ_MHZ,
 	ACT_ACTIVE_CORES,
+	ACT_TASK_MAP,
 	//////////////////////////
 	//////////////////////////
 	SIZE_ACT_TYPES
@@ -71,6 +73,10 @@ template <> struct ActuationTypeInfo<ACT_FREQ_MHZ>{
 
 template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
     using ValType = int;
+};
+
+template <> struct ActuationTypeInfo<ACT_TASK_MAP>{
+    using ValType = const tracked_task_data_t*;
 };
 
 //////////////////////////////////////////////////////////////////////////////

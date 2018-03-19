@@ -129,6 +129,9 @@ class Actuator {
 	ActuatorDefDefaultActuationFuncs(freq_domain_info_t,
 									 int,
 									 const PerformanceData& data, int wid, int cores_min=1);
+	//used when setting task-to-core mapping
+	ActuatorDefDefaultActuationFuncs(core_info_t,
+	        const tracked_task_data_t*);
 
 
 };

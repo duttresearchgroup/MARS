@@ -15,30 +15,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __arm_rt_actuation_interface_h
-#define __arm_rt_actuation_interface_h
+#ifndef __arm_rt_offline_actuatortaskmap_h
+#define __arm_rt_offline_actuatortaskmap_h
 
-//has IS_LINUX_PLAT / IS_OFFLINE_PLAT
-#include <runtime/interfaces/common/pal/pal_setup.h>
 
-#include "linux/freq_actuator.h"
-#include "linux/idledomain_actuator.h"
-#include "linux/taskmap_actuator.h"
-#include "offline/freq_actuator.h"
-#include "offline/idledomain_actuator.h"
-#include "offline/taskmap_actuator.h"
+#include <runtime/framework/types.h>
+#include <runtime/framework/actuator.h>
 
-#if defined(IS_LINUX_PLAT)
-	typedef LinuxFrequencyActuator FrequencyActuator;
-	typedef LinuxTaskMapActuator TaskMapActuator;
-	typedef LinuxIdleDomainActuator IdleDomainActuator;
-#elif defined(IS_OFFLINE_PLAT)
-	typedef OfflineFrequencyActuator FrequencyActuator;
-	typedef OfflineTaskMapActuator TaskMapActuator;
-	typedef OfflineIdleDomainActuator IdleDomainActuator;
-#else
-#error "Platform not properly defined"
-#endif
+class OfflineTaskMapActuator : public Actuator {
+
+protected:
+	void implSystemMode(){
+
+	}
+	void implSystemMode(const std::string &arg){
+
+	}
+	void implFrameworkMode(){
+
+	}
+
+public:
+	OfflineTaskMapActuator(const sys_info_t &_info)
+		:Actuator(ACT_TASK_MAP,_info)
+	{
+		for(int i = 0; i < _info.core_list_size; ++i)
+			setActForResource(&(_info.core_list[i]));
+	}
+
+	~OfflineTaskMapActuator()
+	{
+	}
+
+	// Standard actuation interface override
+
+	void doSysActuation(core_info_t *rsc, tracked_task_data_t *task){
+
+	}
+	void getSysActuation(freq_domain_info_t *rsc, tracked_task_data_t **val_mhz){
+
+	}
+
+};
 
 #endif
 
