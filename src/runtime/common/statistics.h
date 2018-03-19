@@ -45,7 +45,7 @@ struct Statistics {
         double intercept;
     };
 
-    Average average(std::vector<double> &samples){
+    static Average average(std::vector<double> &samples){
         double acc = 0;
         double accSqr = 0;
         for(auto s : samples){
@@ -57,14 +57,14 @@ struct Statistics {
         return avg;
     }
 
-    double min(std::vector<double> &samples){
+    static double min(std::vector<double> &samples){
         double min = std::numeric_limits<double>::max();
         for(auto s : samples){
             if(s <= min) min = s;
         }
         return min;
     }
-    double max(std::vector<double> &samples){
+    static double max(std::vector<double> &samples){
         double max = 0;
         for(auto s : samples){
             if(s >= max) max = s;

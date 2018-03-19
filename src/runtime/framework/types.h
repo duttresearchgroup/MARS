@@ -103,6 +103,16 @@ enum SensingType {
 	SIZE_SEN_TYPES
 };
 
+// How to aggregate SensingType values.
+enum SensingAggType {
+    //Performance stuff
+    SEN_AGG_SUM = 0,//Aggregation is the sum of all values
+    SEN_AGG_MEAN,//Aggregation is the mean of all values
+    SEN_AGG_INT_COUNT,//Values converted to ints and the aggregated value
+                      //equals the most frequent value
+    /////////////
+    SIZE_SEN_AGG
+};
 
 // This struct has information
 // describing each sensinng type.
@@ -121,6 +131,10 @@ struct SensingTypeInfo {
     // is void
     using ParamType = void;
 
+    // How we should aggregate values of this type
+    static constexpr SensingAggType agg = SIZE_SEN_AGG;
+
+    // string name of this type
     static const std::string str;
 };
 //of course this template instantiation is invalid
@@ -133,60 +147,70 @@ template <> struct SensingTypeInfo<SIZE_SEN_TYPES>;
 template <> struct SensingTypeInfo<SEN_PERFCNT>{
     using ValType = uint64_t; //number of events
     using ParamType = perfcnt_t; //which perf. counter
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_TOTALTIME_S>{
     using ValType = double; // total time elapsed in s
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_BUSYTIME_S>{
     using ValType = double; // total time the cpu was busy in s
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_BEATS>{
     using ValType = unsigned int; // number of heartbeats issued
     using ParamType = unsigned int; //beats domain
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     //nasty workaround to get a const str for diff beats domains
-    static const std::string str0,str1,str2,str3,str4;
+    static const std::string str,str0,str1,str2,str3,str4;
 };
 
 template <> struct SensingTypeInfo<SEN_NIVCSW>{
     using ValType = unsigned int; // number of involuntary ctx switches
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     static const std::string str;
 };
 template <> struct SensingTypeInfo<SEN_NVCSW>{
     using ValType = unsigned int; // number of voluntary ctx switches
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_SUM;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_POWER_W>{
     using ValType = double; // average power in W
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_MEAN;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_TEMP_C>{
     using ValType = double; // average temperature in C
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_MEAN;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_FREQ_MHZ>{
     using ValType = double; // average frequency in MHz
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_MEAN;
     static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_LASTCPU>{
     using ValType = int; //last cpu used by some task
     using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_INT_COUNT;
     static const std::string str;
 };
 
@@ -211,7 +235,12 @@ inline const std::string& sen_str<SEN_BEATS>(int domain){
     default: return SensingTypeInfo<SEN_BEATS>::str4;
     }
 }
+// Same as sen_str() but takes SensingType as function param instead
+// of template param. Notice this one has a higher runtime cost.
+const std::string& sen_str(SensingType t);
 
+// Helper function the get the SensingAggType using a non template param.
+// This is akin to sen_str(SensingType t)
+SensingAggType sen_agg(SensingType t);
 
 #endif
-
