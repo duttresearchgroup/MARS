@@ -58,6 +58,18 @@ public:
   	};
 
   	virtual ~TracingSystem();
+
+    // Name of the columns included in the task traces.
+    // For perfcnts we use the counter name given by perfcnt_str
+    static const std::string& T_TOTAL_TIME_S;
+    static const std::string& T_BUSY_TIME_S;
+    static const std::string& T_POWER_W;
+    static const std::string& T_FREQ_MHZ;
+    static const std::string& T_NIVCSW;
+    static const std::string& T_NVCSW;
+    static const std::string& T_CORE;
+    static const std::string& T_BEATS(int domain);
+
 };
 
 

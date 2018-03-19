@@ -110,6 +110,9 @@ public:
 		_dump();
 	}
 
+	static const std::string COL_TIMESTAMP;
+	static const std::string COL_SAMPLEID;
+
 };
 
 

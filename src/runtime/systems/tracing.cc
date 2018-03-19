@@ -148,6 +148,17 @@ void TracingSystem::setup()
 	sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 }
 
+const std::string& TracingSystem::T_TOTAL_TIME_S = sen_str<SEN_TOTALTIME_S>();
+const std::string& TracingSystem::T_BUSY_TIME_S = sen_str<SEN_BUSYTIME_S>();
+const std::string& TracingSystem::T_POWER_W = sen_str<SEN_POWER_W>();
+const std::string& TracingSystem::T_FREQ_MHZ = sen_str<SEN_FREQ_MHZ>();
+const std::string& TracingSystem::T_NIVCSW = sen_str<SEN_NIVCSW>();
+const std::string& TracingSystem::T_NVCSW = sen_str<SEN_NVCSW>();
+const std::string& TracingSystem::T_CORE = sen_str<SEN_LASTCPU>();
+const std::string& TracingSystem::T_BEATS(int domain){
+    return sen_str<SEN_BEATS>(domain);
+}
+
 void TracingSystem::window_handler(int wid,System *owner)
 {
 	TracingSystem* self = dynamic_cast<TracingSystem*>(owner);
@@ -162,24 +173,24 @@ void TracingSystem::window_handler(int wid,System *owner)
 		    auto trace = self->getHandleForTask(task,wid);
 
 		    //data for this epoch
-			trace("total_time_s") = sense<SEN_TOTALTIME_S>(&task,wid);
-			trace("busy_time_s") = sense<SEN_BUSYTIME_S>(&task,wid);
+			trace(T_TOTAL_TIME_S) = sense<SEN_TOTALTIME_S>(&task,wid);
+			trace(T_BUSY_TIME_S) = sense<SEN_BUSYTIME_S>(&task,wid);
 
-			trace("power_w") = sense<SEN_POWER_W>(self->info()->core_list[last_cpu_used].power,wid);
+			trace(T_POWER_W) = sense<SEN_POWER_W>(self->info()->core_list[last_cpu_used].power,wid);
 
-			trace("freq_mhz") = sense<SEN_FREQ_MHZ>(self->info()->core_list[last_cpu_used].freq,wid);
+			trace(T_FREQ_MHZ) = sense<SEN_FREQ_MHZ>(self->info()->core_list[last_cpu_used].freq,wid);
 			for(int i = 0; i < data.numMappedPerfcnts(); ++i) {
 				trace(perfcnt_str(data.perfcntFromIdx(i))) = sense<SEN_PERFCNT>(data.perfcntFromIdx(i),&task,wid);
 			}
 
-			trace("nivcsw") = sense<SEN_NIVCSW>(&task,wid);
-			trace("nvcsw") = sense<SEN_NVCSW>(&task,wid);
+			trace(T_NIVCSW) = sense<SEN_NIVCSW>(&task,wid);
+			trace(T_NVCSW) = sense<SEN_NVCSW>(&task,wid);
 
 			for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) {
-				trace("beats"+std::to_string(j)) = sense<SEN_BEATS>(j,&task,wid);
+				trace(T_BEATS(j)) = sense<SEN_BEATS>(j,&task,wid);
 			}
 
-			trace("core") = last_cpu_used;
+			trace(T_CORE) = last_cpu_used;
 		}
 	}
 

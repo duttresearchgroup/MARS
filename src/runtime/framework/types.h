@@ -120,60 +120,97 @@ struct SensingTypeInfo {
     // For most SEN_* this won't be used and
     // is void
     using ParamType = void;
+
+    static const std::string str;
 };
 //of course this template instantiation is invalid
 template <> struct SensingTypeInfo<SIZE_SEN_TYPES>;
 
-//Now the knob types values specializations
+// Now the knob types values specializations.
+// For C++11 reasons we still have to define the string
+// representation in a separate file (types_str.cc).
 
 template <> struct SensingTypeInfo<SEN_PERFCNT>{
     using ValType = uint64_t; //number of events
     using ParamType = perfcnt_t; //which perf. counter
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_TOTALTIME_S>{
     using ValType = double; // total time elapsed in s
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_BUSYTIME_S>{
     using ValType = double; // total time the cpu was busy in s
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_BEATS>{
     using ValType = unsigned int; // number of heartbeats issued
     using ParamType = unsigned int; //beats domain
+    //nasty workaround to get a const str for diff beats domains
+    static const std::string str0,str1,str2,str3,str4;
 };
 
 template <> struct SensingTypeInfo<SEN_NIVCSW>{
     using ValType = unsigned int; // number of involuntary ctx switches
     using ParamType = void;
+    static const std::string str;
 };
 template <> struct SensingTypeInfo<SEN_NVCSW>{
     using ValType = unsigned int; // number of voluntary ctx switches
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_POWER_W>{
     using ValType = double; // average power in W
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_TEMP_C>{
     using ValType = double; // average temperature in C
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_FREQ_MHZ>{
     using ValType = double; // average frequency in MHz
     using ParamType = void;
+    static const std::string str;
 };
 
 template <> struct SensingTypeInfo<SEN_LASTCPU>{
     using ValType = int; //last cpu used by some task
     using ParamType = void;
+    static const std::string str;
 };
+
+
+// Helper function to get the name of sen_types
+template<SensingType T>
+inline const std::string& sen_str(){
+    return SensingTypeInfo<T>::str;
+}
+template<SensingType T>
+inline const std::string& sen_str(int){
+    return SensingTypeInfo<T>::str;
+}
+// Specialized for beats
+template<>
+inline const std::string& sen_str<SEN_BEATS>(int domain){
+    switch (domain) {
+    case 0: return SensingTypeInfo<SEN_BEATS>::str0;
+    case 1: return SensingTypeInfo<SEN_BEATS>::str1;
+    case 2: return SensingTypeInfo<SEN_BEATS>::str2;
+    case 3: return SensingTypeInfo<SEN_BEATS>::str3;
+    default: return SensingTypeInfo<SEN_BEATS>::str4;
+    }
+}
 
 
 #endif
