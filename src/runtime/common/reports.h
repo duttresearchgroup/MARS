@@ -38,6 +38,8 @@ public:
 	public:
 		double& operator()(const std::string &entry);
 
+		int sampleIdx() { return _sampleIdx; }
+
 	private:
 		ExecutionTraceHandle(ExecutionTrace &trace)
 			:_trace(trace),_sampleIdx(0)
