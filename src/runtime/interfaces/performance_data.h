@@ -63,7 +63,7 @@ class PerformanceData {
 
 	inline int numMappedPerfcnts() const { return _raw_data->perfcnt_mapped_cnt;}
 
-	inline bool perfCntAvailable(perfcnt_t cnt) { return _raw_data->perfcnt_to_idx_map[cnt] >= 0;}
+	inline bool perfCntAvailable(perfcnt_t cnt) const { return _raw_data->perfcnt_to_idx_map[cnt] >= 0;}
 
 	inline perfcnt_t perfcntFromIdx(int idx) const { return (perfcnt_t)(_raw_data->idx_to_perfcnt_map[idx]);}
 
