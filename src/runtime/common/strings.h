@@ -82,4 +82,10 @@ inline const char * formatstr(const char *s, Args... args){
     return __formatstr_buff;
 }
 
+template<typename S1, typename S2>
+inline bool streq(S1 s1, S2 s2){
+    std::string _s1(s1),_s2(s2);
+    return _s1 == _s2;
+}
+
 #endif

@@ -31,6 +31,7 @@
 #include <map>
 #include <random>
 #include <thread>
+#include <set>
 
 #include <runtime/common/semaphore.h>
 #include "core/core.h"
@@ -39,8 +40,6 @@
 #include "../../sa_solver/solver_cinterface.h"
 #include "../../sa_solver/solver_defines.h"
 #include "app_common.h"
-#include "bin_based_predictor_common.h"
-
 
 struct __overhead {
     double acc;
