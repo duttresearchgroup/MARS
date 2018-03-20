@@ -26,6 +26,20 @@
 
 #include "actuation_interface.h"
 #include "sensing_interface.h"
+#include "model.h"
+
+class Policy : public Model {
+    friend class PolicyManager;
+
+  protected:
+    Policy(int periodMS, Priority priority = PRIORITY_DEFAULT)
+      :Model(periodMS,priority)
+    {
+    }
+
+  public:
+    virtual ~Policy(){}
+};
 
 class PolicyManager : public ActuationInterface, public SensingInterface {
   private:
@@ -46,6 +60,34 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 	std::string _pm_ready_file;
 
     SensingWindowManager *_win_manager;
+
+    // List of models
+    // Ordered by period and then priority
+    struct modelCMP {
+        bool operator()(const Model *a, const Model *b)
+        {
+            if(a->periodMS() == b->periodMS())
+                return a->priority() >= b->priority();
+            else
+                return a->periodMS() < b->periodMS();
+        }
+    };
+    std::multiset<Model*,modelCMP> _models;
+
+    // List of policies for each sensing window
+    // Ordered by priority
+    struct policyCMP {
+        bool operator()(const Policy *a, const Policy *b)
+        { return a->priority() >= b->priority(); }
+    };
+    std::multiset<Policy*,policyCMP> _policies[MAX_WINDOW_CNT];
+
+    // Map to temporaly store policies until we get an window ID for their handler
+    std::map<int,std::vector<Policy*>> _periodToPolicyMap;
+
+    void _finishRegisterPolicy();
+
+    static void _policyWindowHandler(int wid, PolicyManager *owner);
 
   protected:
 
@@ -68,6 +110,9 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 
   protected:
 	void quit();
+
+	void registerPolicy(Policy *policy);
+	void registerModel(Model *model);
 
   public:
 	virtual ~PolicyManager();

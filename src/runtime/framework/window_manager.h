@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <limits>
 
 #include <runtime/interfaces/sensing_module.h>
@@ -58,41 +59,31 @@ class SensingWindowManager
         WindowInfo(int p,int id,PolicyManager *o)
             :period_ms(p),wid(id),owner(o)
         {
-            clear_list(handlers);
         }
 
 		struct SensingWindowFunctor {
 		    const Priority priority;
 		    const SensingWindowFunction _func;
 
-		    define_list_addable(SensingWindowFunctor,handler);
-
 		    SensingWindowFunctor(SensingWindowFunction f, Priority p)
 		        :priority(p),_func(f)
-		    {
-		        clear_object(this,handler);
-		    }
+		    {}
 
-		    void operator()(int wid,PolicyManager *owner) { _func(wid,owner); }
+		    void operator()(int wid,PolicyManager *owner) const { _func(wid,owner); }
 		};
 
-		//Linked list of handlers ordered by priority
-		define_vitamins_list(SensingWindowFunctor,handlers);
 
-		//Also store them here so we don't bother destructing them
-		std::vector<SensingWindowFunctor> handlerVector;
+		struct sensingWindowCmp {
+		    bool operator()(const SensingWindowFunctor &a, const SensingWindowFunctor &b)
+		    { return a.priority >= b.priority; }
+		};
 
-		static inline bool sensingWindowCmp(
-		        const SensingWindowManager::WindowInfo::SensingWindowFunctor *a,
-		        const SensingWindowManager::WindowInfo::SensingWindowFunctor *b)
-		{
-		    return a->priority > b->priority;
-		}
+		// Handlers ordered by priority
+		std::multiset<SensingWindowFunctor,sensingWindowCmp> handlers;
+
 
 		void addHandler(SensingWindowFunction func, Priority priority){
-		    handlerVector.emplace_back(func,priority);
-		    SensingWindowFunctor *iter;
-		    add_to_priority_list(handlers,&(handlerVector.back()),handler,sensingWindowCmp,iter);
+		    handlers.emplace(func,priority);
 		}
 	};
 
@@ -130,6 +121,13 @@ class SensingWindowManager
 	SensingModule *sensingModule() { return _sm; }
 
 	const PerformanceData& sensingData() const { return _sm->data(); }
+
+	const WindowInfo* winfo(int wid) {
+	    auto i = _windowHandlers_idmap.find(wid);
+	    if(i == _windowHandlers_idmap.end())
+	        arm_throw(SensingWindowManagerException,"Invalid window id = %d",wid);
+	    return i->second;
+	}
 };
 
 

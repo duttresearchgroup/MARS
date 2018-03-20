@@ -140,10 +140,65 @@ void PolicyManager::_sensing_setup_common()
 	}
 }
 
+void PolicyManager::registerPolicy(Policy *policy)
+{
+    assert_true(policy != nullptr);
+    auto i = _periodToPolicyMap.find(policy->periodMS());
+    if(i == _periodToPolicyMap.end()){
+        _periodToPolicyMap[policy->periodMS()] = std::vector<Policy*>();
+        i = _periodToPolicyMap.find(policy->periodMS());
+    }
+    i->second.push_back(policy);
+
+    // Also register as a model
+    registerModel(policy);
+
+    // We will finish registering policies later with
+    // _finishRegisterPolicy
+
+}
+
+void PolicyManager::_finishRegisterPolicy()
+{
+    //Set a window handler for each period with the priority
+    //of the highest priority policy
+    for(auto i : _periodToPolicyMap){
+        Policy::Priority maxPrio = Policy::PRIORITY_MIN;
+        for(auto p : i.second)
+            if(p->priority() > maxPrio)
+                maxPrio = p->priority();
+
+        //create the window handler
+        auto winfo = _win_manager->addSensingWindowHandler(i.first,this,_policyWindowHandler,maxPrio);
+
+        assert_true(winfo->wid >= 0);
+        assert_true(winfo->wid < MAX_WINDOW_CNT);
+
+        //Create list of policies for this window
+        for(auto p : i.second)
+            _policies[winfo->wid].insert(p);
+    }
+}
+
+void PolicyManager::_policyWindowHandler(int wid, PolicyManager *owner)
+{
+    // Executes all policies for this window
+    for(auto p : owner->_policies[wid])
+        p->execute(wid);
+}
+
+void PolicyManager::registerModel(Model *model)
+{
+    assert_true(model != nullptr);
+    _models.insert(model);
+    model->sys_info = info();
+}
+
 void PolicyManager::start()
 {
 	_sensing_setup_common();
 	setup();
+	_finishRegisterPolicy();
 
 	//saves the sys_info
 	SysInfoPrinter sip(_sys_info); sip.printToOutdirFile();

@@ -50,10 +50,8 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 			auto winfo = wm->_windowHandlers_idmap.find(wid);
 			if(winfo == wm->_windowHandlers_idmap.end()) arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
 
-			WindowInfo::SensingWindowFunctor *iter;
-			for_each_in_internal_list(winfo->second,handlers,iter,handler){
-			    (*iter)(wid,winfo->second->owner);
-			}
+			for(auto &functor : winfo->second->handlers)
+			    (functor)(wid,winfo->second->owner);
 		}
 
 		sm->unresgisterAsDaemonProc();
@@ -106,7 +104,7 @@ const SensingWindowManager::WindowInfo* SensingWindowManager::addSensingWindowHa
         SensingWindowFunction func,
         Priority priority)
 {
-	//check if there is a window for this period
+    //check if there is a window for this period
 	//if there is, then append the handler, otherwise creates the window first
 	if(_windowHandlers_periodmap.find(period_ms) == _windowHandlers_periodmap.end()){
 		int wid = _sm->createSensingWindow(period_ms);
