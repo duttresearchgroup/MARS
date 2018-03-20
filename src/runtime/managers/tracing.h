@@ -18,10 +18,10 @@
 #ifndef __arm_rt_system_tracing_h
 #define __arm_rt_system_tracing_h
 
-#include <runtime/framework/system.h>
 #include <unordered_map>
+#include <runtime/framework/policy.h>
 
-class TracingSystem : public System {
+class TracingSystem : public PolicyManager {
   protected:
 	static const int WINDOW_LENGTH_MS = 10;
 	virtual void setup();
@@ -29,7 +29,7 @@ class TracingSystem : public System {
 
 	const SensingWindowManager::WindowInfo *sensingWindow;
 
-	static void window_handler(int wid,System *owner);
+	static void window_handler(int wid,PolicyManager *owner);
 
 private:
 	std::unordered_map<int,ExecutionTrace*> _execTraces;
@@ -49,12 +49,12 @@ private:
   	void _init();
 
 public:
-  	TracingSystem() :System(), sensingWindow(nullptr){
+  	TracingSystem() :PolicyManager(), sensingWindow(nullptr){
   	    _init();
   	};
 
 #if defined(IS_OFFLINE_PLAT)
-  	TracingSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr){
+  	TracingSystem(simulation_t *sim) :PolicyManager(sim), sensingWindow(nullptr){
   	    _init();
   	};
 #endif

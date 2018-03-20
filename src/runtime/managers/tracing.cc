@@ -143,9 +143,9 @@ TracingSystem::~TracingSystem()
 
 void TracingSystem::setup()
 {
-	_manager->sensingModule()->enablePerTaskSensing();
-	_manager->sensingModule()->pinAllTasksToCPU(rt_param_trace_core());
-	sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+	sensingModule()->enablePerTaskSensing();
+	sensingModule()->pinAllTasksToCPU(rt_param_trace_core());
+	sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 }
 
 const std::string& TracingSystem::T_TOTAL_TIME_S = sen_str<SEN_TOTALTIME_S>();
@@ -159,7 +159,7 @@ const std::string& TracingSystem::T_BEATS(int domain){
     return sen_str<SEN_BEATS>(domain);
 }
 
-void TracingSystem::window_handler(int wid,System *owner)
+void TracingSystem::window_handler(int wid,PolicyManager *owner)
 {
 	TracingSystem* self = dynamic_cast<TracingSystem*>(owner);
 	const PerformanceData& data = self->sensedData();

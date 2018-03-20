@@ -22,66 +22,57 @@
 #include <unistd.h>
 
 #include <base/base.h>
+#include <runtime/framework/policy.h>
 
-#include "system.h"
 #include <runtime/interfaces/common/pal/pal_setup.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 
 #include <signal.h>
 
-bool System::_system_created = false;
+bool PolicyManager::_pm_created = false;
 
-System::System()
+PolicyManager::PolicyManager()
 {
-	if(_system_created) arm_throw(DaemonSystemException,"System already created");
-	_system_created = true;
-
 	_init_info();
 
-	_manager = new SensingWindowManager();
+	_init_common();
 
     uint32_t cksum = sys_info_cksum(&_sys_info);
-    if(cksum != _manager->sensingModule()->data().sysChecksum()) arm_throw(DaemonSystemException,"Sys info cksum differs");
+    if(cksum != _win_manager->sensingModule()->data().sysChecksum()) arm_throw(DaemonSystemException,"Sys info cksum differs");
 
-    //additional check to make sure the domain/core ids match the idx
-    for(int cpu = 0; cpu < _sys_info.core_list_size; ++cpu){
-		if(_sys_info.core_list[cpu].position != cpu) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
-	for(int power_domain = 0; power_domain < _sys_info.power_domain_list_size; ++power_domain){
-		if(_sys_info.power_domain_list[power_domain].domain_id != power_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
-	for(int freq_domain = 0; freq_domain < _sys_info.freq_domain_list_size; ++freq_domain){
-		if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
-
-    _system_pid = getpid();
-	_system_ready_file = rt_param_daemon_file() + ".ready";
+    _pm_pid = getpid();
+	_pm_ready_file = rt_param_daemon_file() + ".ready";
 }
 
 #if defined(IS_OFFLINE_PLAT)
-System::System(simulation_t *sim)
+PolicyManager::PolicyManager(simulation_t *sim)
 {
-	if(_system_created) arm_throw(DaemonSystemException,"System already created");
-	_system_created = true;
-
 	_init_info(sim);
 
-	_manager = new SensingWindowManager();
-
-    //additional check to make sure the domain/core ids match the idx
-    for(int cpu = 0; cpu < _sys_info.core_list_size; ++cpu){
-		if(_sys_info.core_list[cpu].position != cpu) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
-	for(int power_domain = 0; power_domain < _sys_info.power_domain_list_size; ++power_domain){
-		if(_sys_info.power_domain_list[power_domain].domain_id != power_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
-	for(int freq_domain = 0; freq_domain < _sys_info.freq_domain_list_size; ++freq_domain){
-		if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-	}
+	_init_common();
 }
 #endif
 
-void System::_init_info()
+void PolicyManager::_init_common()
+{
+    if(_pm_created) arm_throw(DaemonSystemException,"System already created");
+    _pm_created = true;
+
+    _win_manager = new SensingWindowManager();
+
+    //additional check to make sure the domain/core ids match the idx
+    for(int cpu = 0; cpu < _sys_info.core_list_size; ++cpu){
+        if(_sys_info.core_list[cpu].position != cpu) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+    }
+    for(int power_domain = 0; power_domain < _sys_info.power_domain_list_size; ++power_domain){
+        if(_sys_info.power_domain_list[power_domain].domain_id != power_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+    }
+    for(int freq_domain = 0; freq_domain < _sys_info.freq_domain_list_size; ++freq_domain){
+        if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+    }
+}
+
+void PolicyManager::_init_info()
 {
 	int online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 
@@ -100,7 +91,7 @@ void System::_init_info()
 }
 
 #if defined(IS_OFFLINE_PLAT)
-void System::_init_info(simulation_t *sim)
+void PolicyManager::_init_info(simulation_t *sim)
 {
 	int online_cpus = sim->core_list_size();
 
@@ -126,30 +117,30 @@ void System::_init_info(simulation_t *sim)
 }
 #endif
 
-System::~System()
+PolicyManager::~PolicyManager()
 {
 	//pinfo("%s called\n",__PRETTY_FUNCTION__);
-	_system_created = false;
-	delete _manager;
+	_pm_created = false;
+	delete _win_manager;
 }
 
-void System::_sensing_setup_common()
+void PolicyManager::_sensing_setup_common()
 {
 	//enables the perfcnts we are sampling
 
 	//we always do instr and busy cy
-	_manager->sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
-	_manager->sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
+	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
+	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
 
 	for(int i = 0; i < SIZE_PERFCNT; ++i){
 		if(i == PERFCNT_BUSY_CY) continue;
 		if(i == PERFCNT_INSTR_EXE) continue;
 		if(rt_param_trace_perfcnt((perfcnt_t)i))
-			_manager->sensingModule()->tracePerfCounter((perfcnt_t)i);
+			_win_manager->sensingModule()->tracePerfCounter((perfcnt_t)i);
 	}
 }
 
-void System::start()
+void PolicyManager::start()
 {
 	_sensing_setup_common();
 	setup();
@@ -157,25 +148,25 @@ void System::start()
 	//saves the sys_info
 	SysInfoPrinter sip(_sys_info); sip.printToOutdirFile();
 
-	_manager->startSensing();
+	_win_manager->startSensing();
 
 	//creates a file that users can check to see if the daemon is ready
 	//also stores the daemon pid
-    std::ofstream fs(_system_ready_file);
-    fs << _system_pid;
+    std::ofstream fs(_pm_ready_file);
+    fs << _pm_pid;
     fs.close();
 }
 
-void System::stop()
+void PolicyManager::stop()
 {
-	_manager->stopSensing();
+	_win_manager->stopSensing();
 	report();
 	//removes the file created by start
-	std::remove(_system_ready_file.c_str());
+	std::remove(_pm_ready_file.c_str());
 }
 
-void System::quit()
+void PolicyManager::quit()
 {
-    kill(_system_pid,SIGQUIT);
+    kill(_pm_pid,SIGQUIT);
 }
 

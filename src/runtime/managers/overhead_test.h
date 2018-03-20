@@ -18,9 +18,9 @@
 #ifndef __arm_rt_system_overheadtest_h
 #define __arm_rt_system_overheadtest_h
 
-#include <runtime/framework/system.h>
+#include <runtime/framework/policy.h>
 
-class OverheadTestSystem : public System {
+class OverheadTestSystem : public PolicyManager {
 protected:
 	static const int WINDOW_LENGTH_NO_TASK_SENSE_MS = 1000;
 	static const int WINDOW_LENGTH_PER_TASK_SENSE_COARSE_MS = 100;
@@ -29,8 +29,8 @@ protected:
 	virtual void setup();
 	virtual void report();
 
-	static void window_handler_notasksense(int wid,System *owner);
-	static void window_handler_tasksense(int wid,System *owner);
+	static void window_handler_notasksense(int wid,PolicyManager *owner);
+	static void window_handler_tasksense(int wid,PolicyManager *owner);
 
 private:
 	const std::string& _mode;
@@ -38,7 +38,7 @@ private:
 	ExecutionTrace _execTrace;
 
 public:
-	OverheadTestSystem(const std::string& mode) :System(), _mode(mode), _sensingWindow(nullptr), _execTrace("trace"){};
+	OverheadTestSystem(const std::string& mode) :PolicyManager(), _mode(mode), _sensingWindow(nullptr), _execTrace("trace"){};
 
 };
 

@@ -29,7 +29,7 @@
 #include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/interfaces/common/sense_data_shared.h>
 
-#include <runtime/interfaces/window_manager.h>
+#include <runtime/framework/window_manager.h>
 
 class IdleTask
 {

@@ -22,20 +22,20 @@
 void OverheadTestSystem::setup()
 {
 	if(_mode == "overhead_test_notasksense"){
-		_sensingWindow = _manager->addSensingWindowHandler(
+		_sensingWindow = windowManager()->addSensingWindowHandler(
 				WINDOW_LENGTH_NO_TASK_SENSE_MS,this,
 				window_handler_notasksense);
 	}
 	else if(_mode == "overhead_test_tasksense_coarse"){
-		_manager->sensingModule()->enablePerTaskSensing();
-		_sensingWindow = _manager->addSensingWindowHandler(
+		sensingModule()->enablePerTaskSensing();
+		_sensingWindow = windowManager()->addSensingWindowHandler(
 				WINDOW_LENGTH_PER_TASK_SENSE_COARSE_MS,this,
 				window_handler_tasksense);
 
 	}
 	else if(_mode == "overhead_test_tasksense_fine"){
-		_manager->sensingModule()->enablePerTaskSensing();
-		_sensingWindow = _manager->addSensingWindowHandler(
+		sensingModule()->enablePerTaskSensing();
+		_sensingWindow = windowManager()->addSensingWindowHandler(
 				WINDOW_LENGTH_PER_TASK_SENSE_FINE_MS,this,
 				window_handler_tasksense);
 	}
@@ -43,11 +43,11 @@ void OverheadTestSystem::setup()
 	pinfo("Overhead test with mode = %s\n",_mode.c_str());
 }
 
-void OverheadTestSystem::window_handler_notasksense(int wid,System *owner)
+void OverheadTestSystem::window_handler_notasksense(int wid,PolicyManager *owner)
 {
 
 }
-void OverheadTestSystem::window_handler_tasksense(int wid,System *owner)
+void OverheadTestSystem::window_handler_tasksense(int wid,PolicyManager *owner)
 {
 	OverheadTestSystem *self =  dynamic_cast<OverheadTestSystem*>(owner);
 	auto sensedData = self->sensingModule()->data();

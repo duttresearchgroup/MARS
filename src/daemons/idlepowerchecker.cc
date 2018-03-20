@@ -19,7 +19,7 @@
 #include <runtime/interfaces/actuation_interface.h>
 #include <unordered_map>
 
-class IdlePowerChecker : public System {
+class IdlePowerChecker : public PolicyManager {
 protected:
     static const int WINDOW_LENGTH_MS = 200;
 
@@ -31,7 +31,7 @@ protected:
 
     const SensingWindowManager::WindowInfo *sensingWindow;
 
-    static void window_handler(int wid,System *owner);
+    static void window_handler(int wid,PolicyManager *owner);
 
     FrequencyActuator _freqAct;
 
@@ -59,7 +59,7 @@ protected:
     }
 
 public:
-    IdlePowerChecker() :System(),
+    IdlePowerChecker() :PolicyManager(),
         sensingWindow(nullptr),
         _freqAct(*info()),_state(INCREASING),_iterations(0){};
 
@@ -73,7 +73,7 @@ public:
 
 void IdlePowerChecker::setup()
 {
-    sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+    sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 
     _freqAct.setFrameworkMode();
     for(int domain_id = 0; domain_id < info()->freq_domain_list_size; ++domain_id){
@@ -84,7 +84,7 @@ void IdlePowerChecker::setup()
 }
 
 
-void IdlePowerChecker::window_handler(int wid,System *owner)
+void IdlePowerChecker::window_handler(int wid,PolicyManager *owner)
 {
     IdlePowerChecker *self =  dynamic_cast<IdlePowerChecker*>(owner);
 

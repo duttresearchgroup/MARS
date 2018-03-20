@@ -20,13 +20,13 @@
 #include <runtime/interfaces/actuation_interface.h>
 #include <runtime/framework/models/hw_model.h>
 
-class PredictorTestSystem : public System {
+class PredictorTestSystem : public PolicyManager {
 protected:
     static const int WINDOW_LENGTH_MS = 500;
 
     virtual void setup();
 
-    static void window_handler(int wid,System *owner);
+    static void window_handler(int wid,PolicyManager *owner);
 
     struct PredData {
         double ipc;
@@ -43,7 +43,7 @@ private:
     PredData _predData;
 
 public:
-    PredictorTestSystem() :System(),
+    PredictorTestSystem() :PolicyManager(),
         _execTrace("trace"),
         _freqAct(*info()), _mapAct(*info()),
         _hwModel(info()),
@@ -54,15 +54,15 @@ public:
 
 void PredictorTestSystem::setup()
 {
-    _manager->sensingModule()->enablePerTaskSensing();
+    sensingModule()->enablePerTaskSensing();
 
-    _manager->sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
-    _manager->sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
-    _manager->sensingModule()->tracePerfCounter(PERFCNT_BRANCH_MISPRED);
-    _manager->sensingModule()->tracePerfCounter(PERFCNT_L1DCACHE_MISSES);
-    _manager->sensingModule()->tracePerfCounter(PERFCNT_LLCACHE_MISSES);
+    sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
+    sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
+    sensingModule()->tracePerfCounter(PERFCNT_BRANCH_MISPRED);
+    sensingModule()->tracePerfCounter(PERFCNT_L1DCACHE_MISSES);
+    sensingModule()->tracePerfCounter(PERFCNT_LLCACHE_MISSES);
 
-    _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+    windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 
     //sets all domains to the same frequency
     constexpr int freqMHz = 1000;
@@ -72,7 +72,7 @@ void PredictorTestSystem::setup()
     }
 }
 
-void PredictorTestSystem::window_handler(int wid,System *owner)
+void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
 {
     PredictorTestSystem *self = dynamic_cast<PredictorTestSystem*>(owner);
     // Picks the task with the greatest number of instructions

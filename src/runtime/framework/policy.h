@@ -20,37 +20,38 @@
 
 #include <base/base.h>
 
-#include <runtime/interfaces/window_manager.h>
+#include <runtime/framework/window_manager.h>
 #include <runtime/common/reports.h>
 #include <runtime/interfaces/performance_data.h>
 
 #include "actuation_interface.h"
 #include "sensing_interface.h"
 
-class System : public ActuationInterface, public SensingInterface {
+class PolicyManager : public ActuationInterface, public SensingInterface {
   private:
 	//used to check only one system object should exist
-	static bool _system_created;
+	static bool _pm_created;
 
 	sys_info_t _sys_info;
 	core_info_t _core_info_list[MAX_NR_CPUS];
 
+	void _init_common();
 	void _init_info();
 #if defined(IS_OFFLINE_PLAT)
 	void _init_info(simulation_t *sim);
 #endif
 	void _sensing_setup_common();
 
-	int _system_pid;
-	std::string _system_ready_file;
+	int _pm_pid;
+	std::string _pm_ready_file;
+
+    SensingWindowManager *_win_manager;
 
   protected:
 
-	SensingWindowManager *_manager;
-
-	System();
+	PolicyManager();
 #if defined(IS_OFFLINE_PLAT)
-	System(simulation_t *sim);
+	PolicyManager(simulation_t *sim);
 #endif
 
 	/*
@@ -69,7 +70,7 @@ class System : public ActuationInterface, public SensingInterface {
 	void quit();
 
   public:
-	virtual ~System();
+	virtual ~PolicyManager();
 
 	void start();
 	void stop();
@@ -77,8 +78,8 @@ class System : public ActuationInterface, public SensingInterface {
 	sys_info_t* info() { return &_sys_info;}
 	virtual model_sys_t* model() {return nullptr;}
 
-	SensingModule *sensingModule() { return _manager->sensingModule(); }
-	SensingWindowManager *windowManager() { return _manager; }
+	SensingModule *sensingModule() const { return _win_manager->sensingModule(); }
+	SensingWindowManager *windowManager() { return _win_manager; }
 	const PerformanceData& sensedData() { return sensingModule()->data(); }
 
 };

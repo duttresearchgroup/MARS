@@ -31,7 +31,7 @@
 #include <runtime/common/strings.h>
 #include <runtime/common/reports.h>
 #include <runtime/common/statistics.h>
-#include <runtime/systems/tracing.h>
+#include <runtime/managers/tracing.h>
 
 struct glob_files {
     std::string file;

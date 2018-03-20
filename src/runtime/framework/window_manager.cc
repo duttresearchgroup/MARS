@@ -50,8 +50,9 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 			auto winfo = wm->_windowHandlers_idmap.find(wid);
 			if(winfo == wm->_windowHandlers_idmap.end()) arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
 
-			for(auto func : winfo->second->handlers){
-				func(wid,winfo->second->owner);
+			WindowInfo::SensingWindowFunctor *iter;
+			for_each_in_internal_list(winfo->second,handlers,iter,handler){
+			    (*iter)(wid,winfo->second->owner);
 			}
 		}
 
@@ -99,7 +100,11 @@ void SensingWindowManager::stopSensing()
 	_sensingRunning = false;
 }
 
-const SensingWindowManager::WindowInfo* SensingWindowManager::addSensingWindowHandler(int period_ms, System *owner, SensingWindowFunction func)
+const SensingWindowManager::WindowInfo* SensingWindowManager::addSensingWindowHandler(
+        int period_ms,
+        PolicyManager *owner,
+        SensingWindowFunction func,
+        Priority priority)
 {
 	//check if there is a window for this period
 	//if there is, then append the handler, otherwise creates the window first
@@ -114,10 +119,9 @@ const SensingWindowManager::WindowInfo* SensingWindowManager::addSensingWindowHa
 	WindowInfo *winfo = _windowHandlers_periodmap[period_ms];
 	if(winfo->owner != owner) arm_throw(SensingWindowManagerException,"Multiple systems using same window");
 
-	winfo->handlers.push_back(func);
+	winfo->addHandler(func,priority);
 
 	return winfo;
-
 }
 
 void SensingWindowManager::cleanupWindows() {

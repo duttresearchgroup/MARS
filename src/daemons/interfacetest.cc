@@ -20,7 +20,7 @@
 #include <runtime/common/strings.h>
 #include <map>
 
-class InterfaceTest : public System {
+class InterfaceTest : public PolicyManager {
 protected:
     static const int WINDOW_LENGTH_FINE_MS = 50;
     static const int WINDOW_LENGTH_COARSE_MS = 200;
@@ -30,8 +30,8 @@ protected:
     const SensingWindowManager::WindowInfo *sensingWindow_fine;
     const SensingWindowManager::WindowInfo *sensingWindow_coarse;
 
-    static void fine_window_handler(int wid,System *owner);
-    static void coarse_window_handler(int wid,System *owner);
+    static void fine_window_handler(int wid,PolicyManager *owner);
+    static void coarse_window_handler(int wid,PolicyManager *owner);
 
     ExecutionTrace _execTrace_fine;
     ExecutionTrace _execTrace_coarse;
@@ -42,7 +42,7 @@ protected:
     std::map<int,bool> _fd_state;
 
 public:
-    InterfaceTest() :System(),
+    InterfaceTest() :PolicyManager(),
         sensingWindow_fine(nullptr),sensingWindow_coarse(nullptr),
         _execTrace_fine("execTraceFine"),_execTrace_coarse("execTraceCoarse"),
         _freqAct(*info()){};
@@ -51,9 +51,9 @@ public:
 
 void InterfaceTest::setup()
 {
-    _manager->sensingModule()->enablePerTaskSensing();
-    sensingWindow_fine = _manager->addSensingWindowHandler(WINDOW_LENGTH_FINE_MS,this,fine_window_handler);
-    sensingWindow_coarse = _manager->addSensingWindowHandler(WINDOW_LENGTH_COARSE_MS,this,coarse_window_handler);
+    sensingModule()->enablePerTaskSensing();
+    sensingWindow_fine = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_FINE_MS,this,fine_window_handler);
+    sensingWindow_coarse = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_COARSE_MS,this,coarse_window_handler);
 
     _freqAct.setFrameworkMode();
     for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
@@ -64,7 +64,7 @@ void InterfaceTest::setup()
     }
 }
 
-void InterfaceTest::fine_window_handler(int wid,System *owner)
+void InterfaceTest::fine_window_handler(int wid,PolicyManager *owner)
 {
     InterfaceTest *self =  dynamic_cast<InterfaceTest*>(owner);
 
@@ -112,7 +112,7 @@ void InterfaceTest::fine_window_handler(int wid,System *owner)
     }
 }
 
-void InterfaceTest::coarse_window_handler(int wid,System *owner)
+void InterfaceTest::coarse_window_handler(int wid,PolicyManager *owner)
 {
     InterfaceTest *self =  dynamic_cast<InterfaceTest*>(owner);
 

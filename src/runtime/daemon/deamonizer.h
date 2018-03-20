@@ -18,7 +18,7 @@
 #ifndef __arm_daemon_daemonizer_h
 #define __arm_daemon_daemonizer_h
 
-#include <runtime/framework/system.h>
+#include <runtime/framework/policy.h>
 
 /*
  * Converts the current process into a daemon.
@@ -54,7 +54,7 @@ void daemon_setup(int argc, char * argv[]);
  * of the specified type using the default constructor is provided.
  *
  */
-void daemon_run_sys(System* sys);
+void daemon_run_sys(PolicyManager* sys);
 
 template<typename Sys>
 void daemon_run_sys()

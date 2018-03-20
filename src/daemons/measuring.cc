@@ -18,7 +18,7 @@
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/common/reports_deprecated.h>
 
-class MeasuringSystem : public System {
+class MeasuringSystem : public PolicyManager {
 protected:
     static const int WINDOW_LENGTH_MS = 50;
 
@@ -27,28 +27,28 @@ protected:
 
     const SensingWindowManager::WindowInfo *sensingWindow;
 
-    static void window_handler(int wid,System *owner);
+    static void window_handler(int wid,PolicyManager *owner);
 
 private:
     TimeTracer _timeTracer;
 
 public:
-    MeasuringSystem() :System(), sensingWindow(nullptr),_timeTracer(info()){};
+    MeasuringSystem() :PolicyManager(), sensingWindow(nullptr),_timeTracer(info()){};
 
 #if defined(IS_OFFLINE_PLAT)
-    MeasuringSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_timeTracer(info()){};
+    MeasuringSystem(simulation_t *sim) :PolicyManager(sim), sensingWindow(nullptr),_timeTracer(info()){};
 #endif
 
 };
 
 void MeasuringSystem::setup()
 {
-    _manager->sensingModule()->enablePerTaskSensing();
-    sensingWindow = _manager->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
+    sensingModule()->enablePerTaskSensing();
+    sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
     _timeTracer.setWid(sensingWindow->wid);
 }
 
-void MeasuringSystem::window_handler(int wid,System *owner)
+void MeasuringSystem::window_handler(int wid,PolicyManager *owner)
 {
     dynamic_cast<MeasuringSystem*>(owner)->_timeTracer.record();
 }
