@@ -21,7 +21,7 @@
 #include <fstream>
 #include <map>
 
-#include <core/core.h>
+#include <base/base.h>
 
 class CpuFreq
 {

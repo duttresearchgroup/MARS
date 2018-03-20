@@ -18,7 +18,7 @@
 #ifndef __arm_rt_actutation_types_h
 #define __arm_rt_actutation_types_h
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/interfaces/common/sense_defs.h>
 

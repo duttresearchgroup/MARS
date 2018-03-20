@@ -35,7 +35,9 @@ private:
 public:
     MeasuringSystem() :System(), sensingWindow(nullptr),_timeTracer(info()){};
 
+#if defined(IS_OFFLINE_PLAT)
     MeasuringSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr),_timeTracer(info()){};
+#endif
 
 };
 

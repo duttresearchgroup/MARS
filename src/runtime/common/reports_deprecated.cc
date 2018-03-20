@@ -19,7 +19,7 @@
 #include <ostream>
 #include <fstream>
 
-#include <core/base/base.h>
+#include <base/base.h>
 
 #include <runtime/common/rt_config_params.h>
 #include <runtime/common/reports_deprecated.h>

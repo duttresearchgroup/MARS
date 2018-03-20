@@ -21,7 +21,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
-#include "core/core.h"
+#include "core_legacy/core.h"
 #include "inputparser.h"
 #include "linsched_proxy.h"
 

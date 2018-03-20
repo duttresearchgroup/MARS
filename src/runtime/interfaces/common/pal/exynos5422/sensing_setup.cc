@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <system_error>
 
-#include <core/core.h>
+#include <base/base.h>
 
 #include <runtime/interfaces/common/pal/sensing_setup.h>
 #include <runtime/interfaces/sensing_module.h>

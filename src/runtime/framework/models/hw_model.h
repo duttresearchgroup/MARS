@@ -30,8 +30,9 @@
 #define __arm_rt_models_hwmodel_h
 
 #include <unordered_map>
+#include <cmath>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/common/sense_defs.h>
 #include <runtime/interfaces/sensing_module.h>
 #include <runtime/common/rt_config_params.h>

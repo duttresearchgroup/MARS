@@ -34,7 +34,7 @@
 #include <runtime/interfaces/common/user_if_shared.h>
 #include <runtime/interfaces/common/pal/sensing_setup.h>
 
-#include <core/core.h>
+#include <base/base.h>
 
 #include <runtime/common/rt_config_params.h>
 

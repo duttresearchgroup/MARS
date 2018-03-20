@@ -26,7 +26,7 @@
 #ifdef __KERNEL__
 	#include "../linux-module/core.h"
 #else
-	#include <core/core.h>
+	#include <base/base.h>
 #endif
 
 #include "pal/pal_setup.h"

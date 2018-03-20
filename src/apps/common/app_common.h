@@ -20,7 +20,7 @@
 
 #include <thread>
 
-#include "core/core.h"
+#include "core_legacy/core.h"
 #include "offline_sim/inputparser.h"
 #include "offline_sim/exec_sim.h"
 

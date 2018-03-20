@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/common/sense_data_shared.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 #include <runtime/interfaces/common/user_if_shared.h>

@@ -18,9 +18,11 @@
 #ifndef __core_core_h
 #define __core_core_h
 
+#warning core_legacy files are deprecated. Avoid them !
+
 //Single header that just includes all other headers
 
-#include "base/base.h"
+#include <base/base.h>
 
 #include "bin_predictor.h"
 #include "cfs.h"

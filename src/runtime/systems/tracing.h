@@ -53,9 +53,11 @@ public:
   	    _init();
   	};
 
+#if defined(IS_OFFLINE_PLAT)
   	TracingSystem(simulation_t *sim) :System(sim), sensingWindow(nullptr){
   	    _init();
   	};
+#endif
 
   	virtual ~TracingSystem();
 

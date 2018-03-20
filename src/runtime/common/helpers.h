@@ -21,7 +21,7 @@
 #include <linux/kernel.h>
 #include <linux/sched.h>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/common/sense_data_shared.h>
 
 bool actuate_change_cpu(tracked_task_data_t *kern_tsk, int next_cpu);

@@ -21,15 +21,14 @@
 //has IS_LINUX_PLAT / IS_OFFLINE_PLAT
 #include <runtime/interfaces/common/pal/pal_setup.h>
 
-#include "linux/sensing_module.h"
-#include "offline/sensing_module.h"
-
 #if defined(IS_LINUX_PLAT)
+    #include "linux/sensing_module.h"
 	typedef LinuxSensingModule SensingModule;
 #elif defined(IS_OFFLINE_PLAT)
+    #include "offline/sensing_module.h"
 	typedef OfflineSensingModule SensingModule;
 #else
-#error "Platform not properly defined"
+    #error "Platform not properly defined"
 #endif
 
 #endif

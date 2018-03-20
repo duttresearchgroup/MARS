@@ -17,7 +17,7 @@
 
 #include "common/app_common.h"
 #include "offline_sim/inputparser.h"
-#include "core/core.h"
+#include "core_legacy/core.h"
 
 #include <iostream>
 

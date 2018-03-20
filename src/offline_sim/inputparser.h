@@ -23,7 +23,7 @@
 #include <vector>
 #include <cstdarg>
 
-#include "core/core.h"
+#include "core_legacy/core.h"
 
 typedef std::string task_name_t;
 

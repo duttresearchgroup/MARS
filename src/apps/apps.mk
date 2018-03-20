@@ -35,7 +35,8 @@ APPS_LIBS_DEPS = lib_$(ARCH)_$(PLAT)/libsasolver.a
 APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/libofflinesim.a 	
 APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/libruntime.a
 APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/liblinsched.a 
-APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/libcore.a
+APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/liblegacycore.a
+APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/libbase.a
 APPS_LIBS_DEPS += lib_$(ARCH)_$(PLAT)/libmcpat.a
 
 bin_$(ARCH)_$(PLAT)/apps/%: src/apps/%.cc $(OBJS_CXX_APPS_COMMON) $(APPS_LIBS_DEPS)

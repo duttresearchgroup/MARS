@@ -25,7 +25,7 @@
 #include <map>
 #include <limits>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/interfaces/common/sense_data_shared.h>
 

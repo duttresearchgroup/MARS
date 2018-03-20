@@ -20,7 +20,7 @@
 #include <fstream>
 
 #include <runtime/interfaces/common/sense_defs.h>
-#include <core/base/base.h>
+#include <base/base.h>
 
 #include <runtime/common/reports.h>
 #include <runtime/interfaces/sensing_module.h>

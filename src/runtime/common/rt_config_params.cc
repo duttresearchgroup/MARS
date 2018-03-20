@@ -20,7 +20,7 @@
 
 #include <tclap/CmdLine.h>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/common/strings.h>
 
 #include "rt_config_params.h"

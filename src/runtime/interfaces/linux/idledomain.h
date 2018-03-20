@@ -18,7 +18,7 @@
 #ifndef __arm_rt_idledomain_h
 #define __arm_rt_idledomain_h
 
-#include <core/core.h>
+#include <base/base.h>
 #include <sched.h>
 
 #include <map>

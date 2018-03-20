@@ -19,13 +19,13 @@
 #define __arm_rt_actuator_commons_h
 
 
-#include <core/core.h>
+#include <base/base.h>
 
 // Returns the closest valid core_freq_t for the
 // given MHz freq value
 //
 // The new framework should be as independent as
-// possible from <core/core.h> so this should
+// possible from <base/base.h> so this should
 // be used to interface with older code only
 core_freq_t closestStaticFreq(int freqMHz);
 
@@ -34,7 +34,7 @@ core_freq_t closestStaticFreq(int freqMHz);
 // frequency domain
 //
 // The new framework should be as independent as
-// possible from <core/core.h> so this should
+// possible from <base/base.h> so this should
 // be used to interface with older code only
 core_freq_t maxStaticFreq(const freq_domain_info_t* domain);
 
@@ -43,7 +43,7 @@ core_freq_t maxStaticFreq(const freq_domain_info_t* domain);
 // frequency domain
 //
 // The new framework should be as independent as
-// possible from <core/core.h> so this should
+// possible from <base/base.h> so this should
 // be used to interface with older code only
 core_freq_t minStaticFreq(const freq_domain_info_t* domain);
 

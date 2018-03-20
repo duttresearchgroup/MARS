@@ -21,7 +21,7 @@
 #include <sched.h>
 #include <unistd.h>
 
-#include <core/core.h>
+#include <base/base.h>
 
 #include "system.h"
 #include <runtime/interfaces/common/pal/pal_setup.h>
@@ -35,8 +35,6 @@ System::System()
 {
 	if(_system_created) arm_throw(DaemonSystemException,"System already created");
 	_system_created = true;
-
-	vitamins_reset_archs();
 
 	_init_info();
 
@@ -60,12 +58,11 @@ System::System()
 	_system_ready_file = rt_param_daemon_file() + ".ready";
 }
 
+#if defined(IS_OFFLINE_PLAT)
 System::System(simulation_t *sim)
 {
 	if(_system_created) arm_throw(DaemonSystemException,"System already created");
 	_system_created = true;
-
-	vitamins_reset_archs();
 
 	_init_info(sim);
 
@@ -82,6 +79,7 @@ System::System(simulation_t *sim)
 		if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
 	}
 }
+#endif
 
 void System::_init_info()
 {
@@ -101,6 +99,7 @@ void System::_init_info()
 	}
 }
 
+#if defined(IS_OFFLINE_PLAT)
 void System::_init_info(simulation_t *sim)
 {
 	int online_cpus = sim->core_list_size();
@@ -125,6 +124,7 @@ void System::_init_info(simulation_t *sim)
 		_core_info_list[core] = sim->core_info_list()[core];
 	}
 }
+#endif
 
 System::~System()
 {

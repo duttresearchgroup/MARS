@@ -19,7 +19,7 @@
 #define __core_dvfs_h
 
 #include "base/base.h"
-#include "controllers.h"
+#include "runtime/common/controllers.h"
 
 /*
  * TODO

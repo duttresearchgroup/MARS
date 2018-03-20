@@ -18,7 +18,7 @@
 #ifndef __arm_rt_controllers_new_h
 #define __arm_rt_controllers_new_h
 
-#include "core.h"
+#include <base/base.h>
 
 #include <cmath>
 #include <limits>

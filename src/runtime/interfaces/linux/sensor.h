@@ -23,7 +23,7 @@
 #include <semaphore.h>
 
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/framework/types.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 

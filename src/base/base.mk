@@ -15,14 +15,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-obj-m := vitamins.o
-vitamins-objs := main.o helpers.o setup.o sense.o sense_data.o user_if.o user_if_ioctl.o sensing_window.o
-vitamins-objs += pal/$(PLAT)/perf_sense.o ../common/pal/$(PLAT)/setup_info.o
-vitamins-objs += ../../../base/info_init.o
- 
-PWD := $(shell pwd)
+#########################################################
+# Sources (updete if new directory with sources is added#
+#########################################################
 
-all:
-	    KCPPFLAGS="-DPLAT_DEF=$(PLAT)" make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD) modules
-clean:
-	    KCPPFLAGS="-DPLAT_DEF=$(PLAT)" make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD) clean
+SRCS_CC_BASE = $(wildcard src/base/*.c)
+
+##############
+# Other stuff#
+##############
+
+OBJS_BASE = $(patsubst %.c,obj_$(ARCH)_$(PLAT)/%.o,$(SRCS_CC_BASE))
+
+OBJS_DEPS += $(OBJS_BASE:%.o=%.d)
+
+lib_$(ARCH)_$(PLAT)/libbase.a: $(OBJS_BASE)
+	mkdir -p lib_$(ARCH)_$(PLAT)
+	$(AR) rvs $@  $(OBJS_BASE)
+
+.PHONY: base_lib
+base_lib: lib_$(ARCH)_$(PLAT)/libbase.a 
+
+.PHONY: base_lib_clean
+base_lib_clean:
+	rm -f lib_$(ARCH)_$(PLAT)/libbase.a
+	rm -f $(OBJS_CORE) $(OBJS_BASE:%.o=%.d)

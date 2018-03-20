@@ -18,7 +18,7 @@
 #ifndef __arm_rt_system_h
 #define __arm_rt_system_h
 
-#include <core/core.h>
+#include <base/base.h>
 
 #include <runtime/interfaces/window_manager.h>
 #include <runtime/common/reports.h>
@@ -36,7 +36,9 @@ class System : public ActuationInterface, public SensingInterface {
 	core_info_t _core_info_list[MAX_NR_CPUS];
 
 	void _init_info();
+#if defined(IS_OFFLINE_PLAT)
 	void _init_info(simulation_t *sim);
+#endif
 	void _sensing_setup_common();
 
 	int _system_pid;
@@ -47,7 +49,9 @@ class System : public ActuationInterface, public SensingInterface {
 	SensingWindowManager *_manager;
 
 	System();
+#if defined(IS_OFFLINE_PLAT)
 	System(simulation_t *sim);
+#endif
 
 	/*
 	 * Called by System::start()
