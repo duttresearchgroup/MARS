@@ -52,6 +52,7 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 
 			for(auto &functor : winfo->second->handlers)
 			    (functor)(wid,winfo->second->owner);
+
 		}
 
 		sm->unresgisterAsDaemonProc();

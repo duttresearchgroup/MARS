@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
-#include <runtime/interfaces/actuation_interface.h>
+#include <runtime/framework/actuation_interface.h>
 #include <unordered_map>
 
 class IdlePowerChecker : public PolicyManager {
@@ -32,8 +32,6 @@ protected:
     const SensingWindowManager::WindowInfo *sensingWindow;
 
     static void window_handler(int wid,PolicyManager *owner);
-
-    FrequencyActuator _freqAct;
 
     enum state {
         INCREASING,
@@ -61,7 +59,7 @@ protected:
 public:
     IdlePowerChecker() :PolicyManager(),
         sensingWindow(nullptr),
-        _freqAct(*info()),_state(INCREASING),_iterations(0){};
+        _state(INCREASING),_iterations(0){};
 
     virtual ~IdlePowerChecker(){
         for(auto iter : _execTraces){
@@ -75,11 +73,10 @@ void IdlePowerChecker::setup()
 {
     sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 
-    _freqAct.setFrameworkMode();
     for(int domain_id = 0; domain_id < info()->freq_domain_list_size; ++domain_id){
         actuate<ACT_FREQ_MHZ>(
-                            info()->freq_domain_list[domain_id],
-                            _freqAct.freqMin(info()->freq_domain_list[domain_id]));
+                            &(info()->freq_domain_list[domain_id]),
+                            actuationRanges<ACT_FREQ_MHZ>(&(info()->freq_domain_list[domain_id])).min);
     }
 }
 
@@ -115,18 +112,18 @@ void IdlePowerChecker::window_handler(int wid,PolicyManager *owner)
     bool changed = false;
     for(int i = 0; i < self->info()->freq_domain_list_size; ++i){
         freq_domain_info_t &fd = self->info()->freq_domain_list[i];
-        auto val = actuationVal<ACT_FREQ_MHZ>(fd);
+        auto val = actuationVal<ACT_FREQ_MHZ>(&fd);
         if(self->_state == INCREASING){
-            val += 100;
-            if(val <= self->_freqAct.freqMax(fd)) {
-                actuate<ACT_FREQ_MHZ>(fd, val);
+            val += actuationRanges<ACT_FREQ_MHZ>(&fd).steps;
+            if(val <= actuationRanges<ACT_FREQ_MHZ>(&fd).max) {
+                actuate<ACT_FREQ_MHZ>(&fd, val);
                 changed = true;
             }
         }
         else if(self->_state == DECREASING){
-            val -= 100;
-            if(val >= self->_freqAct.freqMin(fd)) {
-                actuate<ACT_FREQ_MHZ>(fd, val);
+            val -= actuationRanges<ACT_FREQ_MHZ>(&fd).steps;
+            if(val >= actuationRanges<ACT_FREQ_MHZ>(&fd).min) {
+                actuate<ACT_FREQ_MHZ>(&fd, val);
                 changed = true;
             }
         }

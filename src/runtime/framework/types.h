@@ -23,28 +23,11 @@
 #include <runtime/interfaces/common/sense_defs.h>
 
 //////////////////////////////////////////////////////////////////////////////
-// This struct should be reviewed. Proably need to get rid of this "modes".
-// If a system actuator need to be consiedered by the models, its model
-// should be registered explicitly.
-enum ActuationMode {
-	//actuation values are set by the framework
-	ACTMODE_FRAMEWORK = 0,
-
-	//actuation values are set by the system (linux)
-	//the framework should include model of the system policy used
-	ACTMODE_SYSTEM,
-	//////////////////////////
-	//////////////////////////
-	SIZE_ACTMODE
-};
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Actuation knob types
 enum ActuationType {
 	ACT_NULL = 0,
 	ACT_FREQ_MHZ,
+	ACT_FREQ_GOV,
 	ACT_ACTIVE_CORES,
 	ACT_TASK_MAP,
 	//////////////////////////
@@ -61,6 +44,11 @@ template <ActuationType T>
 struct ActuationTypeInfo {
 	//the data type of the actuation knob value
 	using ValType = double;
+
+	// Type that defines ranges for actuation values
+	// Can be void if it doesn't make sense for that
+	// particular actuation knob
+	using Ranges = void;
 };
 //of course this template instantiation is invalid
 template <> struct ActuationTypeInfo<SIZE_ACT_TYPES>;
@@ -69,14 +57,38 @@ template <> struct ActuationTypeInfo<SIZE_ACT_TYPES>;
 
 template <> struct ActuationTypeInfo<ACT_FREQ_MHZ>{
     using ValType = int; //integer value in MHz
+
+    struct Ranges {
+        int min;
+        int max;
+        int steps;
+    };
+};
+
+template <> struct ActuationTypeInfo<ACT_FREQ_GOV>{
+    using ValType = std::string; //Name of the governor
+
+    typedef ActuationTypeInfo<ACT_FREQ_MHZ>::Ranges Ranges;
 };
 
 template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
     using ValType = int;
+
+    struct Ranges {
+        int min;
+        int max;
+        static constexpr int steps = 1;
+    };
 };
 
 template <> struct ActuationTypeInfo<ACT_TASK_MAP>{
-    using ValType = const tracked_task_data_t*;
+    using ValType = core_info_t*;
+
+    struct Ranges {
+        int min;
+        int max;
+        static constexpr int steps = 1;
+    };
 };
 
 //////////////////////////////////////////////////////////////////////////////

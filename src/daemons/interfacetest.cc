@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
-#include <runtime/interfaces/actuation_interface.h>
+#include <runtime/framework/actuation_interface.h>
 #include <runtime/common/strings.h>
 #include <map>
 
@@ -36,16 +36,14 @@ protected:
     ExecutionTrace _execTrace_fine;
     ExecutionTrace _execTrace_coarse;
 
-    FrequencyActuator _freqAct;
-
     //is freq increassing or decreassing ?
     std::map<int,bool> _fd_state;
 
 public:
     InterfaceTest() :PolicyManager(),
         sensingWindow_fine(nullptr),sensingWindow_coarse(nullptr),
-        _execTrace_fine("execTraceFine"),_execTrace_coarse("execTraceCoarse"),
-        _freqAct(*info()){};
+        _execTrace_fine("execTraceFine"),_execTrace_coarse("execTraceCoarse")
+        {};
 
 };
 
@@ -55,12 +53,11 @@ void InterfaceTest::setup()
     sensingWindow_fine = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_FINE_MS,this,fine_window_handler);
     sensingWindow_coarse = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_COARSE_MS,this,coarse_window_handler);
 
-    _freqAct.setFrameworkMode();
     for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
         _fd_state[domain_id] = false;
         actuate<ACT_FREQ_MHZ>(
-                            info()->freq_domain_list[domain_id],
-                            _freqAct.freqMax(info()->freq_domain_list[domain_id]));
+                            &(info()->freq_domain_list[domain_id]),
+                            actuationRanges<ACT_FREQ_MHZ>(&(info()->freq_domain_list[domain_id])).max);
     }
 }
 
@@ -94,21 +91,21 @@ void InterfaceTest::fine_window_handler(int wid,PolicyManager *owner)
 
         trace(formatstr("freq_domain%d_sensed",i)) = sense<SEN_FREQ_MHZ>(&fd,wid);
 
-        int curr = actuationVal<ACT_FREQ_MHZ>(fd);
+        int curr = actuationVal<ACT_FREQ_MHZ>(&fd);
 
         trace(formatstr("freq_domain%d_set",i)) = curr;
 
         //reached max and we were increassing freq
-        if((curr >= self->_freqAct.freqMax(fd)) && self->_fd_state[i])
+        if((curr >= actuationRanges<ACT_FREQ_MHZ>(&fd).max) && self->_fd_state[i])
             self->_fd_state[i] = false;//now we decrease
         //reached min and we were decreassing freq
-        else if((curr <= self->_freqAct.freqMin(fd)) && !self->_fd_state[i])
+        else if((curr <= actuationRanges<ACT_FREQ_MHZ>(&fd).min) && !self->_fd_state[i])
             self->_fd_state[i] = true;//now we increase
 
         if(self->_fd_state[i])
-            actuate<ACT_FREQ_MHZ>(fd,curr+100);
+            actuate<ACT_FREQ_MHZ>(&fd,curr + actuationRanges<ACT_FREQ_MHZ>(&fd).steps);
         else
-            actuate<ACT_FREQ_MHZ>(fd,curr-100);
+            actuate<ACT_FREQ_MHZ>(&fd,curr - actuationRanges<ACT_FREQ_MHZ>(&fd).steps);
     }
 }
 

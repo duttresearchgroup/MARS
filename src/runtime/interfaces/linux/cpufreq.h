@@ -68,6 +68,8 @@ public:
 	int scaling_max_freq(const freq_domain_info_t *domain);
 	int scaling_min_freq(const freq_domain_info_t *domain);
 
+	const sys_info_t& sys_info() { return _info; }
+
 };
 
 

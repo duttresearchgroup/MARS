@@ -17,7 +17,7 @@
 
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/common/reports.h>
-#include <runtime/interfaces/actuation_interface.h>
+#include <runtime/framework/actuation_interface.h>
 #include <runtime/framework/models/hw_model.h>
 
 class PredictorTestSystem : public PolicyManager {
@@ -37,15 +37,12 @@ protected:
 
 private:
     ExecutionTrace _execTrace;
-    FrequencyActuator _freqAct;
-    TaskMapActuator _mapAct;
     StaticHWModel _hwModel;
     PredData _predData;
 
 public:
     PredictorTestSystem() :PolicyManager(),
         _execTrace("trace"),
-        _freqAct(*info()), _mapAct(*info()),
         _hwModel(info()),
         _predData({0,0,0,false})
     {};
@@ -66,9 +63,8 @@ void PredictorTestSystem::setup()
 
     //sets all domains to the same frequency
     constexpr int freqMHz = 1000;
-    _freqAct.setFrameworkMode();
     for(int domain_id = 0; domain_id < info()->power_domain_list_size; ++domain_id){
-        actuate<ACT_FREQ_MHZ>(info()->freq_domain_list[domain_id], freqMHz);
+        actuate<ACT_FREQ_MHZ>(&(info()->freq_domain_list[domain_id]), freqMHz);
     }
 }
 
@@ -138,7 +134,7 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
             if(currCpu == littleCpu) currCpu = bigCpu;
             else currCpu = littleCpu;
 
-            actuate<ACT_TASK_MAP>(&(owner->info()->core_list[currCpu]),highestTask);
+            actuate<ACT_TASK_MAP>(highestTask,&(owner->info()->core_list[currCpu]));
         }
         else
             ++epochs;

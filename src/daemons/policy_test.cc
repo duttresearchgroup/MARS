@@ -17,7 +17,7 @@
 
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/common/reports.h>
-#include <runtime/interfaces/actuation_interface.h>
+#include <runtime/framework/actuation_interface.h>
 #include <runtime/framework/models/hw_model.h>
 
 template<int pMS, Policy::Priority prio>

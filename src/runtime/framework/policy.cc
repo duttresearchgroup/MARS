@@ -70,6 +70,9 @@ void PolicyManager::_init_common()
     for(int freq_domain = 0; freq_domain < _sys_info.freq_domain_list_size; ++freq_domain){
         if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
     }
+
+    //Does required setup for actuators
+    ActuationInterface::construct(_sys_info);
 }
 
 void PolicyManager::_init_info()
@@ -120,6 +123,7 @@ void PolicyManager::_init_info(simulation_t *sim)
 PolicyManager::~PolicyManager()
 {
 	//pinfo("%s called\n",__PRETTY_FUNCTION__);
+    ActuationInterface::destruct();
 	_pm_created = false;
 	delete _win_manager;
 }
@@ -155,7 +159,6 @@ void PolicyManager::registerPolicy(Policy *policy)
 
     // We will finish registering policies later with
     // _finishRegisterPolicy
-
 }
 
 void PolicyManager::_finishRegisterPolicy()
@@ -196,7 +199,7 @@ void PolicyManager::registerModel(Model *model)
 
 void PolicyManager::start()
 {
-	_sensing_setup_common();
+    _sensing_setup_common();
 	setup();
 	_finishRegisterPolicy();
 
