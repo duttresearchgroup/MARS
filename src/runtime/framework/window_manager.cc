@@ -50,9 +50,13 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 			auto winfo = wm->_windowHandlers_idmap.find(wid);
 			if(winfo == wm->_windowHandlers_idmap.end()) arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
 
-			for(auto &functor : winfo->second->handlers)
+			for(auto &functor : winfo->second->handlers){
+			    SensingInterface::SensingContext &ctx = SensingInterface::getCurrentContext();
+			    ctx.reflecting = false;
+			    ctx.wid = wid;
+			    ctx.timestamp += 1;
 			    (functor)(wid,winfo->second->owner);
-
+			}
 		}
 
 		sm->unresgisterAsDaemonProc();
