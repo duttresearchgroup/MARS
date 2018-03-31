@@ -31,6 +31,7 @@ protected:
     struct PredData {
         double ipc;
         double power;
+        double tlc;
         int task;
         bool valid;
     };
@@ -44,7 +45,7 @@ public:
     PredictorTestSystem() :PolicyManager(),
         _execTrace("trace"),
         _hwModel(info()),
-        _predData({0,0,0,false})
+        _predData({0,0,0,0,false})
     {};
 
 };
@@ -107,26 +108,24 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
             );
         auto ipc = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,highestTask,wid)
                                    / (double)sense<SEN_PERFCNT>(PERFCNT_BUSY_CY,highestTask,wid);
+        auto util = sense<SEN_BUSYTIME_S>(highestTask,wid)
+                                   / (double)sense<SEN_TOTALTIME_S>(&(owner->info()->core_list[sense<SEN_LASTCPU>(highestTask,wid)]),wid);
         auto power = sense<SEN_POWER_W>(
                 owner->info()->core_list[sense<SEN_LASTCPU>(highestTask,wid)].power,
                 wid
             );
         trace("task_exec_cpufreq") = freqMhz;
         trace("task_exec_ipc") = ipc;
+        trace("task_exec_tlc(util)") = util;
         trace("task_exec_cluster_power") = power;
 
 
         if(self->_predData.valid && (self->_predData.task == highestTask->task_idx)){
             trace("task_exec_pred_ipc") = self->_predData.ipc;
+            trace("task_exec_pred_tlc") = self->_predData.tlc;
             trace("task_exec_pred_cluster_power") = self->_predData.power;
             trace("task_exec_pred_ipc_error") = (1-(self->_predData.ipc / ipc))*100;
             trace("task_exec_pred_cluster_power_error") = (1-(self->_predData.power/power))*100;
-
-            self->_hwModel.feedback(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz,
-                    ipc,
-                    //Assumes other cores are idle and deducts the idle power
-                    power - (self->_hwModel.idlePower(&(owner->info()->core_list[currCpu]),freqMhz) * (owner->info()->core_list[currCpu].power->core_cnt-1))
-            );
         }
 
         if(epochs == maxEpochs){
@@ -141,6 +140,7 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
 
         self->_predData.ipc = self->_hwModel.predictIPC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
         self->_predData.power = self->_hwModel.predictPower(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
+        self->_predData.tlc = self->_hwModel.predictTLC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
         //Assumes other cores are idle and adds up the idle power
         self->_predData.power += self->_hwModel.idlePower(&(owner->info()->core_list[currCpu]),freqMhz) * (owner->info()->core_list[currCpu].power->core_cnt -1);
         self->_predData.task = highestTask->task_idx;

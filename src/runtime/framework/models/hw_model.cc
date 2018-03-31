@@ -37,14 +37,14 @@ static inline core_arch_t archFromStr(const std::string &arch)
 
 void StaticHWModel::_loadModels()
 {
-    _predictor.loadFromFile(_predictorPathName());
+    _binPred.loadFromFile(_predictorPathName());
 
     //chacks if we have the right predictor
-    auto predMetrics =  _predictor.getFuncs().final_metric;
+    auto predMetrics =  _binPred.getFuncs().final_metric;
     if(predMetrics.size() != 2)
         arm_throw(ModelException,"Loaded predictor is invalid");
-    if((predMetrics[PRED_IPC_BUSY_IDX].id != BinBasedPred::BinFuncID::ipcBusy)||
-       (predMetrics[PRED_POWER_IDX].id != BinBasedPred::BinFuncID::power))
+    if((predMetrics[BIN_PRED_IPC_BUSY_IDX].id != BinBasedPred::BinFuncID::ipcBusy)||
+       (predMetrics[BIN_PRED_POWER_IDX].id != BinBasedPred::BinFuncID::power))
         arm_throw(ModelException,"Loaded predictor is invalid");
 
     //load idle power
