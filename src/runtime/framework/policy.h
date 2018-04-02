@@ -32,10 +32,15 @@ class Policy : public Model {
     friend class PolicyManager;
 
   protected:
-    Policy(int periodMS, Priority priority = PRIORITY_DEFAULT)
-      :Model(periodMS,priority)
+    Policy(int periodMS, const std::string &name, Priority priority)
+      :Model(periodMS,name,priority)
     {
+        pureModel(false);
     }
+    Policy(int periodMS) :Policy(periodMS,"DefaultPolicyName",PRIORITY_DEFAULT) {}
+    Policy(int periodMS, const std::string &name) :Policy(periodMS,name,PRIORITY_DEFAULT) {}
+    Policy(int periodMS, Priority priority) :Policy(periodMS,"DefaultPolicyName",PRIORITY_DEFAULT){}
+
 
   public:
     virtual ~Policy(){}
@@ -62,12 +67,13 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
     SensingWindowManager *_win_manager;
 
     // List of models
-    // Ordered by period and then priority
+    // Ordered by period and then priority such that
+    // "finer-grained" models appear first
     struct modelCMP {
-        bool operator()(const Model *a, const Model *b)
+        bool operator()(const Model *a, const Model *b) const
         {
             if(a->periodMS() == b->periodMS())
-                return a->priority() >= b->priority();
+                return a->priority() > b->priority();
             else
                 return a->periodMS() < b->periodMS();
         }
@@ -78,7 +84,7 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
     // Ordered by priority
     struct policyCMP {
         bool operator()(const Policy *a, const Policy *b)
-        { return a->priority() >= b->priority(); }
+        { return a->priority() > b->priority(); }
     };
     std::multiset<Policy*,policyCMP> _policies[MAX_WINDOW_CNT];
 
@@ -86,6 +92,8 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
     std::map<int,std::vector<Policy*>> _periodToPolicyMap;
 
     void _finishRegisterPolicy();
+
+    void _buildSchedules();
 
     static void _policyWindowHandler(int wid, PolicyManager *owner);
 
@@ -109,7 +117,6 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 	virtual void report() {};
 
   protected:
-	void quit();
 
 	void registerPolicy(Policy *policy);
 	void registerModel(Model *model);
@@ -120,12 +127,40 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 	void start();
 	void stop();
 
+	void quit() const;//this will KILL the daemon processes
+
 	sys_info_t* info() { return &_sys_info;}
 	virtual model_sys_t* model() {return nullptr;}
 
 	SensingModule *sensingModule() const { return _win_manager->sensingModule(); }
 	SensingWindowManager *windowManager() { return _win_manager; }
 	const PerformanceData& sensedData() { return sensingModule()->data(); }
+
+	//requires the model_path parameter
+	void enableReflection() const;
+
+	// Returns the model before/after the given model in the hierarchy
+	// or null if none
+	Model* modelBefore(Model *m) const
+	{
+	    auto iter = _models.find(m);
+	    if((iter == _models.end()) || (iter == _models.begin()))
+	        return nullptr;
+	    else return *(--iter);
+	}
+	Model* modelNext(Model *m) const
+	{
+	    auto iter = _models.find(m);
+	    if(iter == _models.end()) return nullptr;
+	    ++iter;
+	    if(iter == _models.end()) return nullptr;
+	    else return *iter;
+	}
+
+	// The first model and last models in the hierarchy.
+	// The finer one is the one with the shortest period and highest priority.
+	Model* modelCoarser() const { return *(_models.rbegin()); }
+	Model* modelFiner() const { return *(_models.begin()); }
 
 };
 

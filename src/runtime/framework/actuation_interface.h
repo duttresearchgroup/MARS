@@ -22,10 +22,14 @@
 #include <map>
 
 #include "types.h"
+#include "sensing_interface.h"
+#include "actuation_interface_impl.h"
 #include <base/base.h>
 
 
-class ActuationInterface {
+class ActuationInterface : ActuationInterfaceImpl {
+
+    friend class ReflectiveEngine;
 
   public:
 
@@ -33,25 +37,42 @@ class ActuationInterface {
 	 * Sets a new actuation valute
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static void actuate(const ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val);
+	static void actuate(const ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
+	{
+	    if(ReflectiveEngine::isReflecting())
+	        tryActuate<ACT_T>(rsc,val);
+	    else{
+	        if(ReflectiveEngine::enabled())
+	            ReflectiveEngine::get().actuate<ACT_T>(rsc,val);
+	        Impl::actuate<ACT_T>(rsc,val);
+	    }
+	}
 
 	/*
 	 * Gets the current actuation value.
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(const ResourceT *rsc);
+	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(const ResourceT *rsc)
+	{
+	    if(ReflectiveEngine::isReflecting())
+            return tryActuationVal<ACT_T>(rsc);
+        else
+            return Impl::actuationVal<ACT_T>(rsc);
+	}
 
     /*
      * Gets the actuation ranges
      */
     template<ActuationType ACT_T,typename ResourceT>
-    static const typename ActuationTypeInfo<ACT_T>::Ranges& actuationRanges(const ResourceT *rsc);
+    static const typename ActuationTypeInfo<ACT_T>::Ranges& actuationRanges(const ResourceT *rsc)
+    { return Impl::actuationRanges<ACT_T>(rsc); }
 
     /*
      * Tries to change the actuation ranges.
      */
     template<ActuationType ACT_T,typename ResourceT>
-    static void actuationRanges(const ResourceT *rsc, const typename ActuationTypeInfo<ACT_T>::Ranges &new_range);
+    static void actuationRanges(const ResourceT *rsc, const typename ActuationTypeInfo<ACT_T>::Ranges &new_range)
+    { Impl::actuationRanges<ACT_T>(rsc,new_range); }
 
     /*
      * One-time functions that need be called before using the interface
@@ -68,7 +89,8 @@ class ActuationInterface {
 	template<ActuationType ACT_T,typename ResourceT>
 	static void tryActuate(const ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
-	    arm_throw(ActuationInterfaceException,"Not implemented");
+	    //pinfo("tryActuate\n");
+	    ReflectiveEngine::get().tryActuate<ACT_T>(rsc,val);
 	}
 
 	/*
@@ -77,7 +99,10 @@ class ActuationInterface {
 	template<ActuationType ACT_T,typename ResourceT>
 	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(const ResourceT *rsc)
 	{
-	    arm_throw(ActuationInterfaceException,"Not implemented");
+	    if(ReflectiveEngine::get().hasNewActuationVal<ACT_T>(rsc))
+	        return ReflectiveEngine::get().newActuationVal<ACT_T>(rsc);
+	    else
+	        return Impl::actuationVal<ACT_T>(rsc);
 	}
 };
 

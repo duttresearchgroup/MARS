@@ -19,6 +19,7 @@
 #define __arm_rt_actutation_types_h
 
 #include <base/base.h>
+#include <runtime/common/time_aggregator.h>
 #include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/interfaces/common/sense_defs.h>
 
@@ -56,6 +57,15 @@ struct ActuationTypeInfo {
 	// Can be void if it doesn't make sense for that
 	// particular actuation knob
 	using Ranges = void;
+
+	// The aggregator is used to combine multiple actuation setting when
+	// predicting values for a sensing window. For instance, in a 50ms
+	// window the frequency is initially 100MHz, then set to 200MHz at time
+	// 20, then set to 300MHz at time 40. At time 50, the avg. frequency in the
+	// 50ms window would have been 180MHz. The ContinuousAggregator provides
+	// this average number. For actutuation types that cannot be averaged-out
+	// DiscreateAggregator should be used to get the more frequent value
+	using AggregatorType = void;
 };
 //of course this template instantiation is invalid
 template <> struct ActuationTypeInfo<SIZE_ACT_TYPES>;
@@ -70,12 +80,16 @@ template <> struct ActuationTypeInfo<ACT_FREQ_MHZ>{
         int max;
         int steps;
     };
+
+    using AggregatorType = ContinuousAggregator<ValType>;
 };
 
 template <> struct ActuationTypeInfo<ACT_FREQ_GOV>{
     using ValType = std::string; //Name of the governor
 
     typedef ActuationTypeInfo<ACT_FREQ_MHZ>::Ranges Ranges;
+
+    using AggregatorType = DiscreteAggregator<ValType>;
 };
 
 template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
@@ -86,6 +100,8 @@ template <> struct ActuationTypeInfo<ACT_ACTIVE_CORES>{
         int max;
         static constexpr int steps = 1;
     };
+
+    using AggregatorType = ContinuousAggregator<ValType>;
 };
 
 template <> struct ActuationTypeInfo<ACT_TASK_MAP>{
@@ -96,6 +112,8 @@ template <> struct ActuationTypeInfo<ACT_TASK_MAP>{
         int max;
         static constexpr int steps = 1;
     };
+
+    using AggregatorType = DiscreteAggregator<ValType>;
 };
 
 template <> struct ActuationTypeInfo<ACT_DUMMY1>{
@@ -106,6 +124,8 @@ template <> struct ActuationTypeInfo<ACT_DUMMY1>{
         int max;
         static constexpr int steps = 1;
     };
+
+    using AggregatorType = ContinuousAggregator<ValType>;
 };
 
 template <> struct ActuationTypeInfo<ACT_DUMMY2>{
@@ -116,6 +136,8 @@ template <> struct ActuationTypeInfo<ACT_DUMMY2>{
         int max;
         static constexpr int steps = 1;
     };
+
+    using AggregatorType = ContinuousAggregator<ValType>;
 };
 
 //////////////////////////////////////////////////////////////////////////////

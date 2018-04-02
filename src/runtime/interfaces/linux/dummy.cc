@@ -70,13 +70,14 @@ static inline typename SensingTypeInfo<SEN_DUMMY>::ValType dummySenseAgg(int wid
 
 template<>
 typename SensingTypeInfo<SEN_DUMMY>::ValType
-SensingInterface::sense<SEN_DUMMY,NullResource>(const NullResource *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_DUMMY,NullResource>(const NullResource *rsc, int wid)
 {
+    //pinfo("\t\t***SEN_DUMMY : Avg SEN_DUMMY is %f\n",dummySense(wid));
     return dummySense(wid);
 }
 template<>
 typename SensingTypeInfo<SEN_DUMMY>::ValType
-SensingInterface::senseAgg<SEN_DUMMY,NullResource>(const NullResource *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_DUMMY,NullResource>(const NullResource *rsc, int wid)
 {
     return dummySenseAgg(wid);
 }
@@ -88,27 +89,28 @@ SensingInterface::senseAgg<SEN_DUMMY,NullResource>(const NullResource *rsc, int 
 
 template<>
 void
-ActuationInterface::actuate<ACT_DUMMY1,NullResource>(
+ActuationInterfaceImpl::Impl::actuate<ACT_DUMMY1,NullResource>(
         const NullResource *rsc,
         typename ActuationTypeInfo<ACT_DUMMY1>::ValType val)
 {
     actDummyVal1 = val;
+    //pinfo("\t\t***ACT_DUMMY1: SEN_DUMMY now is %d (%d + %d)\n",actDummyVal1+actDummyVal2,actDummyVal1,actDummyVal2);
 }
 template<>
 typename ActuationTypeInfo<ACT_DUMMY1>::ValType
-ActuationInterface::actuationVal<ACT_DUMMY1,NullResource>(const NullResource *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_DUMMY1,NullResource>(const NullResource *rsc)
 {
     return actDummyVal1;
 }
 template<>
 const typename ActuationTypeInfo<ACT_DUMMY1>::Ranges&
-ActuationInterface::actuationRanges<ACT_DUMMY1,NullResource>(const NullResource *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_DUMMY1,NullResource>(const NullResource *rsc)
 {
     return actDummyRanges1;
 }
 template<>
 void
-ActuationInterface::actuationRanges<ACT_DUMMY1,NullResource>(const NullResource *rsc,
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_DUMMY1,NullResource>(const NullResource *rsc,
         const typename ActuationTypeInfo<ACT_DUMMY1>::Ranges &newRange)
 {
     actDummyRanges1 = newRange;
@@ -117,27 +119,28 @@ ActuationInterface::actuationRanges<ACT_DUMMY1,NullResource>(const NullResource 
 
 template<>
 void
-ActuationInterface::actuate<ACT_DUMMY2,NullResource>(
+ActuationInterfaceImpl::Impl::actuate<ACT_DUMMY2,NullResource>(
         const NullResource *rsc,
         typename ActuationTypeInfo<ACT_DUMMY2>::ValType val)
 {
     actDummyVal2 = val;
+    //pinfo("\t\t***ACT_DUMMY2: SEN_DUMMY now is %d (%d + %d)\n",actDummyVal1+actDummyVal2,actDummyVal1,actDummyVal2);
 }
 template<>
 typename ActuationTypeInfo<ACT_DUMMY2>::ValType
-ActuationInterface::actuationVal<ACT_DUMMY2,NullResource>(const NullResource *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_DUMMY2,NullResource>(const NullResource *rsc)
 {
     return actDummyVal2;
 }
 template<>
 const typename ActuationTypeInfo<ACT_DUMMY2>::Ranges&
-ActuationInterface::actuationRanges<ACT_DUMMY2,NullResource>(const NullResource *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_DUMMY2,NullResource>(const NullResource *rsc)
 {
     return actDummyRanges2;
 }
 template<>
 void
-ActuationInterface::actuationRanges<ACT_DUMMY2,NullResource>(const NullResource *rsc,
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_DUMMY2,NullResource>(const NullResource *rsc,
         const typename ActuationTypeInfo<ACT_DUMMY2>::Ranges &newRange)
 {
     actDummyRanges2 = newRange;

@@ -40,6 +40,8 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 
 		sm->resgisterAsDaemonProc();
 
+		int prevTimestamp = 0;
+
 		while(sm->isSensing()){
 			int wid = sm->nextSensingWindow();
 
@@ -50,12 +52,25 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
 			auto winfo = wm->_windowHandlers_idmap.find(wid);
 			if(winfo == wm->_windowHandlers_idmap.end()) arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
 
-			for(auto &functor : winfo->second->handlers){
-			    SensingInterface::SensingContext &ctx = SensingInterface::getCurrentContext();
-			    ctx.reflecting = false;
-			    ctx.wid = wid;
-			    ctx.timestamp += 1;
-			    (functor)(wid,winfo->second->owner);
+			winfo->second->_timestamp += winfo->second->period_ms;
+			{
+			    ReflectiveEngine::Context::SensingWindowScope sws(wid,winfo->second->period_ms);
+
+			    if(ReflectiveEngine::enabled()){
+			        // Window is on a diffent period then the previous ones
+			        if(winfo->second->_timestamp != prevTimestamp)
+			            ReflectiveEngine::get().resetModelsOnNewWindowPeriod();
+
+			        ReflectiveEngine::get().resetModelsOnWindow();
+			    }
+
+			    for(auto &functor : winfo->second->handlers){
+			        if(ReflectiveEngine::enabled())
+			            ReflectiveEngine::get().resetModelsOnHandler();
+			        (functor)(wid,winfo->second->owner);
+			    }
+
+			    prevTimestamp = winfo->second->_timestamp;
 			}
 		}
 

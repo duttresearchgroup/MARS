@@ -842,9 +842,9 @@ void Predictor::predict(std::vector<double> &result,
         const core_info_t *target_core, int target_freq_mhz)
 {
     assert_true(_sys_info!=nullptr);
-    int srcCore = SensingInterface::sense<SEN_LASTCPU>(task,wid);
+    int srcCore = SensingInterfaceImpl::Impl::sense<SEN_LASTCPU>(task,wid);
     core_arch_t srcArch = _sys_info->core_list[srcCore].arch;
-    int srcFreqMhz = SensingInterface::sense<SEN_FREQ_MHZ>(_sys_info->core_list[srcCore].freq,wid);
+    int srcFreqMhz = SensingInterfaceImpl::Impl::sense<SEN_FREQ_MHZ>(_sys_info->core_list[srcCore].freq,wid);
 
     auto srcArchI = _availableSrcFreqs.find(srcArch);
     assert_true(srcArchI!=_availableSrcFreqs.end());
@@ -927,6 +927,7 @@ static void savePreds(MappingBin *pred, minijson::object_writer &predW)
 
 void Predictor::saveToFile(const std::string& filepath)
 {
+    checkConsistency();
     std::ofstream os(filepath);
     minijson::object_writer writer(os,
             minijson::writer_configuration().pretty_printing(true));
@@ -1055,6 +1056,7 @@ void Predictor::loadFromFile(const std::string& filepath)
     is.close();
 
     _make_faster();
+    checkConsistency();
 }
 
 };

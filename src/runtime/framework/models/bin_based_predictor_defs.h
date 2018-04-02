@@ -215,14 +215,18 @@ struct MappingBin{
 
     MappingBin* next(int idx)
     {
-        assert(hasNext());
-        assert(idx < (int)bins->size());
-        return nextHierarchy[(*bins)[idx]];
+        assert_true(hasNext());
+        assert_true(idx < (int)bins->size());
+        auto iter = nextHierarchy.find((*bins)[idx]);
+        assert_true(iter != nextHierarchy.end());
+        return iter->second;
     }
     MappingBin* next(PredBin* bin)
     {
-        assert(hasNext());
-        return nextHierarchy[bin];
+        assert_true(hasNext());
+        auto iter = nextHierarchy.find(bin);
+        assert_true(iter!=nextHierarchy.end());
+        return iter->second;
     }
 
     bool hasNext() { return nextHierarchy.size() > 0; }
@@ -230,16 +234,16 @@ struct MappingBin{
     MappingBin(double _min, double _max, BinFunc _metric)
       :min(_min),max(_max),metric(_metric),bins(nullptr), layer(-1), prevLayer(nullptr){
         bins = new std::vector<PredBin*>;
-        assert(bins != nullptr);
+        assert_true(bins != nullptr);
     }
     MappingBin()
     :min(0),max(0),metric((BinFuncID)0),bins(nullptr), layer(-1), prevLayer(nullptr){
         bins = new std::vector<PredBin*>;
-        assert(bins != nullptr);
+        assert_true(bins != nullptr);
     }
     ~MappingBin(){
-        for(auto b : *bins) delete b;
         for(auto b : nextHierarchy) delete b.second;
+        for(auto b : *bins) delete b;
         delete bins;
     }
 
@@ -247,8 +251,20 @@ struct MappingBin{
         return print(out,*this,"");
     }
 
-
     static MappingBin* create_bins(std::vector<AveragedMatchedWindow> *samples, LayerConf funcs);
+
+    void checkConsistency()
+    {
+        assert_true(bins != nullptr);
+        assert_true(bins->size() > 0);
+        if(hasNext()){
+            assert_true(nextHierarchy.size() > 0);
+            for(auto b : *bins)
+                assert_true(next(b) != nullptr);
+            for(auto b : *bins)
+                next(b)->checkConsistency();
+        }
+    }
 
 private:
 

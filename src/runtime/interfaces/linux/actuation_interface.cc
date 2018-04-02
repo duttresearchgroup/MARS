@@ -124,6 +124,7 @@ public:
     }
 };
 
+
 class LinuxIdleDomainActuator {
 
 private:
@@ -199,7 +200,9 @@ public:
         auto i = _tasks.find(task);
         if(i == _tasks.end()){
             pinfo("WARNING: ACT_TASK_MAP for task %d never set. Using sense<SEN_LASTCPU>\n",(int)task->this_task_pid);
-            return &(_info.core_list[SensingInterface::sense<SEN_LASTCPU>(task,0)]);
+            int cpu = SensingInterface::sense<SEN_LASTCPU>(task,0);
+            assert_true((cpu >= 0) && (cpu < _info.core_list_size));
+            return &(_info.core_list[cpu]);
         }
         else
             return i->second;
@@ -239,7 +242,7 @@ void ActuationInterface::destruct()
 
 template<>
 void
-ActuationInterface::actuate<ACT_FREQ_MHZ,freq_domain_info_t>(
+ActuationInterfaceImpl::Impl::actuate<ACT_FREQ_MHZ,freq_domain_info_t>(
         const freq_domain_info_t *rsc,
         typename ActuationTypeInfo<ACT_FREQ_MHZ>::ValType val)
 {
@@ -249,7 +252,7 @@ ActuationInterface::actuate<ACT_FREQ_MHZ,freq_domain_info_t>(
 
 template<>
 typename ActuationTypeInfo<ACT_FREQ_MHZ>::ValType
-ActuationInterface::actuationVal<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(freqAct != nullptr);
     return freqAct->getSysActuation(rsc);
@@ -257,7 +260,7 @@ ActuationInterface::actuationVal<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_dom
 
 template<>
 const typename ActuationTypeInfo<ACT_FREQ_MHZ>::Ranges&
-ActuationInterface::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(freqAct != nullptr);
     return freqAct->ranges(rsc);
@@ -265,7 +268,7 @@ ActuationInterface::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(const freq_
 
 template<>
 void
-ActuationInterface::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(
         const freq_domain_info_t *rsc,
         const typename ActuationTypeInfo<ACT_FREQ_MHZ>::Ranges &newRange)
 {
@@ -279,7 +282,7 @@ ActuationInterface::actuationRanges<ACT_FREQ_MHZ,freq_domain_info_t>(
 
 template<>
 void
-ActuationInterface::actuate<ACT_FREQ_GOV,freq_domain_info_t>(
+ActuationInterfaceImpl::Impl::actuate<ACT_FREQ_GOV,freq_domain_info_t>(
         const freq_domain_info_t *rsc,
         typename ActuationTypeInfo<ACT_FREQ_GOV>::ValType val)
 {
@@ -289,7 +292,7 @@ ActuationInterface::actuate<ACT_FREQ_GOV,freq_domain_info_t>(
 
 template<>
 typename ActuationTypeInfo<ACT_FREQ_GOV>::ValType
-ActuationInterface::actuationVal<ACT_FREQ_GOV,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_FREQ_GOV,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(freqAct != nullptr);
     return freqAct->getGovernor(rsc);
@@ -297,7 +300,7 @@ ActuationInterface::actuationVal<ACT_FREQ_GOV,freq_domain_info_t>(const freq_dom
 
 template<>
 const typename ActuationTypeInfo<ACT_FREQ_GOV>::Ranges&
-ActuationInterface::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(freqAct != nullptr);
     return freqAct->ranges(rsc);
@@ -305,7 +308,7 @@ ActuationInterface::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(const freq_
 
 template<>
 void
-ActuationInterface::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(
         const freq_domain_info_t *rsc,
         const typename ActuationTypeInfo<ACT_FREQ_GOV>::Ranges &newRange)
 {
@@ -318,7 +321,7 @@ ActuationInterface::actuationRanges<ACT_FREQ_GOV,freq_domain_info_t>(
 
 template<>
 void
-ActuationInterface::actuate<ACT_ACTIVE_CORES,freq_domain_info_t>(
+ActuationInterfaceImpl::Impl::actuate<ACT_ACTIVE_CORES,freq_domain_info_t>(
         const freq_domain_info_t *rsc,
         typename ActuationTypeInfo<ACT_ACTIVE_CORES>::ValType val)
 {
@@ -328,7 +331,7 @@ ActuationInterface::actuate<ACT_ACTIVE_CORES,freq_domain_info_t>(
 
 template<>
 typename ActuationTypeInfo<ACT_ACTIVE_CORES>::ValType
-ActuationInterface::actuationVal<ACT_ACTIVE_CORES,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_ACTIVE_CORES,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(idleDmAct != nullptr);
     return idleDmAct->getSysActuation(rsc);
@@ -336,7 +339,7 @@ ActuationInterface::actuationVal<ACT_ACTIVE_CORES,freq_domain_info_t>(const freq
 
 template<>
 const typename ActuationTypeInfo<ACT_ACTIVE_CORES>::Ranges&
-ActuationInterface::actuationRanges<ACT_ACTIVE_CORES,freq_domain_info_t>(const freq_domain_info_t *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_ACTIVE_CORES,freq_domain_info_t>(const freq_domain_info_t *rsc)
 {
     assert_true(idleDmAct != nullptr);
     return idleDmAct->range(rsc);
@@ -352,7 +355,7 @@ ActuationInterface::actuationRanges<ACT_ACTIVE_CORES,freq_domain_info_t>(const f
 
 template<>
 void
-ActuationInterface::actuate<ACT_TASK_MAP,tracked_task_data_t>(
+ActuationInterfaceImpl::Impl::actuate<ACT_TASK_MAP,tracked_task_data_t>(
         const tracked_task_data_t *rsc,
         typename ActuationTypeInfo<ACT_TASK_MAP>::ValType val)
 {
@@ -362,7 +365,7 @@ ActuationInterface::actuate<ACT_TASK_MAP,tracked_task_data_t>(
 
 template<>
 typename ActuationTypeInfo<ACT_TASK_MAP>::ValType
-ActuationInterface::actuationVal<ACT_TASK_MAP,tracked_task_data_t>(const tracked_task_data_t *rsc)
+ActuationInterfaceImpl::Impl::actuationVal<ACT_TASK_MAP,tracked_task_data_t>(const tracked_task_data_t *rsc)
 {
     assert_true(tMapAct != nullptr);
     return tMapAct->getSysActuation(rsc);
@@ -370,7 +373,7 @@ ActuationInterface::actuationVal<ACT_TASK_MAP,tracked_task_data_t>(const tracked
 
 template<>
 const typename ActuationTypeInfo<ACT_TASK_MAP>::Ranges&
-ActuationInterface::actuationRanges<ACT_TASK_MAP,tracked_task_data_t>(const tracked_task_data_t *rsc)
+ActuationInterfaceImpl::Impl::actuationRanges<ACT_TASK_MAP,tracked_task_data_t>(const tracked_task_data_t *rsc)
 {
     assert_true(tMapAct != nullptr);
     return tMapAct->range(rsc);

@@ -169,7 +169,7 @@ void pal_sensing_teardown<SensingModule>(SensingModule *m){
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::Impl::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	switch (rsc->domain_id) {
 		case 0:
@@ -185,7 +185,7 @@ SensingInterface::Impl::sense<SEN_POWER_W,power_domain_info_t>(const power_domai
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::Impl::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	switch (rsc->domain_id) {
 		case 0:
@@ -204,7 +204,24 @@ SensingInterface::Impl::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_do
 // However this fuction should never be actually called
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::Impl::sense<SEN_POWER_W,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_POWER_W,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    arm_throw(SensingException,"This function should never be called");
+    return 0;
+}
+
+// We need this specialization only to allow the reflective code to compile
+// However this fuction should never be actually called
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterfaceImpl::Impl::sense<SEN_POWER_W,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
+{
+    arm_throw(SensingException,"This function should never be called");
+    return 0;
+}
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterfaceImpl::Impl::senseAgg<SEN_POWER_W,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
 {
     arm_throw(SensingException,"This function should never be called");
     return 0;

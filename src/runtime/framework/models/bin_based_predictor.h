@@ -61,7 +61,7 @@ struct TrainingData {
             int minWindowSize=1, int maxWindowSize=0);
 };
 
-class Predictor {
+class Predictor : SensingInterfaceImpl {
   private:
     const sys_info_t *_sys_info;//needs to be set for runtime predictions, may be null otherwise
     LayerConf _funcs;
@@ -92,6 +92,7 @@ class Predictor {
     {
         _create_predictors(training.averagedWindows,_predictors,funcs);
         _make_faster();
+        checkConsistency();
     }
 
     // Loads a predictor saved to a file
@@ -99,6 +100,7 @@ class Predictor {
         :_sys_info(nullptr)
     {
         loadFromFile(filepath);
+        checkConsistency();
     }
 
     // The constructors we wanna be using for runtime predictions
@@ -106,6 +108,7 @@ class Predictor {
         :_sys_info(sys_info)
     {
         loadFromFile(filepath);
+        checkConsistency();
     }
 
     // The constructors we wanna be using for runtime predictions
@@ -138,6 +141,13 @@ class Predictor {
     const LayerConf& getFuncs()
     {
         return _funcs;
+    }
+
+    void checkConsistency()
+    {
+        assert_true(_predictors.size() > 0);
+        for(auto corefreq : _predictors)
+            corefreq.second->checkConsistency();
     }
 
   private:

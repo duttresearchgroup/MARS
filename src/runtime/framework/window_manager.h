@@ -54,10 +54,16 @@ class SensingWindowManager
 		const int wid;
 		PolicyManager *const owner;
 
+		int timestamp() { return _timestamp; }
+
 	  private:
 
+		// A virtual timestamp, incremented by period_ms everytime this
+		// window is ready
+		int _timestamp;
+
         WindowInfo(int p,int id,PolicyManager *o)
-            :period_ms(p),wid(id),owner(o)
+            :period_ms(p),wid(id),owner(o),_timestamp(0)
         {
         }
 

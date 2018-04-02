@@ -18,7 +18,7 @@
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/common/reports.h>
 #include <runtime/framework/actuation_interface.h>
-#include <runtime/framework/models/hw_model.h>
+#include "../runtime/framework/models/baseline_model.h"
 
 class PredictorTestSystem : public PolicyManager {
 protected:
@@ -38,13 +38,13 @@ protected:
 
 private:
     ExecutionTrace _execTrace;
-    StaticHWModel _hwModel;
+    DefaultBaselineModel _baselineModel;
     PredData _predData;
 
 public:
     PredictorTestSystem() :PolicyManager(),
         _execTrace("trace"),
-        _hwModel(info()),
+        _baselineModel(info()),
         _predData({0,0,0,0,false})
     {};
 
@@ -86,7 +86,7 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
     const PerformanceData &data = owner->sensedData();
     const tracked_task_data_t *highestTask = nullptr;
     uint64_t highestInstrCnt = 0;
-    for(int i = 0; i < data.numCreatedTasks(); ++i){
+    for(int i = 0; i < data.numCreatedTasks(wid); ++i){
         const tracked_task_data_t *tsk = &(data.task(i));
         uint64_t tskInstr = sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,tsk,wid);
         if(tskInstr > highestInstrCnt){
@@ -138,11 +138,11 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
         else
             ++epochs;
 
-        self->_predData.ipc = self->_hwModel.predictIPC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
-        self->_predData.power = self->_hwModel.predictPower(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
-        self->_predData.tlc = self->_hwModel.predictTLC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
+        self->_predData.ipc = self->_baselineModel.predictIPC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
+        self->_predData.power = self->_baselineModel.predictPower(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
+        self->_predData.tlc = self->_baselineModel.predictTLC(highestTask,wid,&(owner->info()->core_list[currCpu]),freqMhz);
         //Assumes other cores are idle and adds up the idle power
-        self->_predData.power += self->_hwModel.idlePower(&(owner->info()->core_list[currCpu]),freqMhz) * (owner->info()->core_list[currCpu].power->core_cnt -1);
+        self->_predData.power += self->_baselineModel.idlePower(&(owner->info()->core_list[currCpu]),freqMhz) * (owner->info()->core_list[currCpu].power->core_cnt -1);
         self->_predData.task = highestTask->task_idx;
         self->_predData.valid = true;
     }

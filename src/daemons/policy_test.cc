@@ -15,33 +15,101 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+#include <cmath>
+#include <sstream>
+#include <unistd.h>
+
 #include <runtime/daemon/deamonizer.h>
 #include <runtime/common/reports.h>
 #include <runtime/framework/actuation_interface.h>
-#include <runtime/framework/models/hw_model.h>
+#include "../runtime/framework/models/baseline_model.h"
 
-template<int pMS, Policy::Priority prio>
-class DummyPolicy : public Policy {
+// Always increases ACT_DUMMY1
+class DummyPolicy1 : public Policy {
 
   public:
 
-    DummyPolicy() :Policy(pMS,prio) {}
+    DummyPolicy1() :Policy(100,"DummyPolicy1") {}
 
     void execute(int wid) override {
-        pinfo("Dummy policy p=%dms prio=%d\n",periodMS(),priority());
-    }
+        std::stringstream ss; for(int i = 0; i < nesting(); ++i) ss << "    ";
+        pinfo("%s %04d DummyPolicy1(wid=%d p=%dms) as %s: dummyVal=%f\n",
+                ss.str().c_str(),
+                currExecTimeMS(),
+                wid,periodMS(),
+                ReflectiveEngine::isReflecting() ? "MODEL" : "POLICY",
+                sense<SEN_DUMMY>(nullResource()));
 
+        actuate<ACT_DUMMY1>(nullResource(),actuationVal<ACT_DUMMY1>(nullResource())+1);
+    }
 };
 
-template<int pMS, Policy::Priority prio>
+// Tries to maintain SEN_DUMMY value=5 by setting ACT_DUMMY2
+class DummyPolicy2 : public Policy {
+
+  public:
+
+    DummyPolicy2() :Policy(250,"DummyPolicy2") {}
+
+    void execute(int wid) override {
+        //SensingModule::get().sensingStop();
+        std::stringstream ss; for(int i = 0; i < nesting(); ++i) ss << "    ";
+        pinfo("%s %04d DummyPolicy2(wid=%d p=%dms) as %s: dummyVal=%f\n",
+                ss.str().c_str(),
+                currExecTimeMS(),
+                wid,periodMS(),
+                ReflectiveEngine::isReflecting() ? "MODEL" : "POLICY",
+                sense<SEN_DUMMY>(nullResource()));
+
+        // Non-reflective version
+        //actuate<ACT_DUMMY2>(nullResource(),
+        //        actuationVal<ACT_DUMMY2>(nullResource()) +
+        //        (5 - sense<SEN_DUMMY>(nullResource()))
+        //);
+
+        // Reflective version
+        pinfo("  %s %04d DummyPolicy2(wid=%d p=%dms): predicted dummyVal=%f\n",
+                        ss.str().c_str(),
+                        currExecTimeMS(),
+                        wid,periodMS(),
+                        senseIf<SEN_DUMMY>(nullResource()));
+
+        constexpr int maxIters = 4;
+        int act2Val = 0; int iters = 0;
+        while(std::fabs(senseIf<SEN_DUMMY>(nullResource())-5) > 0.5){
+            act2Val = tryActuationVal<ACT_DUMMY2>(nullResource()) + (5 - senseIf<SEN_DUMMY>(nullResource()));
+
+            pinfo("  %s %04d DummyPolicy2(wid=%d p=%dms): act2Val=%d because dummyVal=%f\n",
+                    ss.str().c_str(),
+                    currExecTimeMS(),
+                    wid,periodMS(),
+                    act2Val,
+                    senseIf<SEN_DUMMY>(nullResource()));
+
+            tryActuate<ACT_DUMMY2>(nullResource(), act2Val);
+
+            if(++iters >= maxIters) break;
+        }
+        if(iters > 0)
+            actuate<ACT_DUMMY2>(nullResource(),act2Val);
+    }
+};
+
+// Does nothing
 class DummyModel : public Model {
 
   public:
 
-    DummyModel() :Model(pMS,prio) {}
+    DummyModel() :Model(50,"DummyModel") {}
 
     void execute(int wid) override {
-        pinfo("Dummy model p=%dms prio=%d\n",periodMS(),priority());
+        std::stringstream ss; for(int i = 0; i < nesting(); ++i) ss << "    ";
+        pinfo("%s %04d DummyModel(wid=%d p=%dms) as %s: dummyVal=%f\n",
+                ss.str().c_str(),
+                currExecTimeMS(),
+                wid,periodMS(),
+                ReflectiveEngine::isReflecting() ? "MODEL" : "POLICY",
+                sense<SEN_DUMMY>(nullResource()));
     }
 
 };
@@ -50,26 +118,16 @@ class PolicyTestManager : public PolicyManager {
 
   protected:
 
-    void setup() override;
+    void setup() override {
+        //pinfo("Waiting 10s for GDB to attach\n");
+        //sleep(10);
+        registerPolicy(new DummyPolicy1());
+        registerPolicy(new DummyPolicy2());
+        registerModel(new DummyModel());
 
-    template<int prio>
-    static void dummyHandler(int wid, PolicyManager *owner){
-        auto winfo = owner->windowManager()->winfo(wid);
-        pinfo("Dummy handler p=%dms prio=%d\n",winfo->period_ms,prio);
+        enableReflection();
     }
 };
-
-void PolicyTestManager::setup()
-{
-    registerPolicy(new DummyPolicy<500,Policy::PRIORITY_MIN>());
-    registerPolicy(new DummyPolicy<500,Policy::PRIORITY_MAX>());
-    registerPolicy(new DummyPolicy<250,Policy::PRIORITY_DEFAULT>());
-    registerPolicy(new DummyPolicy<100,Policy::PRIORITY_DEFAULT>());
-    registerModel(new DummyModel<50,Model::PRIORITY_DEFAULT>());
-    windowManager()->addSensingWindowHandler(500,this,dummyHandler<Policy::PRIORITY_DEFAULT>,Policy::PRIORITY_DEFAULT);
-    windowManager()->addSensingWindowHandler(500,this,dummyHandler<Policy::PRIORITY_MIN>,Policy::PRIORITY_MIN);
-    windowManager()->addSensingWindowHandler(500,this,dummyHandler<Policy::PRIORITY_MAX>,Policy::PRIORITY_MAX);
-}
 
 
 int main(int argc, char * argv[]){

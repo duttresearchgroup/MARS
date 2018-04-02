@@ -42,6 +42,7 @@ PolicyManager::PolicyManager()
 
     _pm_pid = getpid();
 	_pm_ready_file = rt_param_daemon_file() + ".ready";
+	pinfo("PolicyManager::PolicyManager() done\n");
 }
 
 #if defined(IS_OFFLINE_PLAT)
@@ -77,7 +78,7 @@ void PolicyManager::_init_common()
 
 void PolicyManager::_init_info()
 {
-	int online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    int online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 
 	assert_false(online_cpus > MAX_NR_CPUS);
 	assert_false(MAX_NUM_TASKS <= online_cpus);
@@ -122,7 +123,8 @@ void PolicyManager::_init_info(simulation_t *sim)
 
 PolicyManager::~PolicyManager()
 {
-	//pinfo("%s called\n",__PRETTY_FUNCTION__);
+    if(ReflectiveEngine::enabled())
+        ReflectiveEngine::disable();
     ActuationInterface::destruct();
 	_pm_created = false;
 	delete _win_manager;
@@ -183,11 +185,40 @@ void PolicyManager::_finishRegisterPolicy()
     }
 }
 
+void PolicyManager::_buildSchedules()
+{
+    if(!ReflectiveEngine::enabled()) return;
+
+    for(auto model : _models)
+        ReflectiveEngine::get().buildSchedule(model);
+}
+
 void PolicyManager::_policyWindowHandler(int wid, PolicyManager *owner)
 {
     // Executes all policies for this window
-    for(auto p : owner->_policies[wid])
+    for(auto p : owner->_policies[wid]){
+        ReflectiveEngine::Context::PolicyScope polScp(p);
+        p->setCurrentTimeMS(p->nextExecTimeMS());
+
+        if(ReflectiveEngine::enabled()){
+            // Pure models don't have a handler executing them, so we increment
+            // their current time here (for all models finer-grained then this policy)
+            for(auto model : owner->_models){
+                if(model == (Model*)p) break; // further models are coarser-grained
+                if(!model->pureModel()) continue;
+                while(model->nextExecTimeMS() <= p->currExecTimeMS())
+                    model->setCurrentTimeMS(model->nextExecTimeMS());
+            }
+
+            // Reset models before running the policy
+            // to clean up any tryActuate issued in the scope of
+            // a previous policy
+            ReflectiveEngine::get().resetModelsOnHandler();
+        }
+
+        // Now execute the policy
         p->execute(wid);
+    }
 }
 
 void PolicyManager::registerModel(Model *model)
@@ -195,6 +226,8 @@ void PolicyManager::registerModel(Model *model)
     assert_true(model != nullptr);
     _models.insert(model);
     model->sys_info = info();
+    model->pm = this;
+    model->onRegister();
 }
 
 void PolicyManager::start()
@@ -202,6 +235,7 @@ void PolicyManager::start()
     _sensing_setup_common();
 	setup();
 	_finishRegisterPolicy();
+	_buildSchedules();
 
 	//saves the sys_info
 	SysInfoPrinter sip(_sys_info); sip.printToOutdirFile();
@@ -217,14 +251,22 @@ void PolicyManager::start()
 
 void PolicyManager::stop()
 {
-	_win_manager->stopSensing();
+    _win_manager->stopSensing();
 	report();
 	//removes the file created by start
 	std::remove(_pm_ready_file.c_str());
 }
 
-void PolicyManager::quit()
+void PolicyManager::quit() const
 {
     kill(_pm_pid,SIGQUIT);
+    for (;;) pause();
+
 }
+
+void PolicyManager::enableReflection() const
+{
+    ReflectiveEngine::enable(&_sys_info);
+}
+
 

@@ -24,7 +24,7 @@
 class PerformanceData {
     friend class LinuxSensingModule;
     friend class OfflineSensingModule;
-    friend class SensingInterface;
+    friend class SensingInterfaceImpl;
 
   private:
 

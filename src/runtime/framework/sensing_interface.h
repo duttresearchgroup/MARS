@@ -21,12 +21,15 @@
 #include <type_traits>
 
 #include "types.h"
+#include "reflective.h"
+#include "sensing_interface_impl.h"
 #include <base/base.h>
 
 class SensingWindowManager;
 
-struct SensingInterface {
-    friend class SensingWindowManager;
+struct SensingInterface : SensingInterfaceImpl {
+
+    friend class ReflectiveEngine;
 
 	/*
 	 * Returns the sensed value for given window (or the current window if not specified).
@@ -36,8 +39,8 @@ struct SensingInterface {
 	template<SensingType SEN_T,typename ResourceT>
 	static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT *rsc, int wid)
 	{
-	    if(_currentContext.reflecting) {
-	        assert_true(wid == _currentContext.wid);
+	    if(ReflectiveEngine::isReflecting()) {
+	        assert_true(wid == ReflectiveEngine::currentWID());
 	        return senseIf<SEN_T,ResourceT>(rsc);
 	    }
 	    else
@@ -46,16 +49,16 @@ struct SensingInterface {
 	template<SensingType SEN_T,typename ResourceT>
 	static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT *rsc)
 	{
-	    if(_currentContext.reflecting)
+	    if(ReflectiveEngine::isReflecting())
 	        return senseIf<SEN_T,ResourceT>(rsc);
 	    else
-	        return Impl::sense<SEN_T,ResourceT>(rsc,_currentContext.wid);
+	        return Impl::sense<SEN_T,ResourceT>(rsc,ReflectiveEngine::currentWID());
 	}
 	template<SensingType SEN_T,typename ResourceT>
 	static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid)
 	{
-	    if(_currentContext.reflecting) {
-	        assert_true(wid == _currentContext.wid);
+	    if(ReflectiveEngine::isReflecting()) {
+	        assert_true(wid == ReflectiveEngine::currentWID());
 	        return senseIf<SEN_T,ResourceT>(p,rsc);
 	    }
 	    else
@@ -64,10 +67,10 @@ struct SensingInterface {
 	template<SensingType SEN_T,typename ResourceT>
 	static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc)
 	{
-	    if(_currentContext.reflecting)
+	    if(ReflectiveEngine::isReflecting())
 	        return senseIf<SEN_T,ResourceT>(p,rsc);
 	    else
-	        return Impl::sense<SEN_T,ResourceT>(p,rsc,_currentContext.wid);
+	        return Impl::sense<SEN_T,ResourceT>(p,rsc,ReflectiveEngine::currentWID());
 	}
 
 
@@ -79,8 +82,8 @@ struct SensingInterface {
     template<SensingType SEN_T,typename ResourceT>
     static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT *rsc, int wid)
     {
-        if(_currentContext.reflecting) {
-            assert_true(wid == _currentContext.wid);
+        if(ReflectiveEngine::isReflecting()) {
+            assert_true(wid == ReflectiveEngine::currentWID());
             return senseAggIf<SEN_T,ResourceT>(rsc);
         }
         else
@@ -89,16 +92,16 @@ struct SensingInterface {
     template<SensingType SEN_T,typename ResourceT>
     static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT *rsc)
     {
-        if(_currentContext.reflecting)
+        if(ReflectiveEngine::isReflecting())
             return senseAggIf<SEN_T,ResourceT>(rsc);
         else
-            return Impl::senseAgg<SEN_T,ResourceT>(rsc,_currentContext.wid);
+            return Impl::senseAgg<SEN_T,ResourceT>(rsc,ReflectiveEngine::currentWID());
     }
     template<SensingType SEN_T,typename ResourceT>
     static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid)
     {
-        if(_currentContext.reflecting) {
-            assert_true(wid == _currentContext.wid);
+        if(ReflectiveEngine::isReflecting()) {
+            assert_true(wid == ReflectiveEngine::currentWID());
             return senseAggIf<SEN_T,ResourceT>(p,rsc);
         }
         else
@@ -107,10 +110,10 @@ struct SensingInterface {
     template<SensingType SEN_T,typename ResourceT>
     static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc)
     {
-        if(_currentContext.reflecting)
+        if(ReflectiveEngine::isReflecting())
             return senseAggIf<SEN_T,ResourceT>(p,rsc);
         else
-            return Impl::senseAgg<SEN_T,ResourceT>(p,rsc,_currentContext.wid);
+            return Impl::senseAgg<SEN_T,ResourceT>(p,rsc,ReflectiveEngine::currentWID());
     }
 
 
@@ -144,36 +147,7 @@ struct SensingInterface {
         return Reflective::senseAgg<SEN_T,ResourceT>(p,rsc);
     }
 
-    static int currentWID() { return _currentContext.wid; }
-
-    static int isReflecting() { return _currentContext.reflecting; }
-
   private:
-
-	/*
-	 * These are the functions that need to be specialized
-	 */
-	struct Impl {
-	    /*
-	     * Returns the sensed value for given window
-	     */
-	    template<SensingType SEN_T,typename ResourceT>
-	    static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT *rsc, int wid);
-
-	    template<SensingType SEN_T,typename ResourceT>
-	    static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
-
-
-	    /*
-	     * Returns aggregated sensed value for the
-	     * current and previous instances of the given window
-	     */
-	    template<SensingType SEN_T,typename ResourceT>
-	    static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT *rsc, int wid);
-
-	    template<SensingType SEN_T,typename ResourceT>
-	    static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
-	};
 
     /*
      * These are the functions that need to be specialized
@@ -183,44 +157,33 @@ struct SensingInterface {
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType sense(const ResourceT *rsc)
         {
-            arm_throw(SensingInterfaceException,"Not implemented");
+            ReflectiveEngine::get().runFinerGrainedModels();
+            if(hasPredictedVals(rsc)) return ReflectiveEngine::get().predict<SEN_T>(rsc);
+            else                      return Impl::sense<SEN_T>(rsc,ReflectiveEngine::currentWID());
         }
 
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc)
         {
-            arm_throw(SensingInterfaceException,"Not implemented");
+            ReflectiveEngine::get().runFinerGrainedModels();
+            if(hasPredictedVals(rsc)) return ReflectiveEngine::get().predict<SEN_T>(p,rsc);
+            else                      return Impl::sense<SEN_T>(p,rsc,ReflectiveEngine::currentWID());
         }
 
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType senseAgg(const ResourceT *rsc)
         {
-            arm_throw(SensingInterfaceException,"Not implemented");
+            arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
         }
 
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc)
         {
-            arm_throw(SensingInterfaceException,"Not implemented");
+            arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
         }
+
+        static bool hasPredictedVals(const void *rsc) { return ReflectiveEngine::get().needsPred(rsc); }
     };
-
-	struct SensingContext {
-	    // Current window id
-	    int wid;
-
-	    // If true, sense returns predicted sensed values given an actuation
-	    // made by tryActuate.
-	    // Otherwise, returns real sensed data
-	    bool reflecting;
-
-	    // Timestamp incremented at every window.
-	    int timestamp;
-	};
-
-	static thread_local SensingContext _currentContext;
-
-	static SensingContext& getCurrentContext() { return _currentContext; }
 };
 
 #endif /* ACTUATOR_H_ */
