@@ -119,7 +119,11 @@ TraceParser::TraceParser(std::vector<std::string> dirs)
         _threads.push_back(
           new std::thread(
             _parse_csv_data_thread,
-            this, aux, _traces.samples[tname][arch][freq], &(_traces.samples.find(tname)->first), &(_traces.samples[tname].find(arch)->first), &(_traces.samples[tname][arch].find(freq)->first)
+                this, aux,
+                _traces.samples[tname][arch][freq],
+                &(_traces.samples.find(tname)->first),
+                &(_traces.samples[tname].find(arch)->first),
+                &(_traces.samples[tname][arch].find(freq)->first)
           )
         );
 

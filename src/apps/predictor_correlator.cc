@@ -105,17 +105,6 @@ void doit(int argc, char * argv[]){
         std::cout << "corr(" << stat->sampleXName << ", " << stat->sampleYName << ") = "
                   << stat->correlation() << "\n";
     }
-    /*for(auto stat : stats{
-        Statistics::Line l = stat->least_squares();
-        std::cout << stat->sampleXName << ";"
-                  << stat->sampleYName << ";"
-                  << stat->correlation()
-                  << ";slope;"
-                  << l.slope
-                  << ";intercept;"
-                  << l.intercept << "\n";
-        delete stat;
-    }*/
 
     for(auto stat : stats) delete stat;
 }

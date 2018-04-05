@@ -99,12 +99,8 @@ _find_best_window_aux(int minWindowSize, int maxWindowSize, MatchedWindow &windo
         window.bench2.last = window.bench2.first;
         while(window.bench2.last != bench2.end()){
             if(accept_window(window)){//finally
-                //std::cout << "\taccept:(" << window.bench1.first->curr_instr << ":" << window.bench1.last->curr_instr << ") -> (" << window.bench2.first->curr_instr << ":" << window.bench2.last->curr_instr << ")\n";
-                //std::cout << "\t\t\t" << window.numOfInstructions() << " / " << window.numOfInstructionsDev() << " / " << window.numOfInstructionsDevStart() << " / " << window.numOfInstructionsDevEnd() << "\n\n";
                 return true;
             }
-            //std::cout << "\treject:(" << window.bench1.first->curr_instr << ":" << window.bench1.last->curr_instr << ") -> (" << window.bench2.first->curr_instr << ":" << window.bench2.last->curr_instr << ")\n";
-            //std::cout << "\t\t\t" << window.numOfInstructions() << " / " << window.numOfInstructionsDev() << " / " << window.numOfInstructionsDevStart() << " / " << window.numOfInstructionsDevEnd() << "\n\n";
             if(window.bench2.last->curr_instr > window.bench1.last->curr_instr)
                 break;//further increasing bench2 won't help
             window.bench2.last += 1;
@@ -139,9 +135,6 @@ static void window(std::vector<MatchedWindow> &windows, TaskName task,
             ArchName tgtArc, FrequencyMHz tgtFreq, std::vector<TraceParser::Sample> *tgtSamples,
             int minWindowSize, int maxWindowSize)
 {
-    //std::cout << "Windows for " << srcArc << "_" << srcFreq
-    //          << " -> " << tgtArc << "_" << tgtFreq << "\n";
-
     // start searching from the last sample of the previously found window,
     // so we create an initial window with the inial sample == to begin()
     MatchedWindow window;
@@ -304,7 +297,6 @@ bool Histogram::make_bin()
     //if size is 1, we know its impossible to break up
     if(empty_bins() || (bins.size()==1)) return false;
 
-    //std::cerr << "Make bin\n";
     auto maxBin = bins.size();
     unsigned int nsamples = 0;
     for(unsigned int i = 0 ; i < bins.size(); ++i){
@@ -316,12 +308,6 @@ bool Histogram::make_bin()
         }
     }
     if(maxBin == bins.size()) return false;
-
-    //std::cerr << "Make bin will split bin "<<maxBin<< "\n";
-    //std::cerr << "Bins before:\n";
-    //for(auto b : bins){
-    //    std::cerr << *b << "\n";
-    //}
 
     //the new bin is to be inserted before bins[maxBin]
 
@@ -341,13 +327,9 @@ bool Histogram::make_bin()
     if(maxBin == bins.size()-1) oldBinEnd = std::numeric_limits<double>::max();
     if(maxBin == 0) newBinBegin = std::numeric_limits<double>::lowest();
 
-
     //bkp the original bin
     TrainingBin *oldBinMod = dynamic_cast<TrainingBin*>(bins[maxBin]); assert_true(oldBinMod!=nullptr);
     TrainingBin oldBin = *oldBinMod;
-
-    //std::cerr << "Svector in origBin:" << oldBin.samples << "\n";
-
 
     //give a new set of samples to bins[maxBin] and update its bounds
     oldBinMod->samples = new std::vector<AveragedMatchedWindow>;
@@ -355,20 +337,15 @@ bool Histogram::make_bin()
     oldBinMod->binEnd = oldBinEnd;
     oldBinMod->binRef = oldBinRef;
 
-    //std::cerr << "new Svector in origBin:" << oldBinMod->samples << "\n";
-
     //insert a new bin before
     TrainingBin *newBin = new TrainingBin(newBinBegin,newBinEnd,newBinRef);
     auto insertPoint = bins.insert(bins.begin()+maxBin,newBin);
-
-    //std::cerr << "new Svector in newBin:" << newBin->samples << "\n";
 
     //reinsert the samples
     for(auto s : *(oldBin.samples)) add_sample(s);
 
     //both bin must have samples
     if(empty_bins()){
-        //std::cerr << "Failed, reverting\n";
         //revert and return false
 
         delete oldBinMod->samples;
@@ -378,23 +355,13 @@ bool Histogram::make_bin()
         bins.erase(insertPoint);
         delete newBin;
 
-        //std::cerr << "Bins after:\n";
-        //for(auto b : bins){
-        //    std::cerr << *b << "\n";
-        //}
-
         return false;
     }
 
     //all fine; delete the old sample vector
     delete oldBin.samples;
-    //std::cerr << "deleted Svector in oldBin:" << oldBin.samples << "\n";
-    oldBin.samples = nullptr;
 
-    //std::cerr << "Bins after:\n";
-    //for(auto b : bins){
-    //    std::cerr << *b << "\n";
-    //}
+    oldBin.samples = nullptr;
 
     return true;
 }
@@ -492,7 +459,6 @@ MappingBin* MappingBin::_find_bins(std::vector<AveragedMatchedWindow> *samples, 
     double max = std::numeric_limits<double>::lowest();
 
     //find min/max
-    //std::cerr << "Svector:" << samples << "\n";
     for(auto s : *samples){
         double val = curr->metric(s.bench1Avg);
         assert(val>=0);
@@ -532,10 +498,8 @@ MappingBin* MappingBin::_find_bins(std::vector<AveragedMatchedWindow> *samples, 
         return nullptr;
     }
 
-    //std::cerr << "#### Start bin spliting. numbins = "<< currHistogram->bins.size() <<"\n";
     for(int currBinCnt = currHistogram->bins.size(); currBinCnt < curr->max_bins; ++currBinCnt){
         if(!currHistogram->make_bin()) break;
-        //std::cerr << "#### Split successfull. numbins = "<< currHistogram->bins.size() <<"\n";
     }
     assert(!currHistogram->empty_bins());
 
@@ -758,8 +722,6 @@ void Predictor::_create_predictors(std::map<CoreFreqPair, std::vector<AveragedMa
         MappingBin *bins = MappingBin::create_bins(corefreq.second, funcs);
         assert(bins != nullptr);
         predictors[corefreq.first] = bins;
-
-        //bins->print(std::cout) << "\n";
     }
     print_pred_info(funcs, predictors);
 }
@@ -802,10 +764,7 @@ typename Map::iterator findInsert(Map &map, const Key &key, const Val &val){
 
 void Predictor::_make_faster()
 {
-    //std::cout << "Make faster log:\n";
     for(auto corefreq : _predictors){
-        //std::cout << "\n" << corefreq.first << "\n";
-        //corefreq.second->print(std::cout);
         core_arch_t srcArch = archFromStr(corefreq.first.src.core);
         FrequencyMHz srcFreq = corefreq.first.src.freq;
         core_arch_t tgtArch = archFromStr(corefreq.first.tgt.core);
@@ -882,16 +841,10 @@ void Predictor::predict(std::vector<double> &result,
         const tracked_task_data_t *task, int wid,
         const core_info_t *target_core, int target_freq_mhz)
 {
-    //pinfo(" \n");
-    //pinfo("Predicting for task %d %d/%s\n",task->task_idx,task->this_task_pid,task->this_task_name);
-
     assert_true(_sys_info!=nullptr);
     int srcCore = SensingInterface::sense<SEN_LASTCPU>(task,wid);
     core_arch_t srcArch = _sys_info->core_list[srcCore].arch;
     int srcFreqMhz = SensingInterface::sense<SEN_FREQ_MHZ>(_sys_info->core_list[srcCore].freq,wid);
-
-    //pinfo("\t%s@%d -> %s@%d\n",archToString(srcArch),srcFreqMhz,archToString(target_core->arch),target_freq_mhz);
-
 
     auto srcArchI = _availableSrcFreqs.find(srcArch);
     assert_true(srcArchI!=_availableSrcFreqs.end());
@@ -902,25 +855,13 @@ void Predictor::predict(std::vector<double> &result,
     int tgtFreqMhz0, tgtFreqMhz1;
     _search_bounds(tgtArchI->second,target_freq_mhz,tgtFreqMhz0,tgtFreqMhz1);
 
-    //if((srcFreqMhzNearest > (srcFreqMhz+10)) || (srcFreqMhzNearest < (srcFreqMhz-10)))
-    //    pinfo("\tSrc pred %s@%d unavailable. Using %d\n",archToString(srcArch),srcFreqMhz,srcFreqMhzNearest);
-
-    if(tgtFreqMhz0 != tgtFreqMhz1){
-        //pinfo("\tTgt pred %s@%d unavailable. Interpolating %d and %d \n",archToString(target_core->arch),target_freq_mhz,tgtFreqMhz0,tgtFreqMhz1);
+    if(tgtFreqMhz0 != tgtFreqMhz1)
         _predict_interpolate(result,task,wid,srcArch,srcFreqMhzNearest,target_core->arch,tgtFreqMhz0,tgtFreqMhz1,target_freq_mhz);
-        //for(unsigned i = 0; i < result.size(); ++i){
-        //    pinfo("\t\t%s=(%f  %f)\n",_funcs.final_metric[i].str->c_str(),_predict_interpolate_result0[i],_predict_interpolate_result1[i]);
-        //}
-    }
     else
         _predict_single(result,task,wid,srcArch,srcFreqMhzNearest,target_core->arch,tgtFreqMhz0);
 
     assert(result.size()==_funcs.final_metric.size());
 
-    //pinfo("\tresult:\n");
-    //for(unsigned i = 0; i < result.size(); ++i){
-    //    pinfo("\t\t%s=%f\n",_funcs.final_metric[i].str->c_str(),result[i]);
-    //}
 }
 
 static inline double lin_interp(double x, double x0, double y0, double x1, double y1){
