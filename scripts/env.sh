@@ -35,6 +35,10 @@ export SPARTA_ROOT=$(readlink -f $SPARTA_SCRIPTDIR/..)
 export PATH=$SPARTA_SCRIPTDIR:$PATH
 
 ######################################################
+# Running stuff with valgrind (default=0 so no)
+export RTS_VALGRIND=0
+
+######################################################
 # Checks if the remote confs exists. If it does
 # not, creates one with default information at
 # scripts/confs.sh

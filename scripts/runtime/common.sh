@@ -46,6 +46,10 @@ RTS_DAEMON_BIN_DIR=$RTS_BINS_PATH/daemons
 # daemon when running
 RTS_DAEMON_PID=$RTS_DAEMON_BIN_DIR/.current_active_daemon.pid
 
+# Valgrind command when running daemon with valgrind
+# (when the RTS_VALGRIND var is set 1)
+RTS_VALGRIND_CMD="valgrind --track-origins=yes --leak-check=full --show-reachable=yes --suppressions=$SPARTA_SCRIPTDIR/runtime/valgrind.supp --trace-children=yes --log-file=$RTS_DAEMON_OUTDIR/valgrind.log"
+
 ######################################################
 # Helper functions
 ######################################################
