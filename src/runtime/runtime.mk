@@ -23,6 +23,7 @@ SRCS_CXX_RUNTIME = $(wildcard src/runtime/systems/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/daemon/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/common/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/framework/*.cc)
+SRCS_CXX_RUNTIME += $(wildcard src/runtime/framework/models/*.cc)
 
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/linux/*.cc)

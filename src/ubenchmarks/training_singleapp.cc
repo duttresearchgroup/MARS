@@ -21,6 +21,7 @@
 #include <limits>
 #include <sstream>
 #include "time_util.h"
+#include "stdlib.h"
 
 #include "training.h"
 
@@ -132,7 +133,7 @@ static inline void idle_wait_us(long int time){
 
 static inline void run_combination(int r, int *data)
 {
-    if((r > 2) && IS_LITE) return;//runs only a few iterations for testing
+    if((r > 1) && IS_LITE) exit(0);//runs only a few iterations for testing. exit now
 
     //auto time = vitamins_bm_time_us();
     for(int i = 0; i < r; ++i){

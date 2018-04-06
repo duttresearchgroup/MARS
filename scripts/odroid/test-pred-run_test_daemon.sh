@@ -1,3 +1,4 @@
+#!/bin/sh
 #-------------------------------------------------------------------------------
 # Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
 # 
@@ -15,24 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-######################################################
-# This script synchs the bin_*, scripts, and models 
-# folders on a remote device with the ones on this 
-# machine.
-# DATA ON THE REMOTE DEVICE WILL BE OVERWRITTEN
-######################################################
+source $SPARTA_SCRIPTDIR/runtime/common.sh
 
-# Remote functions
-source $SPARTA_SCRIPTDIR/common/remote.sh
+MODELS=$(readlink -f $MODEL_DIR/arm_exynos5422)
 
-SYNCH_DIRS=$(ls $SPARTA_ROOT 2>/dev/null | xargs -n 1 | grep bin_"$RTS_ARCH"_"$RTS_PLAT")
-SYNCH_DIRS="$SYNCH_DIRS scripts models"
-
-echo Synching: $SYNCH_DIRS
-
-R_WAIT
-
-for i in $SYNCH_DIRS; do
-    R_SYNCH $SPARTA_ROOT/$i $R_SPARTA_ROOT/$i
-done
-
+sudosh $SPARTA_SCRIPTDIR/runtime/start.sh odroid_predictor_test model_path=$MODELS
+sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh

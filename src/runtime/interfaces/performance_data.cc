@@ -36,6 +36,7 @@ SensingInterface::sense<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::P
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
+    assert_true(data.perfCntAvailable(p));
     return data.getPerfcntVal(data.swCurrData(wid).cpus[rsc->position].perfcnt,p);
 }
 template<>
@@ -44,6 +45,7 @@ SensingInterface::senseAgg<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
+    assert_true(data.perfCntAvailable(p));
     return data.getPerfcntVal(data.swAggrData(wid).cpus[rsc->position].perfcnt,p);
 }
 
@@ -54,6 +56,7 @@ SensingInterface::sense<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PER
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
+    assert_true(data.perfCntAvailable(p));
     return data.getPerfcntVal(data.swCurrData(wid).tasks[rsc->task_idx].perfcnt,p);
 }
 template<>
@@ -62,6 +65,7 @@ SensingInterface::senseAgg<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
+    assert_true(data.perfCntAvailable(p));
     return data.getPerfcntVal(data.swAggrData(wid).tasks[rsc->task_idx].perfcnt,p);
 }
 

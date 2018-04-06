@@ -42,3 +42,5 @@ mkdir -p $IDLE_POWER_DIR
 cp $RTS_DAEMON_OUTDIR/idle_trace.* $IDLE_POWER_DIR/
 cp $RTS_DAEMON_OUTDIR/sys_info.json $IDLE_POWER_DIR/
 
+# make the idle_power.json
+python3 $SPARTA_SCRIPTDIR/tracing/make_idle_power.py $IDLE_POWER_DIR

@@ -15,30 +15,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __arm_rt_actuation_interface_h
-#define __arm_rt_actuation_interface_h
+#include "bin_based_predictor_funcs.h"
 
-//has IS_LINUX_PLAT / IS_OFFLINE_PLAT
-#include <runtime/interfaces/common/pal/pal_setup.h>
+namespace BinBasedPred {
 
-#include "linux/freq_actuator.h"
-#include "linux/idledomain_actuator.h"
-#include "linux/taskmap_actuator.h"
-#include "offline/freq_actuator.h"
-#include "offline/idledomain_actuator.h"
-#include "offline/taskmap_actuator.h"
+#define makebinstr(id) const std::string BinFuncImpl<id>::str = #id
 
-#if defined(IS_LINUX_PLAT)
-	typedef LinuxFrequencyActuator FrequencyActuator;
-	typedef LinuxTaskMapActuator TaskMapActuator;
-	typedef LinuxIdleDomainActuator IdleDomainActuator;
-#elif defined(IS_OFFLINE_PLAT)
-	typedef OfflineFrequencyActuator FrequencyActuator;
-	typedef OfflineTaskMapActuator TaskMapActuator;
-	typedef OfflineIdleDomainActuator IdleDomainActuator;
-#else
-#error "Platform not properly defined"
-#endif
+makebinstr(procTimeShare);
+makebinstr(ipsTotal);
+makebinstr(ipsBusy);
+makebinstr(ipcBusy);
+makebinstr(power);
+makebinstr(memRate);
+makebinstr(branchRate);
+makebinstr(fpRate);
+makebinstr(brMisspred);
+makebinstr(brMisspredPerInstr);
+makebinstr(l1Dmiss);
+makebinstr(l1DmissPerInstr);
+makebinstr(l1ImissPerInstr);
+makebinstr(l1Imiss);
+makebinstr(dTLBmiss);
+makebinstr(iTLBmiss);
+makebinstr(dTLBmissPerInstr);
+makebinstr(iTLBmissPerInstr);
+makebinstr(globalLLCmiss);
+makebinstr(localLLCmiss);
+makebinstr(LLCmissPerInstr);
+makebinstr(branchAndCacheSum);
+makebinstr(branchAndCacheMult);
+makebinstr(LLCL1Dsum);
+makebinstr(L1DL1Isum);
+makebinstr(L1DL1ILLCsum);
+makebinstr(L1DL1ILLCsum2);
+makebinstr(L1DLLCmissPerInstr);
 
-#endif
-
+};

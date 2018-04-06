@@ -15,56 +15,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __semaphore_h
-#define __semaphore_h
+#ifndef __arm_rt_offline_actuatortaskmap_h
+#define __arm_rt_offline_actuatortaskmap_h
 
-#include <condition_variable>
-#include <mutex>
 
-class Semaphore {
-private:
-    int count;
-    std::mutex mtx;
-    std::condition_variable cv;
+#include <runtime/framework/types.h>
+#include <runtime/framework/actuator.h>
+
+class OfflineTaskMapActuator : public Actuator {
+
+protected:
+	void implSystemMode(){
+
+	}
+	void implSystemMode(const std::string &arg){
+
+	}
+	void implFrameworkMode(){
+
+	}
 
 public:
-    explicit Semaphore(int count_ = 1) :count(count_){ }
+	OfflineTaskMapActuator(const sys_info_t &_info)
+		:Actuator(ACT_TASK_MAP,_info)
+	{
+		for(int i = 0; i < _info.core_list_size; ++i)
+			setActForResource(&(_info.core_list[i]));
+	}
 
-    void notify()
-    {
-        std::unique_lock<std::mutex> lck(mtx);
-        ++count;
-        cv.notify_one();
-    }
+	~OfflineTaskMapActuator()
+	{
+	}
 
-    void wait()
-    {
-        std::unique_lock<std::mutex> lck(mtx);
+	// Standard actuation interface override
 
-        while(count <= 0){
-            cv.wait(lck);
-        }
-        --count;
-    }
+	void doSysActuation(core_info_t *rsc, tracked_task_data_t *task){
 
-    bool tryWait()
-    {
-        std::unique_lock<std::mutex> lck(mtx);
-        if(count > 0) {
-            --count;
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+	}
+	void getSysActuation(freq_domain_info_t *rsc, tracked_task_data_t **val_mhz){
 
-    int getCount()
-    {
-        std::unique_lock<std::mutex> lck(mtx);
-        return count;
-    }
+	}
+
 };
 
-
 #endif
+

@@ -23,9 +23,13 @@
 ###########################################
 # Build confs
 
-# Arch/Plat of the binaries to be used
+# Arch/Plat of the runtime binaries to be used
 export RTS_ARCH=arm
 export RTS_PLAT=exynos5422
+
+# Arch/Plat of the offline apps to be used
+export APPS_ARCH=x86
+export APPS_PLAT=offline
 
 
 ###########################################
@@ -80,8 +84,12 @@ export R_TRACE_OUTPUT_DIR=$R_SPARTA_ROOT/traces
 ###########################################
 # Confs for training scripts
 
-# Core where calibration ubench is executed before training
+# Core where calibration ubench is executed before training and the
+# frequency to be used. Calibration should always be done in a core with
+# the fastest core type (in case of HMPs) and at the fastest frequency
 export CALIB_CORE=6
-# Frequency to be used when calibrating
-export CALIB_FREQUENCY=1800000
+export CALIB_FREQUENCY=2000000
+
+export MODEL_DIR=$SPARTA_ROOT/models
+export R_MODEL_DIR=$R_SPARTA_ROOT/models
 

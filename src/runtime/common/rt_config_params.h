@@ -42,6 +42,8 @@ bool rt_param_trace_perfcnt(perfcnt_t perfcnt);
 const std::string& rt_param_model_predictor_file(void);
 const std::string& rt_param_model_idlepower_file(void);
 
+const std::string& rt_param_model_path(void);
+
 const std::string& rt_param_outdir(void);
 
 void rt_param_print(void);

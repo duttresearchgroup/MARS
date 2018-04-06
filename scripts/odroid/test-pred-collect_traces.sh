@@ -15,24 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-######################################################
-# This script synchs the bin_*, scripts, and models 
-# folders on a remote device with the ones on this 
-# machine.
-# DATA ON THE REMOTE DEVICE WILL BE OVERWRITTEN
-######################################################
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 200000
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 200000
 
-# Remote functions
-source $SPARTA_SCRIPTDIR/common/remote.sh
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 800000
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 1100000
 
-SYNCH_DIRS=$(ls $SPARTA_ROOT 2>/dev/null | xargs -n 1 | grep bin_"$RTS_ARCH"_"$RTS_PLAT")
-SYNCH_DIRS="$SYNCH_DIRS scripts models"
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 1400000
+sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 2000000
 
-echo Synching: $SYNCH_DIRS
-
-R_WAIT
-
-for i in $SYNCH_DIRS; do
-    R_SYNCH $SPARTA_ROOT/$i $R_SPARTA_ROOT/$i
-done
-
+sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 2000000

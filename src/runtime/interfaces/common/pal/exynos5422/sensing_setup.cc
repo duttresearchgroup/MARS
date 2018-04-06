@@ -199,3 +199,13 @@ SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_i
 	return 0;
 }
 
+// We need this specialization only to support the implementation of
+// BinFuncImpl<power>
+// However this fuction should never be actually called
+template<>
+typename SensingTypeInfo<SEN_POWER_W>::ValType
+SensingInterface::sense<SEN_POWER_W,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+{
+    arm_throw(SensingException,"This function should never be called");
+    return 0;
+}

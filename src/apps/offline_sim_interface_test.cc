@@ -34,7 +34,7 @@
 #include <unistd.h>
 
 #include "../runtime/systems/tracing.h"
-#include "offline_sim/semaphore.h"
+#include <runtime/common/semaphore.h>
 //#include "offline_sim/sensing_module.h"
 #include "core/core.h"
 #include "offline_sim/inputparser.h"

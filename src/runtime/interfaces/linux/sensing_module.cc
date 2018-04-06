@@ -193,6 +193,8 @@ void LinuxSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 	if(_sensingRunning)
 		arm_throw(LinuxSensingModuleException,"Cannot do tracePerfCounter with sensing running errno=%d",errno);
 
+	if(isPerfCntAvailable(perfcnt)) return;//already enabled
+
 	if(ioctl(_module_file_if, IOCTLCMD_PERFCNT_ENABLE,perfcnt) < 0)
 		arm_throw(LinuxSensingModuleException,"IOCTLCMD_PERFCNT_ENABLE failed errno=%d",errno);
 }

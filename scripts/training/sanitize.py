@@ -55,9 +55,18 @@ colsToAvg = ['freq_mhz','power_w',]
 # 'core' must be the same across all samples
 specialCols = ['sample_id','timestamp','total_time_s','core']
 
-# If any detected combination has less than this number of samples,
-# ignore it
-ignoreSampleCnt = 4
+# If any detected combination has <= 'ignoreSampleCnt' number of samples,
+# ignore it.
+# Setting this too low may cause noisy samples to be include.
+# Setting this too high may cause us to ignore real samples.
+# So we set it as a function of TARGET_UBENCH_RT_MS (src/ubenchmarks/training_singleapp.cc)
+# and TracingSystem::WINDOW_LENGTH_MS (src/runtime/systems/tracing.h),
+# such that we ignore the sample if it has than half the minumum number of expected samples
+# (assuming calibration is done in the fasted core in the fastest freq)
+# (TODO fetch these from somewhere ele instead of hardcoding here)
+TARGET_UBENCH_RT_MS=100.0
+WINDOW_LENGTH_MS=10.0
+ignoreSampleCnt = int(round((TARGET_UBENCH_RT_MS/WINDOW_LENGTH_MS)/2))+1
 
 
 df = pd.read_csv(args.srcfile,sep=',',encoding='utf-8')
@@ -132,7 +141,7 @@ def commitRow(row):
         if col in colsToAvg:
             currData[col] /= currentSampleCnt
 
-    if currentSampleCnt >= ignoreSampleCnt:
+    if currentSampleCnt > ignoreSampleCnt:
         currentTimestamp += currData['total_time_s']
 
         currData['timestamp'] = currentTimestamp

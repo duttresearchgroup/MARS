@@ -45,6 +45,9 @@ ExecutionTrace::ExecutionTraceHandle& ExecutionTrace::getHandle(const Performanc
 	return _traceHandle;
 }
 
+const std::string ExecutionTrace::COL_TIMESTAMP = "timestamp";
+const std::string ExecutionTrace::COL_SAMPLEID = "sample_id";
+
 void ExecutionTrace::__dumpNew()
 {
 	//dump the header / overwrite existing file
@@ -52,7 +55,7 @@ void ExecutionTrace::__dumpNew()
 	assert_true(_lastSampleDumped == -1);//if dumping header then samples must've been reset
 
 	std::ofstream of(_pathName);
-	of << "sample_id;timestamp";
+	of << COL_SAMPLEID << ";" << COL_TIMESTAMP;
 	for(const auto &col : _data)
 		of << ";" << col.first;
 	of << "\n";

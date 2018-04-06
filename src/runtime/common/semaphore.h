@@ -15,30 +15,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __arm_rt_actuation_interface_h
-#define __arm_rt_actuation_interface_h
+#ifndef __arm_rt_sempahore_h
+#define __arm_rt_sempahore_h
 
-//has IS_LINUX_PLAT / IS_OFFLINE_PLAT
-#include <runtime/interfaces/common/pal/pal_setup.h>
+#include <condition_variable>
+#include <mutex>
 
-#include "linux/freq_actuator.h"
-#include "linux/idledomain_actuator.h"
-#include "linux/taskmap_actuator.h"
-#include "offline/freq_actuator.h"
-#include "offline/idledomain_actuator.h"
-#include "offline/taskmap_actuator.h"
+class Semaphore {
+private:
+    int count;
+    std::mutex mtx;
+    std::condition_variable cv;
 
-#if defined(IS_LINUX_PLAT)
-	typedef LinuxFrequencyActuator FrequencyActuator;
-	typedef LinuxTaskMapActuator TaskMapActuator;
-	typedef LinuxIdleDomainActuator IdleDomainActuator;
-#elif defined(IS_OFFLINE_PLAT)
-	typedef OfflineFrequencyActuator FrequencyActuator;
-	typedef OfflineTaskMapActuator TaskMapActuator;
-	typedef OfflineIdleDomainActuator IdleDomainActuator;
-#else
-#error "Platform not properly defined"
+public:
+    explicit Semaphore(int count_ = 1) :count(count_){ }
+
+    void notify()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        ++count;
+        cv.notify_one();
+    }
+
+    void wait()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+
+        while(count <= 0){
+            cv.wait(lck);
+        }
+        --count;
+    }
+
+    bool tryWait()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        if(count > 0) {
+            --count;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    int getCount()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        return count;
+    }
+};
+
+
 #endif
-
-#endif
-

@@ -21,6 +21,7 @@
 #include <tclap/CmdLine.h>
 
 #include <core/core.h>
+#include <runtime/common/strings.h>
 
 #include "rt_config_params.h"
 
@@ -34,6 +35,7 @@ static int map_overheadtest_core0 = UNSET_NUM;
 static int map_overheadtest_core1 = UNSET_NUM;
 static std::string predictor_filename = UNSET_STR;
 static std::string idlepower_filename = UNSET_STR;
+static std::string model_path = UNSET_STR;
 static std::string outdir = UNSET_STR;
 static std::string sisotest_ctrlname = UNSET_STR;
 static double sisotest_ref0 = UNSET_NUM;
@@ -115,6 +117,9 @@ bool init_rt_config_params(int argc, const char * argv[]){
 		TCLAP::ValueArg<std::string> p_idlepower_filename(f(),"idlepower_filename","Path to the idle power file (required if on MAPPING mode)",false,idlepower_filename,"string");
 		cmd.add(p_idlepower_filename);
 
+        TCLAP::ValueArg<std::string> p_model_path(f(),"model_path","Path to the directory containing models",false,model_path,"string");
+        cmd.add(p_model_path);
+
 		TCLAP::ValueArg<std::string> p_outdir(f(),"outdir","Path to the directory that stores output files",false,outdir,"string");
 		cmd.add(p_outdir);
 
@@ -174,6 +179,7 @@ bool init_rt_config_params(int argc, const char * argv[]){
 		map_overheadtest_core1 = p_map_overheadtest_core1.getValue();
 		predictor_filename = p_predictor_filename.getValue();
 		idlepower_filename = p_idlepower_filename.getValue();
+		model_path = p_model_path.getValue();
 		outdir = p_outdir.getValue();
 		sisotest_ctrlname = p_sisotest_ctrlname.getValue();
 		sisotest_ref0 = p_sisotest_ref0.getValue();
@@ -204,6 +210,10 @@ const std::string& rt_param_model_idlepower_file(void){
 	return idlepower_filename;
 }
 
+const std::string& rt_param_model_path(void){
+    return model_path;
+}
+
 const std::string& rt_param_mode(void){
 	return mode;
 }
@@ -232,6 +242,7 @@ void rt_param_print(){
     pinfo("\tmap_overheadtest_core1 = %d\n", rt_param_overheadtest_core1());
     pinfo("\tidlepower_filename = %s\n", rt_param_model_idlepower_file().c_str());
     pinfo("\tpredictor_filename = %s\n", rt_param_model_predictor_file().c_str());
+    pinfo("\tmodel_path = %s\n", rt_param_model_path().c_str());
     pinfo("\tadditional perfcnts:\n");
     for(i = 0; i < SIZE_PERFCNT; ++i){
     	if(rt_param_trace_perfcnt((perfcnt_t)i)) {
@@ -265,20 +276,6 @@ static int sys_ctrl_sub_refs_cnt = 0;
 static std::vector<double> sys_ctrl_refs_perf;
 static std::vector<double> sys_ctrl_refs_pow;
 static std::vector<int> sys_ctrl_refs_times;
-
-template<typename T>
-static std::vector<T> splitstr(const std::string &s, char delim){
-	std::stringstream stream(s);
-	std::vector<T> vals;
-	while(true) {
-	   T aux;
-	   stream >> aux;
-	   if(!stream)break;
-	   vals.push_back(aux);
-	   stream.ignore(1,delim);
-	}
-	return vals;
-}
 
 static void parse_sys_ctrl_refs()
 {

@@ -53,4 +53,9 @@ else
 fi
 
 echo Please make sure $__CONF
-echo has the correct setupt before running scripts
+echo has the correct setup before running scripts
+
+if [ "$__CONFDEFAULT" -nt "$__CONF" ]
+then
+    echo WARNING: $(basename $__CONFDEFAULT) is newer than $(basename $__CONF). You may need to update your $(basename $__CONF)
+fi

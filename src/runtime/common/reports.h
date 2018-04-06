@@ -38,6 +38,8 @@ public:
 	public:
 		double& operator()(const std::string &entry);
 
+		int sampleIdx() { return _sampleIdx; }
+
 	private:
 		ExecutionTraceHandle(ExecutionTrace &trace)
 			:_trace(trace),_sampleIdx(0)
@@ -107,6 +109,9 @@ public:
 		_lastSampleDumped = -1;
 		_dump();
 	}
+
+	static const std::string COL_TIMESTAMP;
+	static const std::string COL_SAMPLEID;
 
 };
 

@@ -31,16 +31,15 @@
 #include <map>
 #include <random>
 #include <thread>
+#include <set>
 
-#include "offline_sim/semaphore.h"
+#include <runtime/common/semaphore.h>
 #include "core/core.h"
 #include "offline_sim/inputparser.h"
 #include "offline_sim/exec_sim.h"
 #include "../../sa_solver/solver_cinterface.h"
 #include "../../sa_solver/solver_defines.h"
 #include "app_common.h"
-#include "bin_based_predictor_common.h"
-
 
 struct __overhead {
     double acc;

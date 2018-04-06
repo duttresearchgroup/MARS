@@ -75,7 +75,7 @@ FILES=$(ls $RAW_OUTPUT_DIR/periodic_trace_result*.csv | xargs)
 for file in $FILES 
 do
     cp $file $file.prepowerajustcsv
-    python3 $SPARTA_SCRIPTDIR/tracing/remove_idle_power.py --srcfile $file --destfile $file --idlepowerdir $IDLE_POWER_DIR
+    python3 $SPARTA_SCRIPTDIR/tracing/remove_idle_power.py --srcfile $file --destfile $file --idlepowers $IDLE_POWER_DIR.json
 done
 
 #aggregates the files from multiples runs
