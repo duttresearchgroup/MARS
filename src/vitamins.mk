@@ -20,7 +20,7 @@
 #OPT_FLAGS= -O0 -g
 OPT_FLAGS= -O2 -g
 FLAGS = -Wno-psabi -Wextra -Wall -Werror -Wno-unused-parameter -Wno-error=cpp -Wno-error=format -Wno-error=unused-result $(OPT_FLAGS) $(EXTRAFLAGS) -Isrc -DPLAT_DEF=$(PLAT)
-CXXFLAGS = $(FLAGS) -std=c++11 -pthread -Isrc/external/linsched/tools/linsched/include -Isrc/external/mcpat -Isrc/external/tclap/include
+CXXFLAGS = $(FLAGS) -std=c++11 -pthread -Isrc/external/linsched/tools/linsched/include -Isrc/external/mcpat
 CCFLAGS = $(FLAGS) -std=c99 -pedantic-errors -Wstrict-prototypes #-nostdlib -nodefaultlibs -fno-exceptions -DNDEBUG
 
 CXX = $(CROSS_COMPILE)g++

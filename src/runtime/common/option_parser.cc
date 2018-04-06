@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
-#include <runtime/managers/overhead_test.h>
+#include "option_parser.h"
 
-int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	const std::string& mode = OptionParser::get<std::string>("mode");
-	daemon_run_sys(new OverheadTestSystem(mode));
-	return 0;
-}
+OptionParser* OptionParser::_optionParser = nullptr;
+
+const std::string OptionsTraits<OPT_OUTDIR>::str = "outdir";
+const std::string OptionsTraits<OPT_OUTDIR>::desc = "Path to the directory that stores output files";
+
+const std::string OptionsTraits<OPT_MODELPATH>::str = "model_path";
+const std::string OptionsTraits<OPT_MODELPATH>::desc = "ath to the directory containing models";

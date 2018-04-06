@@ -41,7 +41,7 @@ PolicyManager::PolicyManager()
     if(cksum != _win_manager->sensingModule()->data().sysChecksum()) arm_throw(DaemonSystemException,"Sys info cksum differs");
 
     _pm_pid = getpid();
-	_pm_ready_file = rt_param_daemon_file() + ".ready";
+	_pm_ready_file = OptionParser::parser().progName() + ".ready";
 	pinfo("PolicyManager::PolicyManager() done\n");
 }
 
@@ -137,13 +137,6 @@ void PolicyManager::_sensing_setup_common()
 	//we always do instr and busy cy
 	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
 	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
-
-	for(int i = 0; i < SIZE_PERFCNT; ++i){
-		if(i == PERFCNT_BUSY_CY) continue;
-		if(i == PERFCNT_INSTR_EXE) continue;
-		if(rt_param_trace_perfcnt((perfcnt_t)i))
-			_win_manager->sensingModule()->tracePerfCounter((perfcnt_t)i);
-	}
 }
 
 void PolicyManager::registerPolicy(Policy *policy)

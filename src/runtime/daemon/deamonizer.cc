@@ -89,10 +89,9 @@ static void daemon_init(int argc, char * argv[]) {
 
 	//init params
 
-	if(!init_rt_config_params(argc, (const char **)argv))
-		arm_throw(DaemonInitException,"Error parsing daemon initialization params");
+	OptionParser::init(argc, argv);
 
-	rt_param_print();
+	OptionParser::parser().printOpts();
 
 
     if(rtsys != nullptr)

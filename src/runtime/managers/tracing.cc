@@ -17,16 +17,24 @@
 
 #include "tracing.h"
 
+#include <algorithm>
+
+#include <runtime/common/option_parser.h>
 #include <runtime/common/reports.h>
 #include <runtime/common/reports_deprecated.h>
 
 class ExecutionSummaryWithTracedTask : public ExecutionSummary {
 
     const tracked_task_data_t *_traced_task;
+    int _traced_core;
 
 public:
-    ExecutionSummaryWithTracedTask(sys_info_t *sys)
-        :ExecutionSummary(sys), _traced_task(nullptr){}
+    ExecutionSummaryWithTracedTask(sys_info_t *sys, int traced_core)
+        :ExecutionSummary(sys), _traced_task(nullptr), _traced_core(traced_core)
+    {
+        assert_true(traced_core >= 0);
+        assert_true(traced_core < sys->core_list_size);
+    }
 
     virtual ~ExecutionSummaryWithTracedTask(){ if(!_doneCalled) done(); }
 
@@ -50,8 +58,8 @@ void ExecutionSummaryWithTracedTask::dump()
         for(int p = 0; p < data.numCreatedTasks(); ++p)
             if(data.task(p).this_task_pid == _traced_task->this_task_pid){
                 //adds domain power and freq to the traced task only
-                int pd = _sys->core_list[rt_param_trace_core()].power->domain_id;
-                int fd = _sys->core_list[rt_param_trace_core()].freq->domain_id;
+                int pd = _sys->core_list[_traced_core].power->domain_id;
+                int fd = _sys->core_list[_traced_core].freq->domain_id;
                 _d_task[p][0]->data_vals[D_IDX_POWER] = _d_pd[pd][0]->data_vals[D_IDX_POWER];
                 _d_task[p][0]->data_vals[D_IDX_FREQ] = _d_fd[fd][0]->data_vals[D_IDX_FREQ];
 
@@ -68,7 +76,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
 {
     ExecutionSummary::wrapUp();
 
-    pinfo("Wrapping up assuming tracing enabled on core %d\n",rt_param_trace_core());
+    pinfo("Wrapping up assuming tracing enabled on core %d\n",_traced_core);
 
     const tracked_task_data_t *traced_task = nullptr;
     _traced_task = nullptr;
@@ -81,7 +89,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
         auto instr = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,&task,_wid);
         auto busycy = SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_BUSY_CY,&task,_wid);
         auto busytime = SensingInterface::senseAgg<SEN_BUSYTIME_S>(&task,_wid);
-        if((last_cpu_used == rt_param_trace_core()) &&
+        if((last_cpu_used == _traced_core) &&
            (instr > 0) && (busycy > 0) && (busytime > 0)){
             if(traced_task == nullptr) traced_task = &task;
             else if(instr > SensingInterface::senseAgg<SEN_PERFCNT>(PERFCNT_INSTR_EXE,traced_task,_wid)){
@@ -91,7 +99,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
     }
 
     if(traced_task == nullptr){
-        pinfo("Couldn't identify the traced task on core %d\n",rt_param_trace_core());
+        pinfo("Couldn't identify the traced task on core %d\n",_traced_core);
         pinfo("Retrying might fix this\n");
     }
     else {
@@ -106,11 +114,11 @@ void ExecutionSummaryWithTracedTask::wrapUp()
                       / (double) instr_sum;
         if(rate < 0.5){
             pinfo("Task %d is the traced task, but apparently too many other tasks\n",traced_task->this_task_pid);
-            pinfo("executed in core %d's cluster (rate = %f). Too much interference!\n",rt_param_trace_core(),rate);
+            pinfo("executed in core %d's cluster (rate = %f). Too much interference!\n",_traced_core,rate);
             pinfo("Retrying might fix this\n");
         }
-        else if(last_cpu_used != rt_param_trace_core()){
-            pinfo("Task %d is the traced task, but apparently it ran on core %d. It should run in the traced core %d.\n",traced_task->this_task_pid,last_cpu_used,rt_param_trace_core());
+        else if(last_cpu_used != _traced_core){
+            pinfo("Task %d is the traced task, but apparently it ran on core %d. It should run in the traced core %d.\n",traced_task->this_task_pid,last_cpu_used,_traced_core);
             pinfo("Retrying might fix this\n");
         }
         else{
@@ -126,13 +134,6 @@ void ExecutionSummaryWithTracedTask::showReport()
     //Nothing else to print
 }
 
-void TracingSystem::_init()
-{
-	if(rt_param_trace_core() == -1){
-		arm_throw(DaemonSystemException,"tracing core not set");
-	}
-}
-
 TracingSystem::~TracingSystem()
 {
     //deletes all the execution tracing objects
@@ -141,10 +142,28 @@ TracingSystem::~TracingSystem()
     }
 }
 
+const std::string TracingSystem::OPT_TRACED_CORE = "trace_core";
+const std::string TracingSystem::OPT_TRACED_PERFCNTS = "perfcnts";
+
 void TracingSystem::setup()
 {
-	sensingModule()->enablePerTaskSensing();
-	sensingModule()->pinAllTasksToCPU(rt_param_trace_core());
+    _traced_core = OptionParser::get<OPT_TRACED_CORE_TYPE>(OPT_TRACED_CORE);
+    assert_true(_traced_core >= 0);
+    assert_true(_traced_core < info()->core_list_size);
+
+    auto& perfcnts = OptionParser::getVector<OPT_TRACED_PERFCNTS_TYPE>(OPT_TRACED_PERFCNTS);
+
+    for(int i = 0; i < SIZE_PERFCNT; ++i){
+        if(i == PERFCNT_BUSY_CY) continue;//always enabled
+        if(i == PERFCNT_INSTR_EXE) continue;//always enabled
+        if (std::find(perfcnts.begin(), perfcnts.end(), std::string(perfcnt_str((perfcnt_t)i))) != perfcnts.end())
+        {
+            sensingModule()->tracePerfCounter((perfcnt_t)i);
+        }
+    }
+
+    sensingModule()->enablePerTaskSensing();
+	sensingModule()->pinAllTasksToCPU(_traced_core);
 	sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 }
 
@@ -198,7 +217,7 @@ void TracingSystem::window_handler(int wid,PolicyManager *owner)
 
 void TracingSystem::report()
 {
-	ExecutionSummaryWithTracedTask db(info());
+	ExecutionSummaryWithTracedTask db(info(),_traced_core);
 	db.setWid(sensingWindow->wid);
 	db.record();
 }

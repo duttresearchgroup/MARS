@@ -24,7 +24,7 @@
 #include <fstream>
 #include <sstream>
 
-#include <runtime/common/rt_config_params.h>
+#include <runtime/common/option_parser.h>
 #include <runtime/framework/sensing_interface.h>
 #include <runtime/interfaces/performance_data.h>
 #include <runtime/interfaces/sensing_module.h>
@@ -244,7 +244,7 @@ protected:
 
 protected:
 	inline std::string _pathNameTotal(){
-		std::stringstream ss; ss << rt_param_outdir() << "/total.csv"; return ss.str();
+		std::stringstream ss; ss << Options::get<OPT_OUTDIR>() << "/total.csv"; return ss.str();
 	}
 
 	template<typename C>
@@ -281,7 +281,7 @@ protected:
 private:
 	template<typename T>
 	inline std::string _pathNameTrace(const T &t){
-		std::stringstream ss; ss << rt_param_outdir() << "/trace."<< t <<".csv"; return ss.str();
+		std::stringstream ss; ss << Options::get<OPT_OUTDIR>() << "/trace."<< t <<".csv"; return ss.str();
 	}
 
 	template<typename C>

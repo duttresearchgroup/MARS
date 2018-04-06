@@ -31,6 +31,15 @@ class TracingSystem : public PolicyManager {
 
 	static void window_handler(int wid,PolicyManager *owner);
 
+	// Tracing system command line options
+	static const std::string OPT_TRACED_CORE;
+	using OPT_TRACED_CORE_TYPE = int;
+
+	static const std::string OPT_TRACED_PERFCNTS;
+	using OPT_TRACED_PERFCNTS_TYPE = std::string;
+
+	int _traced_core;
+
 private:
 	std::unordered_map<int,ExecutionTrace*> _execTraces;
 
@@ -46,12 +55,8 @@ private:
 	    }
 	}
 
-  	void _init();
-
 public:
-  	TracingSystem() :PolicyManager(), sensingWindow(nullptr){
-  	    _init();
-  	};
+  	TracingSystem() :PolicyManager(), sensingWindow(nullptr),_traced_core(-1){	};
 
 #if defined(IS_OFFLINE_PLAT)
   	TracingSystem(simulation_t *sim) :PolicyManager(sim), sensingWindow(nullptr){

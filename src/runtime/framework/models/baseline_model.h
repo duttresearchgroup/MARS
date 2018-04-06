@@ -49,7 +49,7 @@
 #include "sharing_model_cfs.h"
 
 
-#include <runtime/common/rt_config_params.h>
+#include <runtime/common/option_parser.h>
 #include <runtime/common/strings.h>
 #include <external/minijson_reader/minijson_reader.hpp>
 
@@ -70,12 +70,12 @@ class BaselineModel<BinBasedPred::Predictor,SharingModel> : public BaselineModel
 
     inline std::string _predictorPathName(){
         std::stringstream ss;
-        ss << rt_param_model_path() << "/bin_pred.json";
+        ss << Options::get<OPT_MODELPATH>() << "/bin_pred.json";
         return ss.str();
     }
     inline std::string _idlePowerPathName(){
         std::stringstream ss;
-        ss << rt_param_model_path() << "/idle_power.json";
+        ss << Options::get<OPT_MODELPATH>() << "/idle_power.json";
         return ss.str();
     }
 
