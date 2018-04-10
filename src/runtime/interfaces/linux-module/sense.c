@@ -332,7 +332,8 @@ static inline void sense_tasks(sys_info_t *sys,int wid)
 
 	uint64_t time_elapsed_ms = counter_diff_32(jiffies_to_msecs(jiffies), vitsdata->sensing_windows[wid].prev_sample_time_ms);
 
-	for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
+	vitsdata->sensing_windows[wid].created_tasks_cnt = vitsdata->created_tasks_cnt;
+	for(p = 0; p < vitsdata->sensing_windows[wid].created_tasks_cnt; ++p){
 		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
 		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
 		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
@@ -641,6 +642,7 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
 
     for(wid=0;wid<sensing_window_cnt;++wid){
     	vitsdata->sensing_windows[wid].num_of_samples = 0;
+    	vitsdata->sensing_windows[wid].created_tasks_cnt = 0;
     	vitsdata->sensing_windows[wid].wid = wid;
     }
 

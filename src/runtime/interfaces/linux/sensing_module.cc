@@ -216,6 +216,9 @@ void LinuxSensingModule::cleanUpCreatedTasks()
 			delete _sensed_data._raw_data->created_tasks[i].tsk_model;
 	}
 	const_cast<perf_data_t*>(_sensed_data._raw_data)->created_tasks_cnt = 0;
+
+	for(int i = 0; i < MAX_WINDOW_CNT; ++i)
+	    const_cast<perf_data_t*>(_sensed_data._raw_data)->sensing_windows[i].created_tasks_cnt = 0;
 }
 
 

@@ -54,6 +54,8 @@ struct perf_window_struct {
 
 	uint32_t num_of_samples;
 
+	int created_tasks_cnt;
+
 	//this window id
 	int wid;
 };
@@ -80,10 +82,13 @@ struct perf_data_struct {
     int                     __acc_tasks_last_cpu[MAX_CREATED_TASKS];
     perf_data_freq_domain_t __acc_freq_domains[MAX_NR_CPUS];
 
-	// list of created tasks. Stores sensing info for each task
-	//as of now there is no dealloc because we keep al the sensed info even
+	// list of created tasks. Stores sensing info for each task.
+	//As of now there is no dealloc because we keep al the sensed info even
 	//after the task is done
 	tracked_task_data_t created_tasks[MAX_CREATED_TASKS];
+	//number of created tasks. Notice this may increment in the middle of a
+	//sensing window, so sensing_windows[wid].created_tasks_cnt should be used
+	//to get the number of tasks in the latest window
 	int created_tasks_cnt;
 	int __created_tasks_cnt_tmp;//used to handle race conditions during task creation. Do not read/write this
 
