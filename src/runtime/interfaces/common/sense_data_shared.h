@@ -58,6 +58,9 @@ struct perf_window_struct {
 
 	//this window id
 	int wid;
+
+	volatile bool ___updating;
+	volatile bool ___reading;
 };
 typedef struct perf_window_struct perf_window_t;
 

@@ -34,52 +34,59 @@
 
 
 void* SensingWindowManager::sen_win_dispatcher(void*arg){
-	try {
-		SensingWindowManager *wm = reinterpret_cast<SensingWindowManager*>(arg);
-		SensingModule *sm = wm->sensingModule();
+    try {
+        SensingWindowManager *wm = reinterpret_cast<SensingWindowManager*>(arg);
+        SensingModule *sm = wm->sensingModule();
 
-		sm->resgisterAsDaemonProc();
+        sm->resgisterAsDaemonProc();
 
-		int prevTimestamp = 0;
+        int prevTimestamp = 0;
 
-		while(sm->isSensing()){
-			int wid = sm->nextSensingWindow();
+        while(sm->isSensing()){
+            int wid = sm->nextSensingWindow();
 
-			if(wid == WINDOW_EXIT) {
-				break;
-			}
+            if(wid == WINDOW_EXIT) {
+                break;
+            }
 
-			auto winfo = wm->_windowHandlers_idmap.find(wid);
-			if(winfo == wm->_windowHandlers_idmap.end()) arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
+            auto winfo = wm->_windowHandlers_idmap.find(wid);
+            if(winfo == wm->_windowHandlers_idmap.end())
+                arm_throw(SensingWindowManagerException,"Sensing module returned unknown wid");
 
-			winfo->second->_timestamp += winfo->second->period_ms;
-			{
-			    ReflectiveEngine::Context::SensingWindowScope sws(wid,winfo->second->period_ms);
+            if(sm->isUpdating(wid))
+                pinfo("WARNING: Going to read window %d, but it's still being updated!!!\n",wid);
+            sm->isReading(wid,true);
+            winfo->second->_timestamp += winfo->second->period_ms;
+            {
+                ReflectiveEngine::Context::SensingWindowScope sws(wid,winfo->second->period_ms);
 
-			    if(ReflectiveEngine::enabled()){
-			        // Window is on a diffent period then the previous ones
-			        if(winfo->second->_timestamp != prevTimestamp)
-			            ReflectiveEngine::get().resetModelsOnNewWindowPeriod();
+                if(ReflectiveEngine::enabled()){
+                    // Window is on a diffent period then the previous ones
+                    if(winfo->second->_timestamp != prevTimestamp)
+                        ReflectiveEngine::get().resetModelsOnNewWindowPeriod();
 
-			        ReflectiveEngine::get().resetModelsOnWindow();
-			    }
+                    ReflectiveEngine::get().resetModelsOnWindow();
+                }
 
-			    for(auto &functor : winfo->second->handlers){
-			        if(ReflectiveEngine::enabled())
-			            ReflectiveEngine::get().resetModelsOnHandler();
-			        (functor)(wid,winfo->second->owner);
-			    }
+                for(auto &functor : winfo->second->handlers){
+                    if(ReflectiveEngine::enabled())
+                        ReflectiveEngine::get().resetModelsOnHandler();
+                    (functor)(wid,winfo->second->owner);
+                }
 
-			    prevTimestamp = winfo->second->_timestamp;
-			}
-		}
+                prevTimestamp = winfo->second->_timestamp;
+            }
+            sm->isReading(wid,false);
+            if(sm->isUpdating(wid))
+                pinfo("WARNING: Window %d might've been modified while being read!!!\n",wid);
+        }
 
-		sm->unresgisterAsDaemonProc();
+        sm->unresgisterAsDaemonProc();
 
-	} arm_catch(exit,EXIT_FAILURE);
+    } arm_catch(exit,EXIT_FAILURE);
 
-	pthread_exit(nullptr);
-	return nullptr;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 SensingWindowManager::SensingWindowManager()
