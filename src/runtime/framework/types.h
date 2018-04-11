@@ -30,6 +30,13 @@ enum ActuationType {
 	ACT_FREQ_GOV,
 	ACT_ACTIVE_CORES,
 	ACT_TASK_MAP,
+
+	//Dummy type for testing.
+	//Actuation values for these types are just stored in memory and
+	//have no effect in the system. These actuators are defined only for
+	//the null resource type
+	ACT_DUMMY1,
+	ACT_DUMMY2,
 	//////////////////////////
 	//////////////////////////
 	SIZE_ACT_TYPES
@@ -91,6 +98,26 @@ template <> struct ActuationTypeInfo<ACT_TASK_MAP>{
     };
 };
 
+template <> struct ActuationTypeInfo<ACT_DUMMY1>{
+    using ValType = int;
+
+    struct Ranges {
+        int min;
+        int max;
+        static constexpr int steps = 1;
+    };
+};
+
+template <> struct ActuationTypeInfo<ACT_DUMMY2>{
+    using ValType = int;
+
+    struct Ranges {
+        int min;
+        int max;
+        static constexpr int steps = 1;
+    };
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -110,6 +137,10 @@ enum SensingType {
 	//Other sensing data
 	SEN_POWER_W,
 	SEN_TEMP_C,
+
+	//Dummy sensed type for testing.
+	//It's value is the avg. value of ACT_DUMMY1+ACT_DUMMY2 in the sensing window
+	SEN_DUMMY,
 
 	/////////////
 	SIZE_SEN_TYPES
@@ -226,6 +257,13 @@ template <> struct SensingTypeInfo<SEN_LASTCPU>{
     static const std::string str;
 };
 
+template <> struct SensingTypeInfo<SEN_DUMMY>{
+    using ValType = double; //last cpu used by some task
+    using ParamType = void;
+    static constexpr SensingAggType agg = SEN_AGG_MEAN;
+    static const std::string str;
+};
+
 
 // Helper function to get the name of sen_types
 template<SensingType T>
@@ -254,5 +292,15 @@ const std::string& sen_str(SensingType t);
 // Helper function the get the SensingAggType using a non template param.
 // This is akin to sen_str(SensingType t)
 SensingAggType sen_agg(SensingType t);
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Null resource type
+
+//Won't be implemented anywhere since we only pass around an invelid
+//ptr of this type
+struct NullResource;
+inline const NullResource* nullResource() { return reinterpret_cast<const NullResource*>(1234567890);}
+
 
 #endif

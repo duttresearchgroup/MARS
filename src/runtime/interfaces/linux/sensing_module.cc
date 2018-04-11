@@ -29,14 +29,13 @@
 #include <stdexcept>
 #include <system_error>
 
+#include <base/base.h>
 #include <runtime/interfaces/common/sense_data_shared.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 #include <runtime/interfaces/common/user_if_shared.h>
 #include <runtime/interfaces/common/pal/sensing_setup.h>
 
-#include <base/base.h>
-
-#include <runtime/common/rt_config_params.h>
+#include "dummy.h"
 
 LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 
@@ -63,6 +62,9 @@ LinuxSensingModule::LinuxSensingModule()
     //setup the platform sensors
     pal_sensing_setup(this);
 
+    //setup the dummy sensor
+    DummySensor::create(this);
+
     _attached = this;
 
 }
@@ -82,6 +84,9 @@ LinuxSensingModule::~LinuxSensingModule()
 
     if(close(_module_file_if) < 0)
     	pinfo("LinuxSensingModule::~LinuxSensingModule: close failed with errno=%d!\n",errno);
+
+    //unsetup the dummy sensor
+    DummySensor::destroy();
 
     //unsetup the platform sensors
     pal_sensing_teardown(this);
