@@ -26,7 +26,7 @@
 source $SPARTA_SCRIPTDIR/common/remote.sh
 
 SYNCH_DIRS=$(ls $SPARTA_ROOT 2>/dev/null | xargs -n 1 | grep bin_"$RTS_ARCH"_"$RTS_PLAT")
-SYNCH_DIRS="$SYNCH_DIRS scripts models"
+SYNCH_DIRS="$SYNCH_DIRS scripts models src"
 
 echo Synching: $SYNCH_DIRS
 
