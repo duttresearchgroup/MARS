@@ -18,7 +18,7 @@
 #ifndef __mcpat_proxy_h
 #define __mcpat_proxy_h
 
-#include "core/core.h"
+#include "core_legacy/core.h"
 #include "offline_sim/exec_sim.h"
 #include "external/mcpat/processor.h"
 

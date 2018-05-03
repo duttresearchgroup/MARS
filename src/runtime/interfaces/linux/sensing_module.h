@@ -23,6 +23,8 @@
 
 class LinuxSensingModule
 {
+    friend class SensingWindowManager;
+
   private:
 
 	static LinuxSensingModule* _attached;
@@ -78,6 +80,20 @@ class LinuxSensingModule
 	void cleanUpCreatedTasks();
 
 	void attachSensor(PeriodicSensor *sensor);
+
+  private:
+
+    // Returns true if the sensing module is currently modifying the given window
+    bool isUpdating(int wid) const {
+        assert_true(wid < MAX_WINDOW_CNT);
+        return _sensed_data._raw_data->sensing_windows[wid].___updating;
+    }
+
+    // Called by WindowManager when this window is being read
+    void isReading(int wid, bool yeah) {
+        assert_true(wid < MAX_WINDOW_CNT);
+        const_cast<perf_data_t*>(_sensed_data._raw_data)->sensing_windows[wid].___reading = yeah;
+    }
 };
 
 #endif /* SENSING_MODULE_H_ */

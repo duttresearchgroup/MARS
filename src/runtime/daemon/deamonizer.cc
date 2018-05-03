@@ -30,7 +30,7 @@
 
 
 static void daemon_init(int argc, char * argv[]);
-static void daemon_start(System* sys);
+static void daemon_start(PolicyManager* sys);
 static void daemonize();
 
 void daemon_setup(int argc, char * argv[]) {
@@ -44,7 +44,7 @@ void daemon_setup(int argc, char * argv[]) {
 	} arm_catch(ARM_CATCH_NO_EXIT);
 }
 
-void daemon_run_sys(System* sys) {
+void daemon_run_sys(PolicyManager* sys) {
 	try {
         daemon_start(sys);
 
@@ -61,7 +61,7 @@ void daemon_run_sys(System* sys) {
 }
 
 
-static System *rtsys = nullptr;
+static PolicyManager *rtsys = nullptr;
 
 static void daemon_exit(int sig) {
 	try {
@@ -89,17 +89,16 @@ static void daemon_init(int argc, char * argv[]) {
 
 	//init params
 
-	if(!init_rt_config_params(argc, (const char **)argv))
-		arm_throw(DaemonInitException,"Error parsing daemon initialization params");
+	OptionParser::init(argc, argv);
 
-	rt_param_print();
+	OptionParser::parser().printOpts();
 
 
     if(rtsys != nullptr)
     	arm_throw(DaemonInitException,"Only one Daemon system is allowed");
 }
 
-static void daemon_start(System* sys) {
+static void daemon_start(PolicyManager* sys) {
     if(sys == nullptr)
         arm_throw(DaemonInitException,"Given system is null");
 

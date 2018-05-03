@@ -17,7 +17,7 @@
 
 #include "../pal_setup.h"
 
-#include <core/core.h>
+#include <base/base.h>
 
 
 core_arch_t pal_core_arch(int core)

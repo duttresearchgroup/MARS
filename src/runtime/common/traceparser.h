@@ -25,7 +25,7 @@
 #include <thread>
 #include <mutex>
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/common/semaphore.h>
 #include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/framework/types.h>

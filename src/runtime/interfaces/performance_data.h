@@ -24,7 +24,7 @@
 class PerformanceData {
     friend class LinuxSensingModule;
     friend class OfflineSensingModule;
-    friend class SensingInterface;
+    friend class SensingInterfaceImpl;
 
   private:
 
@@ -41,13 +41,19 @@ class PerformanceData {
 
   public:
 
+	// TODO need to include a task iterator that skips tasks with core_id = -1
+
 	inline const tracked_task_data_t& task(int idx) const {
 		assert_false(idx >= _raw_data->created_tasks_cnt);
 		return _raw_data->created_tasks[idx];
 	}
-	inline const tracked_task_data_t& task(tracked_task_data_t *t) const { return task(t->task_idx); }
-	inline const tracked_task_data_t& task(tracked_task_data_t &t) const { return task(t.task_idx); }
 
+	inline int numCreatedTasks(int wid) const {
+	    assert_false(wid >= MAX_WINDOW_CNT);
+	    return _raw_data->sensing_windows[wid].created_tasks_cnt;
+	}
+
+	// This may change at any time, so it's dangerous to use in the middle of a window
 	inline int numCreatedTasks() const { return _raw_data->created_tasks_cnt;}
 
 	inline uint32_t numMinumumPeriods() { return _raw_data->num_of_minimum_periods;}

@@ -67,10 +67,10 @@ cntRun=0
 while [ ! -z "$TRACE_PERFCNTS" ]
 do
     #actual counters to be collected in this iteration
-    ACTUAL_TRACE_PERFCNTS=""
+    ACTUAL_TRACE_PERFCNTS="perfcnts="
     for cntiter in $(seq 1 $TRACE_MAXPERFCNT)
     do
-        ACTUAL_TRACE_PERFCNTS="$ACTUAL_TRACE_PERFCNTS ${TRACE_PERFCNTS[0]}"
+        ACTUAL_TRACE_PERFCNTS="$ACTUAL_TRACE_PERFCNTS${TRACE_PERFCNTS[0]},"
         unset TRACE_PERFCNTS[0]
         TRACE_PERFCNTS=( "${TRACE_PERFCNTS[@]}" )
     done

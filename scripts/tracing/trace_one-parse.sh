@@ -87,5 +87,6 @@ NEW_NAME=$(python3 $SPARTA_SCRIPTDIR/tracing/trace_name.py --input_file $OUTPUT_
 mv $OUTPUT_TRACE_NAME $NEW_NAME
 
 NEW_NAME=$(python3 $SPARTA_SCRIPTDIR/tracing/trace_name.py --input_file $RAW_OUTPUT_DIR --sysinfo $IDLE_POWER_DIR/sys_info.json)
+rm -rf $NEW_NAME
 mv $RAW_OUTPUT_DIR $NEW_NAME
 

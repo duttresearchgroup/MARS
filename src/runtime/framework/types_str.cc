@@ -43,6 +43,8 @@ const std::string SensingTypeInfo<SEN_FREQ_MHZ>::str       = "freq_mhz";
 
 const std::string SensingTypeInfo<SEN_LASTCPU>::str        = "core";
 
+const std::string SensingTypeInfo<SEN_DUMMY>::str        = "dummy";
+
 
 
 // Same as sen_str() but takes SensingType as function param instead

@@ -24,7 +24,7 @@
 #include <fstream>
 #include <sstream>
 
-#include <runtime/common/rt_config_params.h>
+#include <runtime/common/option_parser.h>
 #include <runtime/framework/sensing_interface.h>
 #include <runtime/interfaces/performance_data.h>
 #include <runtime/interfaces/sensing_module.h>
@@ -51,7 +51,7 @@ public:
 private:
 
 	inline std::string _pathNameTrace(const std::string &traceName){
-		std::stringstream ss; ss << rt_param_outdir() << "/" << traceName <<".csv"; return ss.str();
+		std::stringstream ss; ss << Options::get<OPT_OUTDIR>() << "/" << traceName <<".csv"; return ss.str();
 	}
 
 	const std::string _traceName;
@@ -122,7 +122,7 @@ private:
 
     inline std::string _pathName(){
         std::stringstream ss;
-        ss << rt_param_outdir() << "/sys_info.json";
+        ss << Options::get<OPT_OUTDIR>() << "/sys_info.json";
         return ss.str();
     }
 

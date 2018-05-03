@@ -19,7 +19,7 @@
 #define __arm_rt_powerfilter_h
 
 #include <runtime/framework/sensing_interface.h>
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/interfaces/performance_data.h>
 
 class PowerFilter

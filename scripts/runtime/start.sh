@@ -55,11 +55,19 @@ rm -rf $RTS_DAEMON_PID
 # inserts kernel sensing module
 insmod $RTS_MODULE_PATH
 
+_DAEMON_CMD="$RTS_DAEMON_BIN_DIR/$RTS_DAEMON_BIN outdir=$RTS_DAEMON_OUTDIR mode=$RTS_DAEMON_BIN $RTS_PARAMS"
+
 # starts daemon proc and waits until ready
-$RTS_DAEMON_BIN_DIR/$RTS_DAEMON_BIN outdir=$RTS_DAEMON_OUTDIR mode=$RTS_DAEMON_BIN $RTS_PARAMS
+if [ "$RTS_VALGRIND" -eq "1" ]; then
+    echo "Running with valgrind"
+    $RTS_VALGRIND_CMD $_DAEMON_CMD
+else
+    $_DAEMON_CMD
+fi
+
 while [ ! -f  "$RTS_DAEMON_READY" ]; do sleep 0.001; done
 
-#RTS_DAEMON_READY and RTS_DAEMON_PID have the same content so just link
+# RTS_DAEMON_READY and RTS_DAEMON_PID have the same content so just link
 ln -s $RTS_DAEMON_READY $RTS_DAEMON_PID
 
 

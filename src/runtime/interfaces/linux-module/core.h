@@ -23,7 +23,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-#include "../../../core/base/base.h"
+#include "../../../base/base.h"
 
 #endif
 

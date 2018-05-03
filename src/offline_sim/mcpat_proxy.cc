@@ -21,7 +21,7 @@
 #include <sstream>
 
 #include "mcpat_proxy.h"
-#include "core/core.h"
+#include "core_legacy/core.h"
 #include "offline_sim/exec_sim.h"
 
 #include "external/mcpat/XML_Parse.h"

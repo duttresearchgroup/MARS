@@ -33,7 +33,7 @@
 #include <runtime/interfaces/common/sensing_window_defs.h>
 #include <runtime/interfaces/common/user_if_shared.h>
 
-#include <core/core.h>
+#include <base/base.h>
 
 #include <runtime/common/rt_config_params.h>
 
@@ -817,14 +817,14 @@ void OfflineSensingModule::setSim(simulation_t *sim) {
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
     return 0;
 }
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
     return 0;
 }

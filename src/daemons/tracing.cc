@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/tracing.h>
+#include <runtime/managers/tracing.h>
 
 int main(int argc, char * argv[]){
 	daemon_setup(argc,argv);

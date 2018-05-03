@@ -1,0 +1,367 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   set_robust_list(head)
+   ...
+   fun:*__pthread_initialize_minimal*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*malloc*
+   fun:*_dl_get_origin*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:malloc
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*int_malloc*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:*int_malloc*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:malloc
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_Znwj
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:_Znwj
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:strcspn
+   fun:strsep
+   fun:fillin_rpath
+   fun:_dl_init_paths
+   fun:_dl_non_dynamic_init
+   fun:__libc_init_first
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*fork*
+   fun:*daemonize*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   set_robust_list(head)
+   ...
+   fun:*fork*
+   fun:*daemonize*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*__run_exit_handlers*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*TCLAP*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*TCLAP*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*basic_string*char_traits*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*basic_string*char_traits*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*basic_streambuf*char_traits*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*basic_streambuf*char_traits*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(arg)
+   fun:ioctl
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*ostream_insert*char_traits*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*start_thread*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*pthread*asynccancel
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*pthread*join
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*rt_param_print*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*rt_param_print*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(count)
+   ...
+   fun:fflush
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:memset
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:memset
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*Rb_tree_header*reset*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:*Rb_tree_header*reset*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*PolicyManager*
+   ...
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:*PolicyManager*
+   ...
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:*Rb_tree_header*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:*Rb_tree_header*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*PolicyManager*init_info*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*PolicyManager*init_info*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*pal_sensing_setup*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*pal_sensing_setup*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*SensingWindowManagerC*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*SensingWindowManagerC*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*ActuationInterface*construct*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*ActuationInterface*construct*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   read(buf)
+   ...
+   fun:*ActuationInterface*construct*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:brk
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   brk(end_data_segment)
+   fun:brk
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*sys_info_cksum*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*sys_info_cksum*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*SensingWindowManager*sensingModule*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*SensingWindowManager*sensingModule*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   read(buf)
+   ...
+   fun:*minijson*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:*minijson*
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   ...
+   fun:*minijson*
+   ...
+}

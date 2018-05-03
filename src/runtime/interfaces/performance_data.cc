@@ -17,7 +17,7 @@
 
 #include <type_traits>
 
-#include <runtime/framework/sensing_interface.h>
+#include <runtime/framework/sensing_interface_impl.h>
 #include <runtime/interfaces/performance_data.h>
 #include <runtime/interfaces/sensing_module.h>
 
@@ -27,12 +27,12 @@
 
 
 /*
- * SEN_PERFCNT for cores and tasks
+ * SEN_PERFCNT for cores, tasks, and freq_domains
  */
 //cores
 template<>
 typename SensingTypeInfo<SEN_PERFCNT>::ValType
-SensingInterface::sense<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const core_info_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
@@ -41,7 +41,7 @@ SensingInterface::sense<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::P
 }
 template<>
 typename SensingTypeInfo<SEN_PERFCNT>::ValType
-SensingInterface::senseAgg<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const core_info_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
@@ -52,7 +52,7 @@ SensingInterface::senseAgg<SEN_PERFCNT,core_info_t>(SensingTypeInfo<SEN_PERFCNT>
 //tasks
 template<>
 typename SensingTypeInfo<SEN_PERFCNT>::ValType
-SensingInterface::sense<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const tracked_task_data_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
@@ -61,7 +61,7 @@ SensingInterface::sense<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PER
 }
 template<>
 typename SensingTypeInfo<SEN_PERFCNT>::ValType
-SensingInterface::senseAgg<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const tracked_task_data_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), perfcnt_t>::value, "p must be perfcnt_t");
     const PerformanceData &data = SensingModule::get().data();
@@ -69,21 +69,35 @@ SensingInterface::senseAgg<SEN_PERFCNT,tracked_task_data_t>(SensingTypeInfo<SEN_
     return data.getPerfcntVal(data.swAggrData(wid).tasks[rsc->task_idx].perfcnt,p);
 }
 
+//freq_domains; calls to this actualy shouldn't exist, but the definition is needed for compilation
+template<>
+typename SensingTypeInfo<SEN_PERFCNT>::ValType
+SensingInterfaceImpl::Impl::sense<SEN_PERFCNT,freq_domain_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const freq_domain_info_t *rsc, int wid)
+{
+    arm_throw(SensingInterfaceException,"Function undefined");
+}
+template<>
+typename SensingTypeInfo<SEN_PERFCNT>::ValType
+SensingInterfaceImpl::Impl::senseAgg<SEN_PERFCNT,freq_domain_info_t>(SensingTypeInfo<SEN_PERFCNT>::ParamType p,const freq_domain_info_t *rsc, int wid)
+{
+    arm_throw(SensingInterfaceException,"Function undefined");
+}
+
 
 /*
- * SEN_TOTALTIME_S for cores and tasks
+ * SEN_TOTALTIME_S for cores,tasks, and freq_domains
  */
 //cores
 template<>
 typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
-SensingInterface::sense<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).cpus[rsc->position].perfcnt.time_total_ms / 1000.0;
 }
 template<>
 typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
-SensingInterface::senseAgg<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.time_total_ms / 1000.0;
@@ -92,17 +106,31 @@ SensingInterface::senseAgg<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc, 
 //tasks
 template<>
 typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
-SensingInterface::sense<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.time_total_ms / 1000.0;
 }
 template<>
 typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
-SensingInterface::senseAgg<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.time_total_ms / 1000.0;
+}
+
+//freq_domains; calls to this actualy shouldn't exist, but the definition is needed for compilation
+template<>
+typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
+SensingInterfaceImpl::Impl::sense<SEN_TOTALTIME_S,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
+{
+    arm_throw(SensingInterfaceException,"Function undefined");
+}
+template<>
+typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType
+SensingInterfaceImpl::Impl::senseAgg<SEN_TOTALTIME_S,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
+{
+    arm_throw(SensingInterfaceException,"Function undefined");
 }
 
 
@@ -112,14 +140,14 @@ SensingInterface::senseAgg<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_ta
 //cores
 template<>
 typename SensingTypeInfo<SEN_BUSYTIME_S>::ValType
-SensingInterface::sense<SEN_BUSYTIME_S,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_BUSYTIME_S,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).cpus[rsc->position].perfcnt.time_busy_ms / 1000.0;
 }
 template<>
 typename SensingTypeInfo<SEN_BUSYTIME_S>::ValType
-SensingInterface::senseAgg<SEN_BUSYTIME_S,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_BUSYTIME_S,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.time_busy_ms / 1000.0;
@@ -128,14 +156,14 @@ SensingInterface::senseAgg<SEN_BUSYTIME_S,core_info_t>(const core_info_t *rsc, i
 //tasks
 template<>
 typename SensingTypeInfo<SEN_BUSYTIME_S>::ValType
-SensingInterface::sense<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.time_busy_ms / 1000.0;
 }
 template<>
 typename SensingTypeInfo<SEN_BUSYTIME_S>::ValType
-SensingInterface::senseAgg<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.time_busy_ms / 1000.0;
@@ -149,14 +177,14 @@ SensingInterface::senseAgg<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_tas
 //cores
 template<>
 typename SensingTypeInfo<SEN_NIVCSW>::ValType
-SensingInterface::sense<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return data.swCurrData(wid).cpus[rsc->position].perfcnt.nivcsw;
 }
 template<>
 typename SensingTypeInfo<SEN_NIVCSW>::ValType
-SensingInterface::senseAgg<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.nivcsw;
@@ -165,14 +193,14 @@ SensingInterface::senseAgg<SEN_NIVCSW,core_info_t>(const core_info_t *rsc, int w
 //tasks
 template<>
 typename SensingTypeInfo<SEN_NIVCSW>::ValType
-SensingInterface::sense<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.nivcsw;
 }
 template<>
 typename SensingTypeInfo<SEN_NIVCSW>::ValType
-SensingInterface::senseAgg<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.nivcsw;
@@ -184,14 +212,14 @@ SensingInterface::senseAgg<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_da
 //cores
 template<>
 typename SensingTypeInfo<SEN_NVCSW>::ValType
-SensingInterface::sense<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return data.swCurrData(wid).cpus[rsc->position].perfcnt.nvcsw;
 }
 template<>
 typename SensingTypeInfo<SEN_NVCSW>::ValType
-SensingInterface::senseAgg<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).cpus[rsc->position].perfcnt.nvcsw;
@@ -200,14 +228,14 @@ SensingInterface::senseAgg<SEN_NVCSW,core_info_t>(const core_info_t *rsc, int wi
 //tasks
 template<>
 typename SensingTypeInfo<SEN_NVCSW>::ValType
-SensingInterface::sense<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swCurrData(wid).tasks[rsc->task_idx].perfcnt.nvcsw;
 }
 template<>
 typename SensingTypeInfo<SEN_NVCSW>::ValType
-SensingInterface::senseAgg<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_NVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double)data.swAggrData(wid).tasks[rsc->task_idx].perfcnt.nvcsw;
@@ -220,7 +248,7 @@ SensingInterface::senseAgg<SEN_NVCSW,tracked_task_data_t>(const tracked_task_dat
 //cores
 template<>
 typename SensingTypeInfo<SEN_BEATS>::ValType
-SensingInterface::sense<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const core_info_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), unsigned int>::value, "p must be unsigned int");
     const PerformanceData &data = SensingModule::get().data();
@@ -228,7 +256,7 @@ SensingInterface::sense<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::Param
 }
 template<>
 typename SensingTypeInfo<SEN_BEATS>::ValType
-SensingInterface::senseAgg<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const core_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const core_info_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), unsigned int>::value, "p must be unsigned int");
     const PerformanceData &data = SensingModule::get().data();
@@ -238,7 +266,7 @@ SensingInterface::senseAgg<SEN_BEATS,core_info_t>(SensingTypeInfo<SEN_BEATS>::Pa
 //tasks
 template<>
 typename SensingTypeInfo<SEN_BEATS>::ValType
-SensingInterface::sense<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), unsigned int>::value, "p must be unsigned int");
     const PerformanceData &data = SensingModule::get().data();
@@ -246,7 +274,7 @@ SensingInterface::sense<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS
 }
 template<>
 typename SensingTypeInfo<SEN_BEATS>::ValType
-SensingInterface::senseAgg<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc, int wid)
 {
     static_assert(std::is_same<decltype(p), unsigned int>::value, "p must be unsigned int");
     const PerformanceData &data = SensingModule::get().data();
@@ -260,7 +288,7 @@ SensingInterface::senseAgg<SEN_BEATS,tracked_task_data_t>(SensingTypeInfo<SEN_BE
 //cores
 template<>
 typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType
-SensingInterface::sense<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double) data.swCurrData(wid).freq_domains[rsc->domain_id].avg_freq_mhz_acc /
@@ -268,7 +296,7 @@ SensingInterface::sense<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_
 }
 template<>
 typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType
-SensingInterface::senseAgg<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_info_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return (double) data.swAggrData(wid).freq_domains[rsc->domain_id].avg_freq_mhz_acc /
@@ -281,14 +309,14 @@ SensingInterface::senseAgg<SEN_FREQ_MHZ,freq_domain_info_t>(const freq_domain_in
  */
 template<>
 typename SensingTypeInfo<SEN_LASTCPU>::ValType
-SensingInterface::sense<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return data.swCurrData(wid).tasks[rsc->task_idx].last_cpu_used;
 }
 template<>
 typename SensingTypeInfo<SEN_LASTCPU>::ValType
-SensingInterface::senseAgg<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc, int wid)
 {
     const PerformanceData &data = SensingModule::get().data();
     return data.swAggrData(wid).tasks[rsc->task_idx].last_cpu_used;

@@ -332,7 +332,8 @@ static inline void sense_tasks(sys_info_t *sys,int wid)
 
 	uint64_t time_elapsed_ms = counter_diff_32(jiffies_to_msecs(jiffies), vitsdata->sensing_windows[wid].prev_sample_time_ms);
 
-	for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
+	vitsdata->sensing_windows[wid].created_tasks_cnt = vitsdata->created_tasks_cnt;
+	for(p = 0; p < vitsdata->sensing_windows[wid].created_tasks_cnt; ++p){
 		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
 		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
 		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
@@ -413,6 +414,11 @@ void sense_window(sys_info_t *sys, int wid)
 {
 	int cpu;
 
+	if(vitsdata->sensing_windows[wid].___reading)
+	    pinfo("WARNING: updating window %d, but daemon might still be reading it.!!!\n",wid);
+
+	vitsdata->sensing_windows[wid].___updating = true;
+
 	if(!sensing_window_tasks_flushed){
 		for_each_online_cpu(cpu){
 			flush_tasks_on_cpu(smp_processor_id(),cpu,true);
@@ -425,6 +431,8 @@ void sense_window(sys_info_t *sys, int wid)
 	sense_tasks(sys,wid);
 
 	vitsdata->sensing_windows[wid].num_of_samples += 1;
+
+	vitsdata->sensing_windows[wid].___updating = false;
 }
 
 static inline int is_userspace(struct task_struct *tsk){
@@ -641,7 +649,10 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
 
     for(wid=0;wid<sensing_window_cnt;++wid){
     	vitsdata->sensing_windows[wid].num_of_samples = 0;
+    	vitsdata->sensing_windows[wid].created_tasks_cnt = 0;
     	vitsdata->sensing_windows[wid].wid = wid;
+    	vitsdata->sensing_windows[wid].___reading = false;
+    	vitsdata->sensing_windows[wid].___updating = false;
     }
 
     vitsdata->num_of_minimum_periods = 0;

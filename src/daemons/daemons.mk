@@ -39,7 +39,7 @@ ifeq ($(BINS_DAEMONS_FILTERED),)
 $(info No daemons to build. Is the filter correct ?)
 endif
      
-bin_$(ARCH)_$(PLAT)/daemons/%: src/daemons/%.cc lib_$(ARCH)_$(PLAT)/libruntime.a lib_$(ARCH)_$(PLAT)/libcore.a lib_$(ARCH)_$(PLAT)/libcpulimit.a
+bin_$(ARCH)_$(PLAT)/daemons/%: src/daemons/%.cc lib_$(ARCH)_$(PLAT)/libruntime.a lib_$(ARCH)_$(PLAT)/libbase.a lib_$(ARCH)_$(PLAT)/libcpulimit.a
 	$(CXX) -static $(CXXFLAGS) $^ -o $@
 	
 bin_$(ARCH)_$(PLAT)/daemons:

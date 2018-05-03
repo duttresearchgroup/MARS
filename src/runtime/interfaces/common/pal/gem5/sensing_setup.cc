@@ -36,14 +36,14 @@ void pal_sensing_teardown<SensingModule>(SensingModule *m){
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::sense<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	return 0;
 }
 
 template<>
 typename SensingTypeInfo<SEN_POWER_W>::ValType
-SensingInterface::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
+SensingInterfaceImpl::Impl::senseAgg<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc, int wid)
 {
 	return 0;
 }

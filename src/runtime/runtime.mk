@@ -24,6 +24,7 @@ SRCS_CXX_RUNTIME += $(wildcard src/runtime/daemon/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/common/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/framework/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/framework/models/*.cc)
+SRCS_CXX_RUNTIME += $(wildcard src/runtime/managers/*.cc)
 
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/linux/*.cc)
@@ -32,12 +33,6 @@ ifeq ($(PLAT),offline)
 endif
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/common/pal/$(PLAT)/*.cc)
 SRCS_CC_RUNTIME += $(wildcard src/runtime/interfaces/common/pal/$(PLAT)/*.c)
-
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/systems/controll/*.cc)
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/systems/controll/micro17/*.cc)
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/systems/controll/iccad17/*.cc)
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/systems/controll/asplos18/*.cc)
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/systems/controll/date18/*.cc)
 
 
 ##############

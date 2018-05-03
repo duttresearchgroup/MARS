@@ -21,7 +21,7 @@
 #include <fstream>
 #include <map>
 
-#include <core/core.h>
+#include <base/base.h>
 
 class CpuFreq
 {
@@ -67,6 +67,8 @@ public:
 	//return min/max in mhz
 	int scaling_max_freq(const freq_domain_info_t *domain);
 	int scaling_min_freq(const freq_domain_info_t *domain);
+
+	const sys_info_t& sys_info() { return _info; }
 
 };
 

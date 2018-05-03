@@ -22,11 +22,14 @@
 #include <map>
 
 #include "types.h"
-#include <core/core.h>
-#include "actuator.h"
+#include "sensing_interface.h"
+#include "actuation_interface_impl.h"
+#include <base/base.h>
 
 
-class ActuationInterface {
+class ActuationInterface : ActuationInterfaceImpl {
+
+    friend class ReflectiveEngine;
 
   public:
 
@@ -34,108 +37,72 @@ class ActuationInterface {
 	 * Sets a new actuation valute
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static void actuate(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
+	static void actuate(const ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		act->doSysActuation(rsc,val);
+	    if(ReflectiveEngine::isReflecting())
+	        tryActuate<ACT_T>(rsc,val);
+	    else{
+	        if(ReflectiveEngine::enabled())
+	            ReflectiveEngine::get().actuate<ACT_T>(rsc,val);
+	        Impl::actuate<ACT_T>(rsc,val);
+	    }
 	}
 
 	/*
 	 * Gets the current actuation value.
-	 * Value is stored at *val
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static void actuationVal(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
+	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(const ResourceT *rsc)
 	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		act->getSysActuation(rsc,val);
+	    if(ReflectiveEngine::isReflecting())
+            return tryActuationVal<ACT_T>(rsc);
+        else
+            return Impl::actuationVal<ACT_T>(rsc);
 	}
 
-	/*
-	 * Gets the current actuation value.
-	 * A new val object is returned
-	 */
-	template<ActuationType ACT_T,typename ResourceT>
-	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(ResourceT *rsc)
-	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		typename ActuationTypeInfo<ACT_T>::ValType val;
-		act->getSysActuation(rsc,&val);
-		return val;
-	}
+    /*
+     * Gets the actuation ranges
+     */
+    template<ActuationType ACT_T,typename ResourceT>
+    static const typename ActuationTypeInfo<ACT_T>::Ranges& actuationRanges(const ResourceT *rsc)
+    { return Impl::actuationRanges<ACT_T>(rsc); }
+
+    /*
+     * Tries to change the actuation ranges.
+     */
+    template<ActuationType ACT_T,typename ResourceT>
+    static void actuationRanges(const ResourceT *rsc, const typename ActuationTypeInfo<ACT_T>::Ranges &new_range)
+    { Impl::actuationRanges<ACT_T>(rsc,new_range); }
+
+    /*
+     * One-time functions that need be called before using the interface
+     * and after we are done using it to contruct/destruct object that may
+     * be necessary for implementing the interface.
+     */
+    static void construct(const sys_info_t &info);
+    static void destruct();
 
 
 	/*
 	 * Updates the predictive models with a new actuation value
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static void tryActuate(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
+	static void tryActuate(const ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
 	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		act->doModelActuation(rsc,val);
+	    //pinfo("tryActuate\n");
+	    ReflectiveEngine::get().tryActuate<ACT_T>(rsc,val);
 	}
 
 	/*
 	 * Gets the current actuatuation values from the predictive models
-	 * Value is stored at *val
 	 */
 	template<ActuationType ACT_T,typename ResourceT>
-	static void tryActuationVal(ResourceT *rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
+	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(const ResourceT *rsc)
 	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		act->getModelActuation(rsc,val);
-	}
-
-	/*
-	 * Gets the current actuatuation values from the predictive models
-	 * A new val object is returned
-	 */
-	template<ActuationType ACT_T,typename ResourceT>
-	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(ResourceT *rsc)
-	{
-		Actuator *act = Actuator::actForResource<ACT_T>(rsc);
-		typename ActuationTypeInfo<ACT_T>::ValType val;
-		act->getModelActuation(rsc,&val);
-		return val;
-	}
-
-
-	//Convenience functions that for passing resource as reference
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static void actuate(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
-	{
-		actuate<ACT_T,ResourceT>(&rsc,val);
-	}
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static void actuationVal(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
-	{
-		actuationVal<ACT_T,ResourceT>(&rsc,val);
-	}
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static typename ActuationTypeInfo<ACT_T>::ValType actuationVal(ResourceT &rsc)
-	{
-		return actuationVal<ACT_T,ResourceT>(&rsc);
-	}
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static void tryActuate(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType val)
-	{
-		tryActuate<ACT_T,ResourceT>(&rsc,val);
-	}
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static void tryActuationVal(ResourceT &rsc, typename ActuationTypeInfo<ACT_T>::ValType *val)
-	{
-		tryActuationVal<ACT_T,ResourceT>(&rsc,val);
-	}
-
-	template<ActuationType ACT_T,typename ResourceT>
-	static typename ActuationTypeInfo<ACT_T>::ValType tryActuationVal(ResourceT &rsc)
-	{
-		return tryActuationVal<ACT_T,ResourceT>(&rsc);
+	    if(ReflectiveEngine::get().hasNewActuationVal<ACT_T>(rsc))
+	        return ReflectiveEngine::get().newActuationVal<ACT_T>(rsc);
+	    else
+	        return Impl::actuationVal<ACT_T>(rsc);
 	}
 };
 

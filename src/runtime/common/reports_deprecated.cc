@@ -19,9 +19,9 @@
 #include <ostream>
 #include <fstream>
 
-#include <core/base/base.h>
+#include <base/base.h>
 
-#include <runtime/common/rt_config_params.h>
+#include <runtime/common/option_parser.h>
 #include <runtime/common/reports_deprecated.h>
 #include <sstream>
 
@@ -425,7 +425,7 @@ void TimeTracer::dump()
 
     assert_false(_timestamps.size() != _time_series_size);
 
-	pinfo("TimeTracer - dumping to %s\n", rt_param_outdir().c_str());
+	pinfo("TimeTracer - dumping to %s\n", Options::get<OPT_OUTDIR>().c_str());
 
 	_dumpComponentTimeSeries(*_sys,_d_sys[0]);
 

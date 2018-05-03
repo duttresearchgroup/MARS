@@ -33,10 +33,10 @@
 #include <thread>
 #include <unistd.h>
 
-#include "../runtime/systems/tracing.h"
+#include "../runtime/managers/tracing.h"
 #include <runtime/common/semaphore.h>
 //#include "offline_sim/sensing_module.h"
-#include "core/core.h"
+#include "core_legacy/core.h"
 #include "offline_sim/inputparser.h"
 #include "offline_sim/exec_sim.h"
 //#include "../sa_solver/solver_cinterface.h"
@@ -44,9 +44,9 @@
 #include "common/app_common.h"
 //#include "bin_based_predictor_common.h"
 
-//#include "runtime/framework/system.h"
+//#include "runtime/framework/policy.h"
 
-static System *rtsys = nullptr;
+static PolicyManager *rtsys = nullptr;
 static simulation_t *sim = nullptr;
 
 static void daemon_exit(int sig) {

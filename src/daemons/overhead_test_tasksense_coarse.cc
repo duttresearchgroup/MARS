@@ -16,11 +16,11 @@
  ******************************************************************************/
 
 #include <runtime/daemon/deamonizer.h>
-#include <runtime/systems/overhead_test.h>
+#include <runtime/managers/overhead_test.h>
 
 int main(int argc, char * argv[]){
 	daemon_setup(argc,argv);
-	const std::string& mode = rt_param_mode();
+	const std::string& mode = OptionParser::get<std::string>("mode");
 	daemon_run_sys(new OverheadTestSystem(mode));
 	return 0;
 }

@@ -18,9 +18,9 @@
 #ifndef __arm_rt_models_binbased_funcs_h
 #define __arm_rt_models_binbased_funcs_h
 
-#include <core/core.h>
+#include <base/base.h>
 #include <runtime/common/traceparser.h>
-#include <runtime/framework/sensing_interface.h>
+#include <runtime/framework/sensing_interface_impl.h>
 #include <runtime/interfaces/common/sense_defs.h>
 
 namespace BinBasedPred {
@@ -274,7 +274,7 @@ struct BinFuncImplWrapper : private BinFuncImpl<ID> {
 
     template<typename ResourceT>
     static double op(const ResourceT *rsc, int wid){
-        return BinFuncImpl<ID>::template op<SensingInterface, ResourceT>(rsc,wid);
+        return BinFuncImpl<ID>::template op<SensingInterfaceImpl::Impl, ResourceT>(rsc,wid);
     }
 
     static double op(const TraceParser::CSVData &data){
