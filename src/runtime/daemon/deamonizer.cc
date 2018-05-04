@@ -1,17 +1,17 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
  * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -143,6 +143,9 @@ static void daemonize() {
     /* or another appropriated directory */
     if(chdir("/")!=0) arm_throw(DaemonInitException,"chdir error. errno = %d",errno);
 
+    // Does no send log to kmsg if DAEMON_NO_KMSG is defined at
+    // src/runtime/interfaces/common/pal/$(plat)/defs.h
+#ifndef DAEMON_NO_KMSG
     /* Close all open file descriptors */
     int x;
     for (x = sysconf(_SC_OPEN_MAX); x>0; x--)
@@ -158,7 +161,7 @@ static void daemonize() {
     stderr = fopen("/dev/kmsg","w");
     if(stderr == NULL)
     	arm_throw(DaemonInitException,"Couldn't point stderr to /dev/ksmg errno=%d",errno);
-
+#endif
     pinfo("Process deamoninzed. pid %d\n",getpid());
 }
 

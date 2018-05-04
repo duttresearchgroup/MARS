@@ -1,16 +1,17 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
- * 
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -65,7 +66,7 @@ static inline void reset_cpu_counters(perf_data_cpu_t *sen_data){
 static inline void reset_freq_counters(perf_data_freq_domain_t *sen_data){
 	sen_data->avg_freq_mhz_acc = 0;
 	sen_data->time_ms_acc = 0;
-	sen_data->last_update_time_ms = jiffies_to_msecs(jiffies);
+	sen_data->last_update_time_ms = ktime_to_ms(ktime_get());
 	smp_mb();
 }
 
@@ -166,10 +167,10 @@ static void flush_tasks_on_cpu(int cpu, int tgt_cpu, bool mustwait){
 
         up(per_cpu(vitamins_flush_tasks_run,tgt_cpu));
 
-        aux = jiffies;
+        aux = ktime_to_ns(ktime_get());
         while((per_cpu(vitamins_flush_tasks_done,tgt_cpu) == false) && mustwait) {
             smp_mb();
-            if((jiffies - aux) >= 1 ){
+            if((ktime_to_ns(ktime_get()) - aux) >= 1 ){
                 break;
             }
         }
@@ -252,7 +253,7 @@ static void sense_cpus(sys_info_t *sys, int wid)
 	unsigned long flags;
 	perf_data_cpu_t data_cnt;
 
-	uint64_t curr_time_ms = jiffies_to_msecs(jiffies);
+	uint64_t curr_time_ms = ktime_to_ms(ktime_get());
 	uint64_t time_elapsed_ms = counter_diff_32(curr_time_ms, vitsdata->sensing_windows[wid].curr_sample_time_ms);
 
     vitsdata->sensing_windows[wid].prev_sample_time_ms = vitsdata->sensing_windows[wid].curr_sample_time_ms;
@@ -330,7 +331,7 @@ static inline void sense_tasks(sys_info_t *sys,int wid)
 	unsigned long flags;
 	perf_data_cpu_t data_cnt;
 
-	uint64_t time_elapsed_ms = counter_diff_32(jiffies_to_msecs(jiffies), vitsdata->sensing_windows[wid].prev_sample_time_ms);
+	uint64_t time_elapsed_ms = counter_diff_32(ktime_to_ms(ktime_get()), vitsdata->sensing_windows[wid].prev_sample_time_ms);
 
 	vitsdata->sensing_windows[wid].created_tasks_cnt = vitsdata->created_tasks_cnt;
 	for(p = 0; p < vitsdata->sensing_windows[wid].created_tasks_cnt; ++p){
@@ -392,7 +393,7 @@ void minimum_sensing_window(sys_info_t *sys)
 {
     int i;
 
-    uint64_t curr_time = jiffies_to_msecs(jiffies);
+    uint64_t curr_time = ktime_to_ms(ktime_get());
     //sense freq
 	for(i = 0; i < sys->freq_domain_list_size; ++i){
     	//gets the frequency using one of the cores in this domain's core list
@@ -482,7 +483,7 @@ static inline void vitamins_sensing_begin_probe(int cpu, struct task_struct *tsk
 	start_perf_sense(cpu);
 
     for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data->perfcnt.perfcnts[i] = read_perfcnt(cpu,vitsdata->idx_to_perfcnt_map[i]);
-    data->perfcnt.time_busy_ms = jiffies_to_msecs(jiffies);
+    data->perfcnt.time_busy_ms = ktime_to_ms(ktime_get());
 
     //beats data
     p = hook_hashmap_get(tsk);
@@ -516,7 +517,7 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 
     for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i)
     	perfcnts[i] = counter_diff_32(read_perfcnt(cpu,vitsdata->idx_to_perfcnt_map[i]), data_begin->perfcnt.perfcnts[i]);
-    time_busy_ms = counter_diff_32(jiffies_to_msecs(jiffies), data_begin->perfcnt.time_busy_ms);
+    time_busy_ms = counter_diff_32(ktime_to_ms(ktime_get()), data_begin->perfcnt.time_busy_ms);
 
     //beats data
     p = hook_hashmap_get(tsk);
@@ -632,7 +633,7 @@ static void vitamins_sense_cleanup_counters(sys_info_t *sys)
     int i,wid;
 
     for(wid=0;wid<sensing_window_cnt;++wid){
-    	vitsdata->sensing_windows[wid].curr_sample_time_ms = jiffies_to_msecs(jiffies);
+    	vitsdata->sensing_windows[wid].curr_sample_time_ms = ktime_to_ms(ktime_get());
     	vitsdata->sensing_windows[wid].prev_sample_time_ms = vitsdata->sensing_windows[wid].curr_sample_time_ms;
     }
     for_each_online_cpu(i){
@@ -690,7 +691,7 @@ void sense_begin(sys_info_t *sys)
 {
     vitamins_sense_cleanup_counters(sys);
 
-    vitsdata->starttime_ms = jiffies_to_msecs(jiffies);
+    vitsdata->starttime_ms = ktime_to_ms(ktime_get());
     vitsdata->stoptime_ms = vitsdata->starttime_ms;
 
     //carefull that vit_plat_enabled_perfcnts may show fixed enabled counter event before any is made available (e.g. PERFCNT_BUSY_CY on armv7)
@@ -702,7 +703,7 @@ void sense_begin(sys_info_t *sys)
 
 void sense_stop(sys_info_t *sys)
 {
-    vitsdata->stoptime_ms = jiffies_to_msecs(jiffies);
+    vitsdata->stoptime_ms = ktime_to_ms(ktime_get());
 
     unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
     unregister_trace_sched_switch(vitamins_context_switch_probe,0);
