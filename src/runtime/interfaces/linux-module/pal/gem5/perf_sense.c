@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "../../../common/pal/gem5/_common.h"
 #include "../../../linux-module/pal/pal.h"
 //@donny TODO: need to hook this into gem5 stats to get counters
 #define PMN_COUNT 31

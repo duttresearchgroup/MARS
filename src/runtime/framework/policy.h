@@ -51,14 +51,9 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 	//used to check only one system object should exist
 	static bool _pm_created;
 
-	sys_info_t _sys_info;
-	core_info_t _core_info_list[MAX_NR_CPUS];
+	sys_info_t &_sys_info;
 
 	void _init_common();
-	void _init_info();
-#if defined(IS_OFFLINE_PLAT)
-	void _init_info(simulation_t *sim);
-#endif
 	void _sensing_setup_common();
 
 	int _pm_pid;

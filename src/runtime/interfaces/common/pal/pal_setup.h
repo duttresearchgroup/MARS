@@ -42,37 +42,15 @@
 /////////////////////////////////////////
 //platform specific functions
 
-
 //implemented at plat/setup_info.c
 //Good for both kernel C and user C++
 
 CBEGIN
 
-core_arch_t pal_core_arch(int core);
-
-bool pal_arch_has_freq(core_arch_t arch, core_freq_t freq);
-
-void pal_setup_freq_domains_info(sys_info_t *sys);
-void pal_setup_power_domains_info(sys_info_t *sys);
-
-freq_domain_info_t * pal_core_freq_domain(int core);
-power_domain_info_t * pal_core_power_domain(int core);
+// Returns a pointer to the sys_info object describing the current platform
+sys_info_t* pal_sys_info(int num_online_cpus);
 
 CEND
-
-//These are not included in the module and implemented only for user level
-
-#ifndef __KERNEL__
-
-//TODO these should be platform independent and implemented elsewhere
-
-void model_setup_freq_domains(sys_info_t *sys);
-void model_setup_power_domains(sys_info_t *sys);
-
-void model_setup_overheads(model_sys_t *sys);
-
-#endif
-
 
 
 #endif

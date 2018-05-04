@@ -29,7 +29,6 @@ AR  = $(CROSS_COMPILE)ar
 
 
 include src/base/base.mk
-include src/core_legacy/core.mk
 include src/apps/apps.mk
 include src/offline_sim/sim.mk
 include src/runtime/runtime.mk
@@ -48,7 +47,7 @@ obj_$(ARCH)_$(PLAT)/%.o : %.c
 	$(CC) -MP -MD $(CCFLAGS) -c $< -o $@
 
 .PHONY: clean
-clean: base_lib_clean core_lib_clean runtime_lib_clean offline_sim_lib_clean apps_clean daemons_clean
+clean: base_lib_clean runtime_lib_clean offline_sim_lib_clean apps_clean daemons_clean
 	rm -rf lib_$(ARCH)_$(PLAT)
 	rm -rf obj_$(ARCH)_$(PLAT)
 	rm -rf bin_$(ARCH)_$(PLAT)

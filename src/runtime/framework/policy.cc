@@ -32,9 +32,8 @@
 bool PolicyManager::_pm_created = false;
 
 PolicyManager::PolicyManager()
+    :_sys_info(*pal_sys_info(sysconf(_SC_NPROCESSORS_ONLN)))
 {
-	_init_info();
-
 	_init_common();
 
     uint32_t cksum = sys_info_cksum(&_sys_info);
@@ -75,51 +74,6 @@ void PolicyManager::_init_common()
     //Does required setup for actuators
     ActuationInterface::construct(_sys_info);
 }
-
-void PolicyManager::_init_info()
-{
-    int online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
-
-	assert_false(online_cpus > MAX_NR_CPUS);
-	assert_false(MAX_NUM_TASKS <= online_cpus);
-
-	_sys_info.core_list = &(_core_info_list[0]);
-	_sys_info.core_list_size = online_cpus;
-
-	pal_setup_freq_domains_info(&_sys_info);
-	pal_setup_power_domains_info(&_sys_info);
-
-	for(int core = 0; core < online_cpus; ++core){
-		core_info_init(&(_core_info_list[core]), pal_core_arch(core), core, pal_core_freq_domain(core), pal_core_power_domain(core));
-	}
-}
-
-#if defined(IS_OFFLINE_PLAT)
-void PolicyManager::_init_info(simulation_t *sim)
-{
-	int online_cpus = sim->core_list_size();
-
-	assert_false(online_cpus > MAX_NR_CPUS);
-	assert_false(MAX_NUM_TASKS <= online_cpus);
-
-	_sys_info.core_list = &(_core_info_list[0]);
-	_sys_info.core_list_size = online_cpus;
-
-	_sys_info.freq_domain_list_size = sim->freq_domain_list_size();
-//	for (int f = 0; f < _sys_info.freq_domain_list_size; f++) {
-//		&(_sys_info.freq_domain_list[f]) = &(sim->freq_domain_info_list()[0]);
-//	}
-	_sys_info.freq_domain_list = &(sim->freq_domain_info_list()[0]);
-
-
-	_sys_info.power_domain_list = &(sim->power_domain_info_list()[0]);
-	_sys_info.power_domain_list_size = sim->power_domain_list_size();
-
-	for(int core = 0; core < online_cpus; ++core){
-		_core_info_list[core] = sim->core_info_list()[core];
-	}
-}
-#endif
 
 PolicyManager::~PolicyManager()
 {
