@@ -20,6 +20,8 @@
 
 #define IS_LINUX_PLAT
 
+#define LINUX_HAS_CPUFREQ
+
 #define MAX_NR_CPUS 8
 #define MAX_CREATED_TASKS 64
 

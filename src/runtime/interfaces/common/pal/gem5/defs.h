@@ -20,10 +20,16 @@
 
 #define IS_LINUX_PLAT
 
+// Currently we are using a Linux-gem5 that does not have the DVFS gov
+//#define LINUX_HAS_CPUFREQ
+
 #define MAX_NR_CPUS 64
 #define MAX_CREATED_TASKS 64
 
 #define MAX_PERFCNTS 64//maximum number of counters
+
+// Daemons won't dump logs to kmsg
+#define DAEMON_NO_KMSG
 
 
 #endif
