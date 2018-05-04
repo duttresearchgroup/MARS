@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -63,6 +63,15 @@ struct TrainingData {
 
 class Predictor : SensingInterfaceImpl {
   private:
+	struct EnumClassHash
+	{
+	    template <typename T>
+	    std::size_t operator()(T t) const
+	    {
+	        return static_cast<std::size_t>(t);
+	    }
+	};
+
     const sys_info_t *_sys_info;//needs to be set for runtime predictions, may be null otherwise
     LayerConf _funcs;
     std::map<CoreFreqPair, MappingBin *> _predictors;
@@ -78,12 +87,12 @@ class Predictor : SensingInterfaceImpl {
                     std::unordered_map<
                         FrequencyMHz,
                         MappingBin *
-                    >
+                    >, EnumClassHash
                 >
-            >
+            >, EnumClassHash
     > _predictors_faster;
-    std::unordered_map<core_arch_t,std::set<FrequencyMHz>> _availableSrcFreqs;
-    std::unordered_map<core_arch_t,std::set<FrequencyMHz>> _availableTgtFreqs;
+    std::unordered_map<core_arch_t,std::set<FrequencyMHz>, EnumClassHash> _availableSrcFreqs;
+    std::unordered_map<core_arch_t,std::set<FrequencyMHz>, EnumClassHash> _availableTgtFreqs;
 
   public:
     // Creates predictor from training data using the specified layers
