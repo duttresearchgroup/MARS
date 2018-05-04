@@ -136,7 +136,7 @@ int LinuxSensingModule::createSensingWindow(int period_ms)
 				case WINDOW_EXIT:
 					arm_throw(LinuxSensingModuleException,"IOCTLCMD_SENSE_WINDOW_CREATE returned WINDOW_EXIT errno=%d",errno);
 				case WINDOW_INVALID_PERIOD:
-					arm_throw(LinuxSensingModuleException,"Sensing period must be multiple of MINIMUM_WINDOW_LENGHT_MS errno=%d",errno);
+					arm_throw(LinuxSensingModuleException,"Sensing period must be multiple of MINIMUM_WINDOW_LENGTH_MS errno=%d",errno);
 				case WINDOW_MAX_NWINDOW:
 					arm_throw(LinuxSensingModuleException,"Maximum number of sensing windows created errno=%d",errno);
 				case WINDOW_EXISTS:

@@ -40,10 +40,10 @@
 
 struct sensing_window_ctrl_struct {
 	int wid;
-	int period;//In terms of MINIMUM_WINDOW_LENGHT
+	int period;//In terms of MINIMUM_WINDOW_LENGTH
 	int period_ms;
 	int period_jiffies;
-	int time_to_ready;//In terms of MINIMUM_WINDOW_LENGHT
+	int time_to_ready;//In terms of MINIMUM_WINDOW_LENGTH
 	//Link for adding this to the list of sensing windows
 	define_list_addable_default(struct sensing_window_ctrl_struct);
 };
@@ -143,10 +143,10 @@ int OfflineSensingModule::createSensingWindow(int period_ms)
 {
 	int i;
 	sensing_window_ctrl_t *iter;
-	int period = period_ms / MINIMUM_WINDOW_LENGHT_MS;
+	int period = period_ms / MINIMUM_WINDOW_LENGTH_MS;
 
-	if((period <= 0) || ((period_ms % MINIMUM_WINDOW_LENGHT_MS)!=0))
-		arm_throw(SensingModuleException,"Sensing period must be multiple of MINIMUM_WINDOW_LENGHT_MS errno=%d",errno);;
+	if((period <= 0) || ((period_ms % MINIMUM_WINDOW_LENGTH_MS)!=0))
+		arm_throw(SensingModuleException,"Sensing period must be multiple of MINIMUM_WINDOW_LENGTH_MS errno=%d",errno);;
 
 	if(sensing_window_cnt >= MAX_WINDOW_CNT)
 		arm_throw(SensingModuleException,"Maximum number of sensing windows created errno=%d",errno);
@@ -209,7 +209,7 @@ int OfflineSensingModule::nextSensingWindow()
 	//return ready window
 //	assert(has_tasks);
 	while(vitamins_list_head(next_window)->time_to_ready != 0){
-		has_tasks = _sim->advance_time_standalone((double)MINIMUM_WINDOW_LENGHT_MS/1000.0,simulation_t::VB_BASIC);
+		has_tasks = _sim->advance_time_standalone((double)MINIMUM_WINDOW_LENGTH_MS/1000.0,simulation_t::VB_BASIC);
 
 		//decrease the time for all windows
 		for(i = 0; i < sensing_window_cnt; ++i)
