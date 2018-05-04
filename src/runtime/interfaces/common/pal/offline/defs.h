@@ -25,4 +25,8 @@
 
 #define MAX_PERFCNTS 16//maximum number of counters
 
+#define MINIMUM_WINDOW_LENGTH_MS 5
+
+#define MAX_WINDOW_CNT 4
+
 #endif

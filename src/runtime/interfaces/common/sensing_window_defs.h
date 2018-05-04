@@ -18,13 +18,22 @@
 #ifndef __arm_rt_sensing_window_defs_h
 #define __arm_rt_sensing_window_defs_h
 
+#include "pal/pal_setup.h"
 
-//Minimum lenght of a sensing window
-//This is also the period used internally in the sensing module to sample
-//sensors/counters that are not sampled at task context switch granularity
-#define MINIMUM_WINDOW_LENGTH_MS 5
+// Minimum length of a sensing window
+// This is also the period used internally in the sensing module to sample
+// sensors/counters that are not sampled at task context switch granularity
+// Must be defined for all platforms
+#ifndef MINIMUM_WINDOW_LENGTH_MS
+    #error "MINIMUM_WINDOW_LENGTH_MS macro not defined"
+#endif
 
-#define MAX_WINDOW_CNT 4
+// The maximum number of sensing window. More windows = more memory allocated
+// for sensing data.
+// Must be defined for all platforms
+#ifndef MAX_WINDOW_CNT
+    #error "MAX_WINDOW_CNT macro not defined"
+#endif
 
 //SPECIAL codes that may be returned instead of a window id
 #define WINDOW_ID_MASK 0xFAB00000
