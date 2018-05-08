@@ -132,7 +132,7 @@ uapi_tests_clean: src/vitamins.mk
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/vitamins.mk clean_uapi_tests
 
 .PHONY: runtime
-runtime: daemons lin_sensing_module uapi_tests
+runtime: daemons lin_sensing_module
 
 .PHONY: clean
 clean:
