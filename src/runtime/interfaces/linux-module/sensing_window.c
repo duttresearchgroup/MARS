@@ -39,7 +39,6 @@ struct sensing_window_ctrl_struct {
 typedef struct sensing_window_ctrl_struct sensing_window_ctrl_t;
 
 static sensing_window_ctrl_t sensing_windows[MAX_WINDOW_CNT];
-int sensing_window_cnt = 0;
 
 //list of sensing windows to keep track of the ones ready to execute
 define_vitamins_list(static sensing_window_ctrl_t,next_window);
@@ -59,23 +58,23 @@ int create_sensing_window(int period_ms)
     if((period <= 0) || ((period_ms % MINIMUM_WINDOW_LENGTH_MS)!=0))
         return WINDOW_INVALID_PERIOD;
 
-    if(sensing_window_cnt >= MAX_WINDOW_CNT)
+    if(vitsdata->sensing_window_cnt >= MAX_WINDOW_CNT)
         return WINDOW_MAX_NWINDOW;
 
-    for(i = 0; i < sensing_window_cnt; ++i)
+    for(i = 0; i < vitsdata->sensing_window_cnt; ++i)
         if(sensing_windows[i].period == period)
             return WINDOW_EXISTS;
 
-    sensing_windows[sensing_window_cnt].wid = sensing_window_cnt;
-    sensing_windows[sensing_window_cnt].period = period;
-    sensing_windows[sensing_window_cnt].period_ms = period_ms;
-    sensing_windows[sensing_window_cnt].time_to_ready = period;
-    clear_object_default(&(sensing_windows[sensing_window_cnt]));
+    sensing_windows[vitsdata->sensing_window_cnt].wid = vitsdata->sensing_window_cnt;
+    sensing_windows[vitsdata->sensing_window_cnt].period = period;
+    sensing_windows[vitsdata->sensing_window_cnt].period_ms = period_ms;
+    sensing_windows[vitsdata->sensing_window_cnt].time_to_ready = period;
+    clear_object_default(&(sensing_windows[vitsdata->sensing_window_cnt]));
     add_to_priority_list_default(next_window,
-            &(sensing_windows[sensing_window_cnt]),sw_order_crit,iter);
-    ++sensing_window_cnt;
+            &(sensing_windows[vitsdata->sensing_window_cnt]),sw_order_crit,iter);
+    ++(vitsdata->sensing_window_cnt);
 
-    return sensing_windows[sensing_window_cnt-1].wid;
+    return sensing_windows[vitsdata->sensing_window_cnt - 1].wid;
 }
 
 
@@ -96,12 +95,12 @@ static inline void __sensing_epoch(int cpu)
     sensing_window_ctrl_t *iter;
 
     //no windows, no sensing
-    if(sensing_window_cnt <= 0) return;
+    if(vitsdata->sensing_window_cnt <= 0) return;
 
     minimum_sensing_window(system_info());
 
     //decrease the time for all windows
-    for(i = 0; i < sensing_window_cnt; ++i)
+    for(i = 0; i < vitsdata->sensing_window_cnt; ++i)
         sensing_windows[i].time_to_ready -= 1;
 
     //triggers all ready ones
@@ -168,7 +167,6 @@ void stop_sensing_windows(){
 
 bool create_queues(){
     clear_list(next_window);
-    sensing_window_cnt = 0;
     sensing_wq = create_workqueue("sensing_epoch_workqueue");
     return sensing_wq != nullptr;
 }
@@ -176,5 +174,4 @@ bool create_queues(){
 void destroy_queues(){
     destroy_workqueue(sensing_wq);
     clear_list(next_window);
-    sensing_window_cnt = 0;
 }

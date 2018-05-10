@@ -32,43 +32,11 @@
 #include "../linux-module/setup.h"
 #include "../linux-module/user_if.h"
 
-
 //per cpu flush kthreads to ensure tasks are sensed at the end of the epoch
 DEFINE_PER_CPU(struct task_struct*,vitamins_flush_tasks);
 DEFINE_PER_CPU(struct semaphore*,vitamins_flush_tasks_run);
 DEFINE_PER_CPU(bool,vitamins_flush_tasks_done);
 static volatile bool vitamins_flush_tasks_stopping;
-
-
-static inline void reset_perf_counters(perf_data_perf_counters_t *sen_data){
-	int cnt;
-	for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt) sen_data->perfcnts[cnt] = 0;
-	sen_data->nivcsw= 0;
-	sen_data->nvcsw = 0;
-	sen_data->time_busy_ms = 0;
-	sen_data->time_total_ms = 0;
-	smp_mb();
-}
-
-static inline void reset_task_counters(int cpu,perf_data_task_t *sen_data){
-	int cnt;
-	reset_perf_counters(&(sen_data->perfcnt));
-	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
-	sen_data->last_cpu_used = cpu;
-}
-
-static inline void reset_cpu_counters(perf_data_cpu_t *sen_data){
-	int cnt;
-	for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
-	reset_perf_counters(&(sen_data->perfcnt));
-}
-
-static inline void reset_freq_counters(perf_data_freq_domain_t *sen_data){
-	sen_data->avg_freq_mhz_acc = 0;
-	sen_data->time_ms_acc = 0;
-	sen_data->last_update_time_ms = ktime_to_ms(ktime_get());
-	smp_mb();
-}
 
 
 static DEFINE_SPINLOCK(new_task_created_lock);
@@ -79,7 +47,6 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     private_hook_data_t *priv_hooks;
     private_hook_data_t *parent;
     sys_info_t *sys;
-    int i;
     int task_idx;
     unsigned long flags;
 
@@ -118,13 +85,8 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     priv_hooks->sen_data_lock[0] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[0]);
     priv_hooks->sen_data_lock[1] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[1]);
 
-    reset_cpu_counters(&(vitsdata->__acc_tasks[task_idx][0]));
-    reset_cpu_counters(&(vitsdata->__acc_tasks[task_idx][1]));
-    vitsdata->__acc_tasks_last_cpu[task_idx] = at_cpu;
-    for(i=0;i<sensing_window_cnt;++i){
-    	reset_task_counters(at_cpu,&(vitsdata->sensing_windows[i].curr.tasks[task_idx]));
-    	reset_task_counters(at_cpu,&(vitsdata->sensing_windows[i].aggr.tasks[task_idx]));
-    }
+    perf_data_reset_task(vitsdata,task_idx, at_cpu);
+
     hooks->num_beat_domains = 0;
     //check if parent has beat domain
     parent = hook_hashmap_get(parent_tsk);
@@ -230,137 +192,40 @@ static int vitamins_flush_tasks_kthread_create(int tgt_cpu){
 //have one lock for each buffer
 static spinlock_t vitamins_cpu_counters_acc_lock[NR_CPUS][2];
 
-// Performs tgt->cnt 'op' acc->cnt, where 'op' is +=,-=,=, for all counters in
-// the structs given by 'acc' and 'tgt'
-// Note:  tgt->perfcnt.time_total_ms is not changed
-#define _perf_data_op(op,tgt,acc) \
-    do{\
-        int cnt;\
-        for(cnt = 0; cnt < MAX_PERFCNTS; ++cnt) (tgt)->perfcnt.perfcnts[cnt] op (acc)->perfcnt.perfcnts[cnt];\
-        (tgt)->perfcnt.nvcsw op (acc)->perfcnt.nvcsw;\
-        (tgt)->perfcnt.nivcsw op (acc)->perfcnt.nivcsw;\
-        (tgt)->perfcnt.time_busy_ms op (acc)->perfcnt.time_busy_ms;\
-        for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) (tgt)->beats[cnt] op (acc)->beats[cnt];\
-    } while(0)
+static inline void perf_data_commit_cpu_window_acc_lock(int cpu, int acc_idx, unsigned long *flags)
+{ spin_lock_irqsave(&(vitamins_cpu_counters_acc_lock[cpu][acc_idx]), (*flags)); }
 
-#define perf_data_set(tgt,acc) _perf_data_op(=,tgt,acc)
-#define perf_data_inc(tgt,acc) _perf_data_op(+=,tgt,acc)
-#define perf_data_dec(tgt,acc) _perf_data_op(-=,tgt,acc)
+static inline void perf_data_commit_cpu_window_acc_unlock(int cpu, int acc_idx, unsigned long *flags)
+{ spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[cpu][acc_idx]), (*flags)); }
+
 
 static void sense_cpus(sys_info_t *sys, int wid)
 {
-	int i;
-	unsigned long flags;
-	perf_data_cpu_t data_cnt;
-
-	uint64_t curr_time_ms = ktime_to_ms(ktime_get());
-	uint64_t time_elapsed_ms = counter_diff_32(curr_time_ms, vitsdata->sensing_windows[wid].curr_sample_time_ms);
-
-    vitsdata->sensing_windows[wid].prev_sample_time_ms = vitsdata->sensing_windows[wid].curr_sample_time_ms;
-    vitsdata->sensing_windows[wid].curr_sample_time_ms = curr_time_ms;
-
-	for_each_online_cpu(i){
-	    perf_data_cpu_t *last_total = &(vitsdata->sensing_windows[wid].aggr.cpus[i]);
-	    perf_data_cpu_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.cpus[i]);
-
-	    //Combine data from both buffers
-	    spin_lock_irqsave(&(vitamins_cpu_counters_acc_lock[i][0]),flags);
-	    perf_data_set(&data_cnt,&(vitsdata->__acc_cpus[i][0]));
-	    spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[i][0]),flags);
-
-	    spin_lock_irqsave(&(vitamins_cpu_counters_acc_lock[i][1]),flags);
-	    perf_data_inc(&data_cnt,&(vitsdata->__acc_cpus[i][1]));
-	    spin_unlock_irqrestore(&(vitamins_cpu_counters_acc_lock[i][1]),flags);
-
-	    //data from current epoch
-	    perf_data_set(curr_epoch,&data_cnt);
-	    perf_data_dec(curr_epoch,last_total);
-
-	    //total acc data
-	    perf_data_set(last_total,&data_cnt);
-
-	    //perfcnt.time_total_ms is not updated within data_cnt, so handled separately
-	    curr_epoch->perfcnt.time_total_ms = time_elapsed_ms;
-	    last_total->perfcnt.time_total_ms += time_elapsed_ms;
-	}
-
-    //freq sense
-    for(i = 0; i < sys->freq_domain_list_size; ++i){
-
-    	perf_data_freq_domain_t *last_total = &(vitsdata->sensing_windows[wid].aggr.freq_domains[i]);
-    	perf_data_freq_domain_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.freq_domains[i]);
-    	perf_data_freq_domain_t *data_cnt = &(vitsdata->__acc_freq_domains[i]);
-
-    	curr_epoch->avg_freq_mhz_acc = data_cnt->avg_freq_mhz_acc - last_total->avg_freq_mhz_acc;
-    	curr_epoch->time_ms_acc = data_cnt->time_ms_acc -  last_total->time_ms_acc;
-
-    	*last_total = *data_cnt;
-    }
+	perf_data_commit_cpu_window(sys,
+	        vitsdata,wid,ktime_to_ms(ktime_get()),
+	        &perf_data_commit_cpu_window_acc_lock,
+	        &perf_data_commit_cpu_window_acc_unlock);
 }
 
-/////////////////////////////
-// perf conter maping funcs
 
-static void vit_reset_mapped_perfcnt(void)
+static inline void perf_data_commit_task_window_acc_lock(int task, int acc_idx, unsigned long *flags)
 {
-	int i;
-	plat_reset_perfcnts();
-	for(i = 0; i < MAX_PERFCNTS;++i) vitsdata->idx_to_perfcnt_map[i] = -1;
-	for(i = 0; i < SIZE_PERFCNT;++i) vitsdata->perfcnt_to_idx_map[i] = -1;
-	vitsdata->perfcnt_mapped_cnt = 0;
-}
-static bool vit_map_perfcnt(perfcnt_t perfcnt)
-{
-	BUG_ON(vitsdata->perfcnt_mapped_cnt > MAX_PERFCNTS);
-	if(vitsdata->perfcnt_mapped_cnt >= MAX_PERFCNTS){
-		pinfo("Cannot use more then %d pmmu counters!",MAX_PERFCNTS);
-		return false;
-	}
-	plat_enable_perfcnt(perfcnt);
-	vitsdata->idx_to_perfcnt_map[vitsdata->perfcnt_mapped_cnt] = perfcnt;
-	vitsdata->perfcnt_to_idx_map[perfcnt] = vitsdata->perfcnt_mapped_cnt;
-	vitsdata->perfcnt_mapped_cnt += 1;
-	return true;
+    private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[task]);
+    spin_lock_irqsave(&(task_priv_hook->sen_data_lock[acc_idx]), (*flags));
 }
 
-///////////////////////////////
+static inline void perf_data_commit_task_window_acc_unlock(int task, int acc_idx, unsigned long *flags)
+{
+    private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[task]);
+    spin_unlock_irqrestore(&(task_priv_hook->sen_data_lock[acc_idx]), (*flags));
+}
 
 static inline void sense_tasks(sys_info_t *sys,int wid)
 {
-	int p;
-	unsigned long flags;
-	perf_data_cpu_t data_cnt;
-
-	uint64_t time_elapsed_ms = counter_diff_32(ktime_to_ms(ktime_get()), vitsdata->sensing_windows[wid].prev_sample_time_ms);
-
-	vitsdata->sensing_windows[wid].created_tasks_cnt = vitsdata->created_tasks_cnt;
-	for(p = 0; p < vitsdata->sensing_windows[wid].created_tasks_cnt; ++p){
-		private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
-		perf_data_task_t *last_total = &(vitsdata->sensing_windows[wid].aggr.tasks[p]);
-		perf_data_task_t *curr_epoch = &(vitsdata->sensing_windows[wid].curr.tasks[p]);
-
-        //Combine data from both buffers
-        spin_lock_irqsave(&(task_priv_hook->sen_data_lock[0]),flags);
-        perf_data_set(&data_cnt,&(vitsdata->__acc_tasks[p][0]));
-        spin_unlock_irqrestore(&(task_priv_hook->sen_data_lock[0]),flags);
-
-        spin_lock_irqsave(&(task_priv_hook->sen_data_lock[1]),flags);
-        perf_data_inc(&data_cnt,&(vitsdata->__acc_tasks[p][1]));
-        spin_unlock_irqrestore(&(task_priv_hook->sen_data_lock[1]),flags);
-
-        //data from current epoch
-        perf_data_set(curr_epoch,&data_cnt);
-        perf_data_dec(curr_epoch,last_total);
-
-        //total acc data
-        perf_data_set(last_total,&data_cnt);
-
-        //perfcnt.time_total_ms is not updated within data_cnt, so handled separately
-        curr_epoch->perfcnt.time_total_ms = time_elapsed_ms;
-        last_total->perfcnt.time_total_ms += time_elapsed_ms;
-        curr_epoch->last_cpu_used = vitsdata->__acc_tasks_last_cpu[p];
-        last_total->last_cpu_used = vitsdata->__acc_tasks_last_cpu[p];
-	}
+    perf_data_commit_tasks_window(sys,
+            vitsdata,wid,ktime_to_ms(ktime_get()),
+            &perf_data_commit_task_window_acc_lock,
+            &perf_data_commit_task_window_acc_unlock);
 }
 
 bool update_task_beat_info(pid_t pid)
@@ -630,50 +495,24 @@ void sense_init(sys_info_t *sys)
 
 static void vitamins_sense_cleanup_counters(sys_info_t *sys)
 {
-    int i,wid;
+    int i;
 
-    for(wid=0;wid<sensing_window_cnt;++wid){
-    	vitsdata->sensing_windows[wid].curr_sample_time_ms = ktime_to_ms(ktime_get());
-    	vitsdata->sensing_windows[wid].prev_sample_time_ms = vitsdata->sensing_windows[wid].curr_sample_time_ms;
-    }
     for_each_online_cpu(i){
-    	reset_cpu_counters(&(cpu_counters_begin[i]));
+        _perf_data_reset_cpu_counters(&(cpu_counters_begin[i]));
     	first_sense[i] = true;
-    	vitsdata->num_of_csw_periods[i] = 0;
-    	reset_cpu_counters(&(vitsdata->__acc_cpus[i][0]));
-    	reset_cpu_counters(&(vitsdata->__acc_cpus[i][1]));
-    	for(wid=0;wid<sensing_window_cnt;++wid){
-    		reset_cpu_counters(&(vitsdata->sensing_windows[wid].curr.cpus[i]));
-    		reset_cpu_counters(&(vitsdata->sensing_windows[wid].aggr.cpus[i]));
-    	}
     }
 
-    for(wid=0;wid<sensing_window_cnt;++wid){
-    	vitsdata->sensing_windows[wid].num_of_samples = 0;
-    	vitsdata->sensing_windows[wid].created_tasks_cnt = 0;
-    	vitsdata->sensing_windows[wid].wid = wid;
-    	vitsdata->sensing_windows[wid].___reading = false;
-    	vitsdata->sensing_windows[wid].___updating = false;
-    }
-
-    vitsdata->num_of_minimum_periods = 0;
-
-    for(i = 0; i < sys->freq_domain_list_size; ++i){
-        reset_freq_counters(&(vitsdata->__acc_freq_domains[i]));
-        for(wid=0;wid<sensing_window_cnt;++wid){
-    		reset_freq_counters(&(vitsdata->sensing_windows[wid].curr.freq_domains[i]));
-    		reset_freq_counters(&(vitsdata->sensing_windows[wid].aggr.freq_domains[i]));
-    	}
-    }
-
-    smp_mb();
+    perf_data_cleanup_counters(sys,vitsdata,ktime_to_ms(ktime_get()));
 }
 
 bool trace_perf_counter(perfcnt_t pc){
-	if(pc >= SIZE_PERFCNT) return false;
-	else {
-		return vit_map_perfcnt(pc);
+	if(pc >= SIZE_PERFCNT)
+	    return false;
+	else if(perf_data_map_perfcnt(vitsdata,pc)) {
+	    plat_enable_perfcnt(pc);
+	    return true;
 	}
+	return false;
 }
 
 bool trace_perf_counter_reset(void){
@@ -682,7 +521,8 @@ bool trace_perf_counter_reset(void){
 		return false;
 	}
 	else {
-		vit_reset_mapped_perfcnt();
+	    plat_reset_perfcnts();
+	    perf_data_reset_mapped_perfcnt(vitsdata);
 		return true;
 	}
 }

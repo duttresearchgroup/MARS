@@ -49,15 +49,7 @@ perf_data_t* alloc_sensed_data(sys_info_t *info){
 	_alloc_sensed_data();
 	if(vitsdata == nullptr) return nullptr;
 
-	vitsdata->starttime_ms = 0;
-	vitsdata->created_tasks_cnt = 0;
-	vitsdata->__created_tasks_cnt_tmp = 0;
-	vitsdata->number_of_cpus = NR_CPUS;
-
-	BUG_ON(MAX_NR_CPUS < NR_CPUS);
-
-	vitsdata->__sysChecksum = sys_info_cksum(info);
-	set_perf_data_cksum(vitsdata);
+	perf_data_init(vitsdata,info);
 
 	return vitsdata;
 }

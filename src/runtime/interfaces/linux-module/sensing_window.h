@@ -24,7 +24,6 @@
 bool create_queues(void);
 void destroy_queues(void);
 
-extern int sensing_window_cnt;
 int create_sensing_window(int period_ms);
 
 void start_sensing_windows(void);
