@@ -18,8 +18,10 @@
 #ifndef LINUX_SENSING_MODULE_H_
 #define LINUX_SENSING_MODULE_H_
 
-#include "../performance_data.h"
-#include "sensor.h"
+#include <unistd.h>
+
+#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/sensor.h>
 
 class LinuxSensingModule
 {
@@ -29,12 +31,12 @@ class LinuxSensingModule
 
 	static LinuxSensingModule* _attached;
 
+	PeriodicSensingManager<LinuxSensingModule> _psensingManager;
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
 	volatile bool _sensingRunning;
 	int _numCreatedWindows;
 	PerformanceData _sensed_data;
-	PeriodicSensingManager _psensingManager;
 
   public:
 	LinuxSensingModule();
@@ -79,7 +81,12 @@ class LinuxSensingModule
 
 	void cleanUpCreatedTasks();
 
-	void attachSensor(PeriodicSensor *sensor);
+	void attachSensor(PeriodicSensor<LinuxSensingModule> *sensor);
+
+	void sleepMS(int timeMS)
+	{
+	    usleep(timeMS*1000);
+	}
 
   private:
 

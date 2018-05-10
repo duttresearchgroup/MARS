@@ -31,10 +31,10 @@
 
 #include <runtime/interfaces/common/pal/sensing_setup.h>
 #include <runtime/interfaces/sensing_module.h>
-#include <runtime/interfaces/linux/sensor.h>
+#include <runtime/interfaces/sensor.h>
 #include <runtime/framework/sensing_interface.h>
 
-class INA231 : public SensorBase<SEN_POWER_W,INA231> {
+class INA231 : public SensorBase<SEN_POWER_W,INA231,SensingModule> {
   public:
 	static constexpr const char* SENSOR_BIGC = "/dev/sensor_arm";
 	static constexpr const char* SENSOR_LITTLEC = "/dev/sensor_kfc";

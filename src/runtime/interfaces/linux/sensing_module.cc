@@ -40,7 +40,8 @@
 LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 
 LinuxSensingModule::LinuxSensingModule()
-	:_module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
+	:_psensingManager(*this),
+	 _module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
 	 _sensingRunning(false),
 	 _numCreatedWindows(0)
 {
@@ -238,7 +239,7 @@ bool LinuxSensingModule::unresgisterAsDaemonProc()
 	return ioctl(_module_file_if, IOCTLCMD_UNREGISTER_DAEMON,0) == 0;
 }
 
-void LinuxSensingModule::attachSensor(PeriodicSensor *sensor)
+void LinuxSensingModule::attachSensor(PeriodicSensor<LinuxSensingModule> *sensor)
 {
 	_psensingManager.attachSensor(sensor);
 }

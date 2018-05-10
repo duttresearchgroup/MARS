@@ -22,15 +22,15 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-
 #include <base/base.h>
 #include <runtime/framework/types.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 
-class PeriodicSensingManager;
+template<typename SensingModule> class PeriodicSensingManager;
 
+template<typename SensingModule>
 class PeriodicSensor {
-	friend class PeriodicSensingManager;
+	friend class PeriodicSensingManager<SensingModule>;
 
   protected:
 
@@ -41,39 +41,105 @@ class PeriodicSensor {
 	virtual ~PeriodicSensor(){}
 };
 
+template<typename SensingModule>
 class PeriodicSensingManager {
   private:
+    SensingModule &_sensing_module;
 	pthread_t		_thread;
 	volatile bool	_threadStop;
 	bool _isRunning;
 
 	bool _sensingWindowSet;
 
-	std::vector<PeriodicSensor*> _sensors;
+	std::vector<PeriodicSensor<SensingModule>*> _sensors;
 
-	void __thread_func();
-	static void* _thread_func(void*arg);
+	void __thread_func()
+	{
+	    pinfo("PeriodicSensing thread started\n");
+
+	    while(!_threadStop){
+	        _sensing_module.sleepMS(MINIMUM_WINDOW_LENGTH_MS);
+
+
+	        for(auto sensor : _sensors)
+	            sensor->doSampling();
+	    }
+	    pinfo("PeriodicSensing thread ended\n");
+	}
+	static void* _thread_func(void*arg)
+	{
+	    try {
+	        PeriodicSensingManager *s = reinterpret_cast<PeriodicSensingManager*>(arg);
+	        s->__thread_func();
+	    } arm_catch(ARM_CATCH_NO_EXIT);
+	    pthread_exit(nullptr);
+	    return nullptr;
+	}
 
   public:
 
-	PeriodicSensingManager();
-	~PeriodicSensingManager();
+	PeriodicSensingManager(SensingModule &module)
+      :_sensing_module(module),
+       _thread(0), _threadStop(false), _isRunning(false), _sensingWindowSet(false)
+    { }
 
-	void attachSensor(PeriodicSensor* sensor);
+	~PeriodicSensingManager()
+	{
+	    if(_isRunning)
+	        stopSensing();
+	}
 
-	void setSensingWindows(int numWindows);
+	void attachSensor(PeriodicSensor<SensingModule>* sensor)
+	{
+	    if(_sensingWindowSet)
+	        arm_throw(SensingException,"Cannot attach new sensors after sensing window is set");
+	    _sensors.push_back(sensor);
+	}
 
-	void windowReady(int wid);
+	void setSensingWindows(int numWindows)
+	{
+	    if(_sensors.size() == 0)
+	        pinfo("WARNING: no sensors attached \"%s\"\n",__PRETTY_FUNCTION__);
+	    for(auto s : _sensors)
+	        s->setSensingWindows(numWindows);
+	    _sensingWindowSet = true;
+	}
 
-	void startSensing();
-	void stopSensing();
+	void windowReady(int wid)
+	{
+	    for(auto s : _sensors)
+	        s->windowReady(wid);
+	}
+
+	void startSensing()
+	{
+	    if(_isRunning)
+	        arm_throw(SensingException,"Sensing already running");
+
+	    int rc = pthread_create(&_thread, NULL, _thread_func, this);
+	    if (rc)
+	        arm_throw(SensingException,"Error code %d returned from pthread_create()",rc);
+
+	    _isRunning = true;
+	}
+
+	void stopSensing()
+	{
+	    if(!_isRunning)
+	        arm_throw(SensingException,"Sensing was not running");
+
+	    _threadStop = true;
+	    pthread_join(_thread,nullptr);
+
+	    _isRunning = false;
+	}
 
 };
 
 
 
-template<SensingType TYPE, typename Derived>
-class SensorBase : public PeriodicSensor {
+template<SensingType TYPE, typename Derived, typename SensingModule>
+class SensorBase : public PeriodicSensor<SensingModule> {
 
 	friend class PeriodicSensing;
 
@@ -142,7 +208,7 @@ class SensorBase : public PeriodicSensor {
 		pthread_mutex_unlock(&_windowMutex);
 	}
 
-	SensorBase() :PeriodicSensor()
+	SensorBase() :PeriodicSensor<SensingModule>()
 	{
 		if(pthread_mutex_init(&_windowMutex,nullptr))
 			arm_throw(SensingException,"pthread_mutex_init failed with errno %d",errno);

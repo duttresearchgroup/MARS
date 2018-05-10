@@ -25,11 +25,11 @@
 #include <base/base.h>
 
 #include <runtime/interfaces/sensing_module.h>
-#include <runtime/interfaces/linux/sensor.h>
+#include <runtime/interfaces/sensor.h>
 #include <runtime/framework/types.h>
 
 
-class DummySensor : public SensorBase<SEN_DUMMY,DummySensor> {
+class DummySensor : public SensorBase<SEN_DUMMY,DummySensor,SensingModule> {
 
   public:
 
