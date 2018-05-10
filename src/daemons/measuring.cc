@@ -33,7 +33,7 @@ private:
     TimeTracer _timeTracer;
 
 public:
-    MeasuringSystem() :PolicyManager(), sensingWindow(nullptr),_timeTracer(info()){};
+    MeasuringSystem(SensingModule *sm) :PolicyManager(sm), sensingWindow(nullptr),_timeTracer(info()){};
 
 #if defined(IS_OFFLINE_PLAT)
     MeasuringSystem(simulation_t *sim) :PolicyManager(sim), sensingWindow(nullptr),_timeTracer(info()){};
@@ -65,7 +65,6 @@ void MeasuringSystem::report()
 }
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<MeasuringSystem>();
+    daemon_run<MeasuringSystem>(argc,argv);
     return 0;
 }

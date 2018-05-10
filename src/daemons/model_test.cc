@@ -111,7 +111,7 @@ private:
     }
 
 public:
-    ModelTest() :PolicyManager()
+    ModelTest(SensingModule *sm) :PolicyManager(sm)
     {};
 
     ~ModelTest()
@@ -285,7 +285,6 @@ void ModelTest::window_handler(int wid,PolicyManager *owner)
 }
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<ModelTest>();
+    daemon_run<ModelTest>(argc,argv);
     return 0;
 }

@@ -31,6 +31,7 @@ class LinuxSensingModule
 
 	static LinuxSensingModule* _attached;
 
+	sys_info_t *_sys_info;
 	PeriodicSensingManager<LinuxSensingModule> _psensingManager;
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
@@ -42,17 +43,6 @@ class LinuxSensingModule
 	LinuxSensingModule();
 
 	~LinuxSensingModule();
-
-	//disconnects this object from the module without checks
-	//will make this object invalid
-	void forceDetach();
-
-	static LinuxSensingModule& get()
-	{
-		if(_attached == nullptr)
-			arm_throw(LinuxSensingModuleException,"Sensing module not attached");
-		return *_attached;
-	}
 
   public:
 
@@ -87,6 +77,8 @@ class LinuxSensingModule
 	{
 	    usleep(timeMS*1000);
 	}
+
+	sys_info_t* info() { return _sys_info;}
 
   private:
 

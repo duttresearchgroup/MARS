@@ -19,7 +19,6 @@
 #include <runtime/managers/tracing.h>
 
 int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	daemon_run_sys<TracingSystem>();
+	daemon_run<TracingSystem>(argc,argv);
 	return 0;
 }

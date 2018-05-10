@@ -89,11 +89,11 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
     return nullptr;
 }
 
-SensingWindowManager::SensingWindowManager()
-	:_sensingRunning(false),
+SensingWindowManager::SensingWindowManager(SensingModule *sm)
+	:_sm(sm),
+	 _sensingRunning(false),
 	 _sen_win_dispatcher_thread(0)
 {
-	_sm = new SensingModule();
 }
 
 SensingWindowManager::~SensingWindowManager()

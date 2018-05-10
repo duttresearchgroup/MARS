@@ -90,7 +90,7 @@ public:
 
 	ExecutionTraceHandle& getHandle(int wid)
 	{
-	    return getHandle(SensingModule::get().data(),wid);
+	    return getHandle(PerformanceData::localData(),wid);
 	}
 
 	void dump()

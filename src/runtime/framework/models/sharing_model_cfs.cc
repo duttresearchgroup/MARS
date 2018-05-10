@@ -22,7 +22,7 @@
 
 bool LinuxCFSModel::noSharing(const tracked_task_data_t *task, int wid)
 {
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int i = 0; i < data.numCreatedTasks(wid); ++i){
         const tracked_task_data_t *other = &(data.task(i));
         if((other != task) &&
@@ -100,7 +100,7 @@ void LinuxCFSModel::updateCoreLoad(const core_info_t *core, int freq)
     cfs.total_tlc_sum = 0;
     cfs.tlc_sum_residual = 0;
 
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int i = 0; i < data.numCreatedTasks(ReflectiveEngine::currentWID()); ++i){
         const tracked_task_data_t *task = &(data.task(i));
         if(ReflectiveEngine::get().predict<SEN_LASTCPU>(task) == core->position){
@@ -206,7 +206,7 @@ void LinuxCFSModel::updateState(const core_info_t *core)
 
     updateCoreLoad(core,freq);
 
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     double taskLoadSum = 0; // For consistency checks
     for(int i = 0; i < data.numCreatedTasks(ReflectiveEngine::currentWID()); ++i){
         const tracked_task_data_t *task = &(data.task(i));

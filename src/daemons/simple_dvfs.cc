@@ -93,12 +93,14 @@ class SimpleDVFSManager : public PolicyManager {
 
         registerPolicy(new SimpleDVFSPolicy());
     }
+
+  public:
+    SimpleDVFSManager(SensingModule *sm) :PolicyManager(sm){}
 };
 
 
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<SimpleDVFSManager>();
+    daemon_run<SimpleDVFSManager>(argc,argv);
     return 0;
 }

@@ -48,18 +48,16 @@ class Policy : public Model {
 
 class PolicyManager : public ActuationInterface, public SensingInterface {
   private:
-	//used to check only one system object should exist
-	static bool _pm_created;
 
-	sys_info_t &_sys_info;
+    SensingWindowManager _win_manager;
+    sys_info_t *_sys_info;
+    SensingModule *_sm;
 
 	void _init_common();
 	void _sensing_setup_common();
 
 	int _pm_pid;
 	std::string _pm_ready_file;
-
-    SensingWindowManager *_win_manager;
 
     // List of models
     // Ordered by period and then priority such that
@@ -94,10 +92,7 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 
   protected:
 
-	PolicyManager();
-#if defined(IS_OFFLINE_PLAT)
-	PolicyManager(simulation_t *sim);
-#endif
+	PolicyManager(SensingModule *sm);
 
 	/*
 	 * Called by System::start()
@@ -124,12 +119,11 @@ class PolicyManager : public ActuationInterface, public SensingInterface {
 
 	void quit() const;//this will KILL the daemon processes
 
-	sys_info_t* info() { return &_sys_info;}
-	virtual model_sys_t* model() {return nullptr;}
+	sys_info_t* info() { return _sys_info;}
 
-	SensingModule *sensingModule() const { return _win_manager->sensingModule(); }
-	SensingWindowManager *windowManager() { return _win_manager; }
-	const PerformanceData& sensedData() { return sensingModule()->data(); }
+	SensingModule *sensingModule() const { return _sm; }
+	SensingWindowManager *windowManager() { return &_win_manager; }
+	const PerformanceData& sensedData() { return _sm->data(); }
 
 	//requires the model_path parameter
 	void enableReflection() const;

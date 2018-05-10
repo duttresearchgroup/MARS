@@ -23,56 +23,32 @@
 
 #include <base/base.h>
 #include <runtime/framework/policy.h>
-
-#include <runtime/interfaces/common/pal/pal_setup.h>
 #include <runtime/interfaces/common/sensing_window_defs.h>
 
 #include <signal.h>
 
-bool PolicyManager::_pm_created = false;
-
-PolicyManager::PolicyManager()
-    :_sys_info(*pal_sys_info(sysconf(_SC_NPROCESSORS_ONLN)))
+PolicyManager::PolicyManager(SensingModule *sm)
+    :_win_manager(sm),
+     _sys_info(sm->info()),
+     _sm(sm)
 {
-	_init_common();
 
-    uint32_t cksum = sys_info_cksum(&_sys_info);
-    if(cksum != _win_manager->sensingModule()->data().sysChecksum()) arm_throw(DaemonSystemException,"Sys info cksum differs");
+    //additional checks to make sure the domain/core ids match the idx
+    for(int cpu = 0; cpu < _sys_info->core_list_size; ++cpu)
+        if(_sys_info->core_list[cpu].position != cpu)
+            arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+    for(int power_domain = 0; power_domain < _sys_info->power_domain_list_size; ++power_domain)
+        if(_sys_info->power_domain_list[power_domain].domain_id != power_domain)
+            arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+    for(int freq_domain = 0; freq_domain < _sys_info->freq_domain_list_size; ++freq_domain)
+        if(_sys_info->freq_domain_list[freq_domain].domain_id != freq_domain)
+            arm_throw(DaemonSystemException,"Sys info assumptions wrong");
+
+    //Doing required setup for actuators
+    ActuationInterface::construct(*_sys_info);
 
     _pm_pid = getpid();
 	_pm_ready_file = OptionParser::parser().progName() + ".ready";
-	pinfo("PolicyManager::PolicyManager() done\n");
-}
-
-#if defined(IS_OFFLINE_PLAT)
-PolicyManager::PolicyManager(simulation_t *sim)
-{
-	_init_info(sim);
-
-	_init_common();
-}
-#endif
-
-void PolicyManager::_init_common()
-{
-    if(_pm_created) arm_throw(DaemonSystemException,"System already created");
-    _pm_created = true;
-
-    _win_manager = new SensingWindowManager();
-
-    //additional check to make sure the domain/core ids match the idx
-    for(int cpu = 0; cpu < _sys_info.core_list_size; ++cpu){
-        if(_sys_info.core_list[cpu].position != cpu) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-    }
-    for(int power_domain = 0; power_domain < _sys_info.power_domain_list_size; ++power_domain){
-        if(_sys_info.power_domain_list[power_domain].domain_id != power_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-    }
-    for(int freq_domain = 0; freq_domain < _sys_info.freq_domain_list_size; ++freq_domain){
-        if(_sys_info.freq_domain_list[freq_domain].domain_id != freq_domain) arm_throw(DaemonSystemException,"Sys info assumptions wrong");
-    }
-
-    //Does required setup for actuators
-    ActuationInterface::construct(_sys_info);
 }
 
 PolicyManager::~PolicyManager()
@@ -80,8 +56,6 @@ PolicyManager::~PolicyManager()
     if(ReflectiveEngine::enabled())
         ReflectiveEngine::disable();
     ActuationInterface::destruct();
-	_pm_created = false;
-	delete _win_manager;
 }
 
 void PolicyManager::_sensing_setup_common()
@@ -89,8 +63,8 @@ void PolicyManager::_sensing_setup_common()
 	//enables the perfcnts we are sampling
 
 	//we always do instr and busy cy
-	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_INSTR_EXE);
-	_win_manager->sensingModule()->tracePerfCounter(PERFCNT_BUSY_CY);
+	_sm->tracePerfCounter(PERFCNT_INSTR_EXE);
+	_sm->tracePerfCounter(PERFCNT_BUSY_CY);
 }
 
 void PolicyManager::registerPolicy(Policy *policy)
@@ -121,7 +95,7 @@ void PolicyManager::_finishRegisterPolicy()
                 maxPrio = p->priority();
 
         //create the window handler
-        auto winfo = _win_manager->addSensingWindowHandler(i.first,this,_policyWindowHandler,maxPrio);
+        auto winfo = _win_manager.addSensingWindowHandler(i.first,this,_policyWindowHandler,maxPrio);
 
         assert_true(winfo->wid >= 0);
         assert_true(winfo->wid < MAX_WINDOW_CNT);
@@ -185,9 +159,9 @@ void PolicyManager::start()
 	_buildSchedules();
 
 	//saves the sys_info
-	SysInfoPrinter sip(_sys_info); sip.printToOutdirFile();
+	SysInfoPrinter sip(*_sys_info); sip.printToOutdirFile();
 
-	_win_manager->startSensing();
+	_win_manager.startSensing();
 
 	//creates a file that users can check to see if the daemon is ready
 	//also stores the daemon pid
@@ -198,7 +172,7 @@ void PolicyManager::start()
 
 void PolicyManager::stop()
 {
-    _win_manager->stopSensing();
+    _win_manager.stopSensing();
 	report();
 	//removes the file created by start
 	std::remove(_pm_ready_file.c_str());
@@ -213,7 +187,7 @@ void PolicyManager::quit() const
 
 void PolicyManager::enableReflection() const
 {
-    ReflectiveEngine::enable(&_sys_info);
+    ReflectiveEngine::enable(_sys_info);
 }
 
 

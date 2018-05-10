@@ -42,7 +42,7 @@ private:
     PredData _predData;
 
 public:
-    PredictorTestSystem() :PolicyManager(),
+    PredictorTestSystem(SensingModule *sm) :PolicyManager(sm),
         _execTrace("trace"),
         _baselineModel(info()),
         _predData({0,0,0,0,false})
@@ -152,7 +152,6 @@ void PredictorTestSystem::window_handler(int wid,PolicyManager *owner)
 
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<PredictorTestSystem>();
+    daemon_run<PredictorTestSystem>(argc,argv);
     return 0;
 }

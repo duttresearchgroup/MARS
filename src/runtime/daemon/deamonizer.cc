@@ -33,7 +33,7 @@ static void daemon_init(int argc, char * argv[]);
 static void daemon_start(PolicyManager* sys);
 static void daemonize();
 
-void daemon_setup(int argc, char * argv[]) {
+void _daemon_setup(int argc, char * argv[]) {
 	try {
 		//becomes a demon
 		daemonize();
@@ -44,7 +44,7 @@ void daemon_setup(int argc, char * argv[]) {
 	} arm_catch(ARM_CATCH_NO_EXIT);
 }
 
-void daemon_run_sys(PolicyManager* sys) {
+void _daemon_run(PolicyManager* sys) {
 	try {
         daemon_start(sys);
 

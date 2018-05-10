@@ -40,7 +40,7 @@ protected:
     std::map<int,bool> _fd_state;
 
 public:
-    InterfaceTest() :PolicyManager(),
+    InterfaceTest(SensingModule *sm) :PolicyManager(sm),
         sensingWindow_fine(nullptr),sensingWindow_coarse(nullptr),
         _execTrace_fine("execTraceFine"),_execTrace_coarse("execTraceCoarse")
         {};
@@ -142,7 +142,6 @@ void InterfaceTest::coarse_window_handler(int wid,PolicyManager *owner)
 }
 
 int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	daemon_run_sys<InterfaceTest>();
+	daemon_run<InterfaceTest>(argc,argv);
 	return 0;
 }

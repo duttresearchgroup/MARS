@@ -105,7 +105,7 @@ protected:
 		}
 		template<typename Resource>
 		inline double _perfcnt(const Resource &r, int pindex, int wid, bool isAgg){
-		    const PerformanceData &data = SensingModule::get().data();
+		    const PerformanceData &data = PerformanceData::localData();
 		    perfcnt_t cnt = data.perfcntFromIdx(pindex);
 		    return isAgg ? SensingInterface::senseAgg<SEN_PERFCNT>(cnt,&r,wid) : SensingInterface::sense<SEN_PERFCNT>(cnt,&r,wid);
 		}

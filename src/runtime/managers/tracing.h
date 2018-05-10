@@ -56,13 +56,7 @@ private:
 	}
 
 public:
-  	TracingSystem() :PolicyManager(), sensingWindow(nullptr),_traced_core(-1){	};
-
-#if defined(IS_OFFLINE_PLAT)
-  	TracingSystem(simulation_t *sim) :PolicyManager(sim), sensingWindow(nullptr){
-  	    _init();
-  	};
-#endif
+  	TracingSystem(SensingModule *sm) :PolicyManager(sm), sensingWindow(nullptr),_traced_core(-1){	};
 
   	virtual ~TracingSystem();
 

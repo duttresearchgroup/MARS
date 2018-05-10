@@ -40,7 +40,8 @@
 LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 
 LinuxSensingModule::LinuxSensingModule()
-	:_psensingManager(*this),
+	:_sys_info(pal_sys_info(sysconf(_SC_NPROCESSORS_ONLN))),
+	 _psensingManager(*this),
 	 _module_file_if(0), _module_shared_mem_raw_ptr(nullptr),
 	 _sensingRunning(false),
 	 _numCreatedWindows(0)
@@ -56,9 +57,20 @@ LinuxSensingModule::LinuxSensingModule()
 
     _module_shared_mem_raw_ptr = mmap(NULL, sizeof(perf_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, _module_file_if, 0);
 
-    if(_module_shared_mem_raw_ptr == MAP_FAILED) arm_throw(LinuxSensingModuleException,"mmap error");
+    if(_module_shared_mem_raw_ptr == MAP_FAILED)
+        arm_throw(LinuxSensingModuleException,"mmap error");
+
+    if(!check_perf_data_cksum(reinterpret_cast<perf_data_t*>(_module_shared_mem_raw_ptr)))
+            arm_throw(LinuxSensingModuleException,"Wrong checksum in mapped shared data");
 
     _sensed_data = PerformanceData(reinterpret_cast<perf_data_t*>(_module_shared_mem_raw_ptr));
+
+
+    // The sys_info got from pal_sys_info must match the one used by the kernel
+    // module
+    uint32_t cksum = sys_info_cksum(_sys_info);
+    if(cksum != _sensed_data.sysChecksum())
+        arm_throw(LinuxSensingModuleException,"Sys info cksum differs");
 
     //setup the platform sensors
     pal_sensing_setup(this);
@@ -93,11 +105,6 @@ LinuxSensingModule::~LinuxSensingModule()
     pal_sensing_teardown(this);
 }
 
-void LinuxSensingModule::forceDetach()
-{
-	munmap(_module_shared_mem_raw_ptr,sizeof(perf_data_t));
-    close(_module_file_if);
-}
 
 void LinuxSensingModule::sensingStart()
 {
@@ -232,6 +239,8 @@ void LinuxSensingModule::resgisterAsDaemonProc()
 {
 	if(ioctl(_module_file_if, IOCTLCMD_REGISTER_DAEMON,SECRET_WORD) !=0)
 		arm_throw(LinuxSensingModuleException,"IOCTLCMD_REGISTER_DAEMON failed errno=%d",errno);
+
+	PerformanceData::localData(&_sensed_data);
 }
 
 bool LinuxSensingModule::unresgisterAsDaemonProc()

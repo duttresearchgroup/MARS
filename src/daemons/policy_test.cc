@@ -127,11 +127,14 @@ class PolicyTestManager : public PolicyManager {
 
         enableReflection();
     }
+
+  public:
+    PolicyTestManager(SensingModule *sm) :PolicyManager(sm){}
+
 };
 
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<PolicyTestManager>();
+    daemon_run<PolicyTestManager>(argc,argv);
     return 0;
 }

@@ -21,6 +21,11 @@
 #include <runtime/interfaces/common/sense_data_shared.h>
 #include <runtime/framework/sensing_interface.h>
 
+// Global per-thread ptr to performance so sensing interfaces can
+// more easily be implemented
+class PerformanceData;
+extern thread_local const PerformanceData* __localData;
+
 class PerformanceData {
     friend class LinuxSensingModule;
     friend class OfflineSensingModule;
@@ -30,16 +35,26 @@ class PerformanceData {
 
     const perf_data_t *_raw_data;
 
-	//special constructor should only be called from the friend class
-	PerformanceData():_raw_data(nullptr){}
+    PerformanceData() :_raw_data(nullptr) {}
 
-	PerformanceData(perf_data_t *raw_data) :_raw_data(raw_data){
-#if defined(IS_LINUX_PLAT)
-		if(!check_perf_data_cksum(raw_data)) arm_throw(SensingDataException,"Wrong checksum in mapped shared data");
-#endif
+	PerformanceData(perf_data_t *raw_data)
+        :_raw_data(raw_data)
+    {
+	}
+
+	static void localData(PerformanceData* data)
+	{
+	    __localData = data;
 	}
 
   public:
+
+	static const PerformanceData& localData()
+	{
+	    assert_true(__localData != nullptr);
+	    return *__localData;
+	}
+
 
 	// TODO need to include a task iterator that skips tasks with core_id = -1
 

@@ -159,7 +159,7 @@ public:
     }
 
     void doSysActuation(const freq_domain_info_t *rsc, int cores){
-        _idleDomain[rsc->domain_id]->idleCores(cores,SensingModule::get().data());
+        _idleDomain[rsc->domain_id]->idleCores(cores,PerformanceData::localData());
     }
     int getSysActuation(const freq_domain_info_t *rsc){
         return _idleDomain[rsc->domain_id]->idleCores();

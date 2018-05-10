@@ -187,7 +187,7 @@ typename SensingTypeInfo<SEN_PERFCNT>::ValType
 ReflectiveEngine::predict<SEN_PERFCNT,core_info_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const core_info_t *rsc)
 {
     SensingTypeInfo<SEN_PERFCNT>::ValType acc = 0;
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int i = 0; i < data.numCreatedTasks(ReflectiveEngine::currentWID()); ++i){
         const tracked_task_data_t *task = &(data.task(i));
         if(predict<SEN_LASTCPU>(task) == rsc->position)
@@ -254,7 +254,7 @@ ReflectiveEngine::predict<SEN_POWER_W,core_info_t>(const core_info_t *rsc)
     // and adds the idle power (if any)
     typename SensingTypeInfo<SEN_POWER_W>::ValType tasksPower = 0;
     int cnt = 0;
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int i = 0; i < data.numCreatedTasks(ReflectiveEngine::currentWID()); ++i){
         const tracked_task_data_t *task = &(data.task(i));
         if(predict<SEN_LASTCPU>(task) == rsc->position){

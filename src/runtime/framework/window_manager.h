@@ -95,6 +95,8 @@ class SensingWindowManager
 
   private:
 
+	SensingModule *_sm;
+
 	volatile bool _sensingRunning;
 
 	pthread_t _sen_win_dispatcher_thread;
@@ -102,8 +104,6 @@ class SensingWindowManager
 	std::vector<WindowInfo*>  _windowInfos;
 	std::map<int,WindowInfo*> _windowHandlers_idmap;
 	std::map<int,WindowInfo*> _windowHandlers_periodmap;
-
-	SensingModule *_sm;
 
 	static void* sen_win_dispatcher(void*arg);
 
@@ -114,7 +114,7 @@ class SensingWindowManager
 
   public:
 
-	SensingWindowManager();
+	SensingWindowManager(SensingModule *sm);
 
 	~SensingWindowManager();
 
