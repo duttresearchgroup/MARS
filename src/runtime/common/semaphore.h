@@ -28,7 +28,7 @@ private:
     std::condition_variable cv;
 
 public:
-    explicit Semaphore(int count_ = 1) :count(count_){ }
+    explicit Semaphore(int count_ = 0) :count(count_){ }
 
     void notify()
     {

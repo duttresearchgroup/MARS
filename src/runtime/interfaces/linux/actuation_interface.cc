@@ -218,16 +218,16 @@ static LinuxFrequencyActuator *freqAct = nullptr;
 static LinuxIdleDomainActuator *idleDmAct = nullptr;
 static LinuxTaskMapActuator *tMapAct = nullptr;
 
-void ActuationInterface::construct(const sys_info_t &info)
+void ActuationInterface::construct(SensingModule *sm)
 {
     assert_true(freqAct == nullptr);
     assert_true(idleDmAct == nullptr);
     assert_true(tMapAct == nullptr);
 #ifdef LINUX_HAS_CPUFREQ
-    freqAct = new LinuxFrequencyActuator(info);
+    freqAct = new LinuxFrequencyActuator(*(sm->info()));
 #endif
-    idleDmAct = new LinuxIdleDomainActuator(info);
-    tMapAct = new LinuxTaskMapActuator(info);
+    idleDmAct = new LinuxIdleDomainActuator(*(sm->info()));
+    tMapAct = new LinuxTaskMapActuator(*(sm->info()));
 }
 
 void ActuationInterface::destruct()

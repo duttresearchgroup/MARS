@@ -26,9 +26,10 @@ SRCS_CXX_RUNTIME += $(wildcard src/runtime/framework/models/*.cc)
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/managers/*.cc)
 
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/*.cc)
-SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/linux/*.cc)
 ifeq ($(PLAT),offline)
 	SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/offline/*.cc)
+else
+	SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/linux/*.cc)
 endif
 SRCS_CXX_RUNTIME += $(wildcard src/runtime/interfaces/common/pal/$(PLAT)/*.cc)
 SRCS_CC_RUNTIME += $(wildcard src/runtime/interfaces/common/pal/$(PLAT)/*.c)

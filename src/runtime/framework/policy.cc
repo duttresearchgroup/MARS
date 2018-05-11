@@ -45,7 +45,7 @@ PolicyManager::PolicyManager(SensingModule *sm)
             arm_throw(DaemonSystemException,"Sys info assumptions wrong");
 
     //Doing required setup for actuators
-    ActuationInterface::construct(*_sys_info);
+    ActuationInterface::construct(_sm);
 
     _pm_pid = getpid();
 	_pm_ready_file = OptionParser::parser().progName() + ".ready";

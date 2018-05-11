@@ -18,100 +18,93 @@
 #ifndef OFFLINE_SENSING_MODULE_H_
 #define OFFLINE_SENSING_MODULE_H_
 
-#include <offline_sim/exec_sim.h>
-#include "../performance_data.h"
+#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/sensor.h>
+
+class TraceSimulator;
+
+// Needed by the ActuationInterface global functions
+class OfflineSensingModule;
+extern thread_local OfflineSensingModule* __localModule;
 
 class OfflineSensingModule
 {
+    friend class SensingWindowManager;
+    friend class TraceSimulator;
+
   private:
 
-	static OfflineSensingModule* _attached;
-
-	int _module_file_if;
-	void* _module_shared_mem_raw_ptr;
-	volatile bool _sensingRunning;
-	PerformanceData _sensed_data;
-	perf_data_t *vitsdata;
-
-	simulation_t *_sim;
-
-//	struct sensing_window_ctrl_struct {
-//		int wid;
-//		int period;//In terms of MINIMUM_WINDOW_LENGHT
-//		int period_ms;
-//		int period_jiffies;
-//		int time_to_ready;//In terms of MINIMUM_WINDOW_LENGHT
-//		//Link for adding this to the list of sensing windows
-//		define_list_addable_default(struct sensing_window_ctrl_struct);
-//	};
-//	typedef struct sensing_window_ctrl_struct sensing_window_ctrl_t;
-//
-//	static sensing_window_ctrl_t sensing_windows[MAX_WINDOW_CNT];
-//	int sensing_window_cnt = 0;
-//	//list of sensing windows to keep track of the ones ready to execute
-//	define_vitamins_list(static sensing_window_ctrl_t,next_window);
-//	//list is ordered by time_to_ready
-//	inline static bool sw_order_crit(sensing_window_ctrl_t *a, sensing_window_ctrl_t *b) {
-//	    return (a->time_to_ready == b->time_to_ready) ? (a->period < b->period) : (a->time_to_ready < b->time_to_ready);
-//	}
-
-	void sense_tasks(int wid);
-
-	void sense_cpus(int wid);
-
-	void reset_perf_counters(perf_data_perf_counters_t *sen_data);
-	void reset_task_counters(int cpu,perf_data_task_t *sen_data);
-	void reset_cpu_counters(perf_data_cpu_t *sen_data);
-	//void reset_power_counters(sensed_data_power_domain_t *sen_data);
-	void reset_freq_counters(perf_data_freq_domain_t *sen_data);
-
-	void vit_map_perfcnt();
+    TraceSimulator *_sim;
+    sys_info_t *_sys_info;
+    PeriodicSensingManager<OfflineSensingModule> _psensingManager;
+    volatile bool _sensingRunning;
+    PerformanceData _sensed_data;
 
   public:
-	OfflineSensingModule();
+    OfflineSensingModule(TraceSimulator *sim);
 
-	~OfflineSensingModule();
+    ~OfflineSensingModule();
 
-	//disconnects this object from the module without checks
-	//will make this object invalid
-	void forceDetach();
+  private:
 
-    static OfflineSensingModule& get()
+    static void localModule(OfflineSensingModule* sm)
     {
-        if(_attached == nullptr)
-            arm_throw(OfflineSensingModuleException,"Sensing module not attached");
-        return *_attached;
+        __localModule = sm;
     }
 
   public:
 
-	void sensingStart();
-	void sensingStop();
+    static OfflineSensingModule* localModule()
+    {
+        assert_true(__localModule != nullptr);
+        return __localModule;
+    }
 
-	bool isSensing() { return _sensingRunning; }
+    TraceSimulator* sim() { return _sim; }
 
-	int createSensingWindow(int period_ms);
+    void sensingStart();
+    void sensingStop();
 
-	int nextSensingWindow();
+    bool isSensing() { return _sensingRunning; }
 
-	void resgisterAsDaemonProc();//registers calling process as a daemon process
-	bool unresgisterAsDaemonProc();
+    int createSensingWindow(int period_ms);
 
-	const PerformanceData& data() { return _sensed_data; }
-	const perf_data_t& vitsData() { return *vitsdata; }
+    int nextSensingWindow();
 
-	//Returns true if counter is being collected.
-	bool isPerfCntAvailable(perfcnt_t cnt);
+    void resgisterAsDaemonProc();//registers calling process as a daemon process
+    bool unresgisterAsDaemonProc();
 
-	void enablePerTaskSensing();
-	void pinAllTasksToCPU(int cpu);
+    const PerformanceData& data() { return _sensed_data; }
 
-	void tracePerfCounter(perfcnt_t perfcnt);
-	void tracePerfCounterResetAll();
+    //Returns true if counter is being collected.
+    bool isPerfCntAvailable(perfcnt_t cnt);
 
-	void cleanUpCreatedTasks();
+    void enablePerTaskSensing();
+    void pinAllTasksToCPU(int cpu);
 
-	void setSim(simulation_t *sim);
+    void tracePerfCounter(perfcnt_t perfcnt);
+    void tracePerfCounterResetAll();
+
+    void cleanUpCreatedTasks();
+
+    void attachSensor(PeriodicSensor<OfflineSensingModule> *sensor);
+
+    void sleepMS(int timeMS);
+
+    sys_info_t* info() { return _sys_info;}
+
+  private:
+
+    // Returns true if the sensing module is currently modifying the given window
+    bool isUpdating(int wid) const {
+        return false;
+    }
+
+    // Called by WindowManager when this window is being read
+    void isReading(int wid, bool yeah) {
+
+    }
 };
+
 
 #endif /* SENSING_MODULE_H_ */

@@ -18,9 +18,21 @@
 #include "../pal_setup.h"
 
 #include <base/base.h>
+#include <runtime/interfaces/common/pal/sensing_setup.h>
+#include <runtime/interfaces/sensing_module.h>
 
 sys_info_t* pal_sys_info(int online_cpus)
 {
+    arm_throw(UnimplementedException,"Function not implemented: %s",__PRETTY_FUNCTION__);
+}
+
+template<>
+void pal_sensing_setup<SensingModule>(SensingModule *m){
+    arm_throw(UnimplementedException,"Function not implemented: %s",__PRETTY_FUNCTION__);
+}
+
+template<>
+void pal_sensing_teardown<SensingModule>(SensingModule *m){
     arm_throw(UnimplementedException,"Function not implemented: %s",__PRETTY_FUNCTION__);
 }
 

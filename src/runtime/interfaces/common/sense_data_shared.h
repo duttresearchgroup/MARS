@@ -229,7 +229,7 @@ static inline void perf_data_reset_mapped_perfcnt(perf_data_t *data)
 static inline bool perf_data_map_perfcnt(perf_data_t *data, perfcnt_t perfcnt)
 {
     if(data->perfcnt_mapped_cnt >= MAX_PERFCNTS){
-        pinfo("Cannot use more then %d pmmu counters!",MAX_PERFCNTS);
+        pinfo("Cannot use more then %d pmmu counters!\n",MAX_PERFCNTS);
         return false;
     }
     data->idx_to_perfcnt_map[data->perfcnt_mapped_cnt] = perfcnt;
