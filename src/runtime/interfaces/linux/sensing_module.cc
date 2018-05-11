@@ -34,8 +34,7 @@
 #include <runtime/interfaces/common/sensing_window_defs.h>
 #include <runtime/interfaces/common/user_if_shared.h>
 #include <runtime/interfaces/common/pal/sensing_setup.h>
-
-#include "dummy.h"
+#include <runtime/interfaces/dummy.h>
 
 LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 

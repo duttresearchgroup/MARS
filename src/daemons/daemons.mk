@@ -18,12 +18,17 @@
 #########################################################
 # Sources (updete if new directory with sources is added#
 #########################################################
-     
+
+SRCS_DAEMONS_COMMON = $(wildcard src/daemons/common/*.cc)    
 SRCS_DAEMONS = $(wildcard src/daemons/*.cc)
 
 ##############
 # Other stuff#
 ##############
+
+OBJS_DAEMONS_COMMON = $(patsubst %.cc,obj_$(ARCH)_$(PLAT)/%.o,$(SRCS_DAEMONS_COMMON))
+
+OBJS_DEPS += $(OBJS_DAEMONS_COMMON:%.o=%.d)
 
 BINS_DAEMONS = $(patsubst src/daemons/%.cc,bin_$(ARCH)_$(PLAT)/daemons/%,$(SRCS_DAEMONS))
 
@@ -39,7 +44,7 @@ ifeq ($(BINS_DAEMONS_FILTERED),)
 $(info No daemons to build. Is the filter correct ?)
 endif
      
-bin_$(ARCH)_$(PLAT)/daemons/%: src/daemons/%.cc lib_$(ARCH)_$(PLAT)/libruntime.a lib_$(ARCH)_$(PLAT)/libbase.a lib_$(ARCH)_$(PLAT)/libcpulimit.a
+bin_$(ARCH)_$(PLAT)/daemons/%: src/daemons/%.cc $(OBJS_DAEMONS_COMMON) lib_$(ARCH)_$(PLAT)/libruntime.a lib_$(ARCH)_$(PLAT)/libbase.a lib_$(ARCH)_$(PLAT)/libcpulimit.a
 	$(CXX) -static $(CXXFLAGS) $^ -o $@
 	
 bin_$(ARCH)_$(PLAT)/daemons:
@@ -50,4 +55,4 @@ daemons: bin_$(ARCH)_$(PLAT)/daemons $(BINS_DAEMONS_FILTERED)
 
 .PHONY: daemons_clean
 daemons_clean:
-	rm -rf bin_$(ARCH)_$(PLAT)/daemons
+	rm -rf bin_$(ARCH)_$(PLAT)/daemons $(OBJS_DAEMONS_COMMON) $(OBJS_DAEMONS_COMMON:%.o=%.d)

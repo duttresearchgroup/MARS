@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
+#include <daemons/common/deamonizer.h>
 #include <runtime/framework/policy.h>
 
 class OverheadTestSystem : public PolicyManager {

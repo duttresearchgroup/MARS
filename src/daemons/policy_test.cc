@@ -19,7 +19,7 @@
 #include <sstream>
 #include <unistd.h>
 
-#include <runtime/daemon/deamonizer.h>
+#include <daemons/common/deamonizer.h>
 #include <runtime/common/reports.h>
 #include <runtime/framework/actuation_interface.h>
 #include "../runtime/framework/models/baseline_model.h"
