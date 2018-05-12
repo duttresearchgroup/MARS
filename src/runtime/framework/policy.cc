@@ -56,6 +56,9 @@ PolicyManager::~PolicyManager()
     if(ReflectiveEngine::enabled())
         ReflectiveEngine::disable();
     ActuationInterface::destruct();
+
+    for(auto model : _models)
+        delete model;
 }
 
 void PolicyManager::_sensing_setup_common()
