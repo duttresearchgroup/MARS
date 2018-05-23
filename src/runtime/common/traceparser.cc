@@ -79,7 +79,7 @@ TraceParser::TraceParser(std::vector<std::string> dirs)
         glob(srcDir,origDir,files);
     }
 
-    pinfo("Parsing %u CSV files using %d threads\n",files.size(),_threadDone->getCount());
+    pinfo("Parsing %d CSV files using %d threads\n",(int)files.size(),_threadDone->getCount());
 
     for(const auto &csv_file : files){
 
