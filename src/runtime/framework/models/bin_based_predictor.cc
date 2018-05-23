@@ -386,7 +386,7 @@ MappingBin* MappingBin::create_bins(std::vector<AveragedMatchedWindow> *samples,
         MappingBin *ret = firstBin->_make_hierachy(0, funcs.binning_metrics.begin()+1, funcs.binning_metrics.end());
         if(ret != 0){
             pinfo("WARNING: _make_hierachy (%s:%d) failed at layer %d!\n",__FILE__,__LINE__,ret->layer);
-            pinfo("layer %d has %lu bins\n",ret->layer,ret->bins->size());
+            pinfo("layer %d has %d bins\n",ret->layer,(int)ret->bins->size());
             pinfo("reducing and try again\n");
             if(tryToReduce(ret->layer, funcs)){
                 delete firstBin;
@@ -641,7 +641,7 @@ static
 void print_pred_info(LayerConf funcs,
                      std::map<CoreFreqPair, MappingBin *> &predictors){
     pinfo("Predictor info:\n");
-    pinfo("\tnum layers = %lu\n",funcs.binning_metrics.size());
+    pinfo("\tnum layers = %d\n",(int)funcs.binning_metrics.size());
     for(unsigned i = 0; i < funcs.binning_metrics.size(); ++i){
         pinfo("\tLayer %u number of bins\n",i);
         double avg = 0;
@@ -708,7 +708,7 @@ void TrainingData::obtain_windows(
                 }
             }
         }
-        pinfo("\tObtained %lu samples\n",windows.size());
+        pinfo("\tObtained %d samples\n",(int)windows.size());
         sumup_windows(task.first,windows,averagedWindows);
     }
 }
