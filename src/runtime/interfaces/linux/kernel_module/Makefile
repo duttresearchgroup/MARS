@@ -15,30 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-#########################################################
-# Sources (updete if new directory with sources is added#
-#########################################################
+obj-m := vitamins.o
+vitamins-objs := main.o helpers.o setup.o sense.o sense_data.o user_if.o user_if_ioctl.o sensing_window.o
+vitamins-objs += ../../common/pal/$(PLAT)/linux_module/perf_sense.o ../../common/pal/$(PLAT)/linux_setup_info.o
+vitamins-objs += ../../../../base/info_init.o
+ 
+PWD := $(shell pwd)
 
-SRCS_CXX_UAPI_TESTS = $(wildcard src/runtime/uapi/tests/*.cc)
-
-
-##############
-# Other stuff#
-##############
-
-BINS_UAPI_TESTS = $(patsubst src/runtime/uapi/tests/%.cc,bin_$(ARCH)_$(PLAT)/uapitests/%,$(SRCS_CXX_UAPI_TESTS))
-
-
-bin_$(ARCH)_$(PLAT)/uapitests/%: src/runtime/uapi/tests/%.cc
-	$(CXX) -static $(CXXFLAGS) $< -o $@
-	
-bin_$(ARCH)_$(PLAT)/uapitests:
-	mkdir -p bin_$(ARCH)_$(PLAT)/uapitests 
-
-.PHONY: uapi_tests
-uapi_tests: bin_$(ARCH)_$(PLAT)/uapitests $(BINS_UAPI_TESTS)
-
-.PHONY: clean_uapi_tests
-clean_uapi_tests:
-	rm -rf bin_$(ARCH)_$(PLAT)/uapitests
-	
+all:
+	    KCPPFLAGS="-DPLAT_DEF=$(PLAT)" make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD) modules
+clean:
+	    KCPPFLAGS="-DPLAT_DEF=$(PLAT)" make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD) clean

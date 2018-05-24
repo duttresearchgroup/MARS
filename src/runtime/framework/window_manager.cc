@@ -26,11 +26,10 @@
 #include <pthread.h>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
-#include <runtime/interfaces/common/sensing_window_defs.h>
-#include <runtime/interfaces/common/user_if_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 #include "window_manager.h"
+#include "reflective.h"
 
 
 void* SensingWindowManager::sen_win_dispatcher(void*arg){

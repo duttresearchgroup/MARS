@@ -28,8 +28,7 @@
 #include <runtime/interfaces/sensing_module.h>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/perfcnts.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 //forward system declaration
 class PolicyManager;

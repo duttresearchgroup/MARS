@@ -15,30 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __exynos5422_common_h
-#define __exynos5422_common_h
+#ifndef __arm_rt_pal_defs_h
+#define __arm_rt_pal_defs_h
 
-#include "../defs.h"
+#ifdef __KERNEL__
+    #include "../../linux/kernel_module/core.h"
+#else
+    #include <base/base.h>
+#endif
 
-static inline bool core_is_big(int core) {return core >= 4;}
+#ifdef PLAT_DEF
+//blackmagic to build an include using PLAT_DEF
+#define _pIDENT(x) x
+#define _pXSTR(x) #x
+#define _pSTR(x) _pXSTR(x)
+#define _pPATH(x,y) _pSTR(_pIDENT(x)_pIDENT(y))
+#define _pFILE /defs.h
+#include _pPATH(PLAT_DEF,_pFILE)
 
-static inline core_arch_t core_to_arch_cluster(int core){
-    if      (core <= 3) return COREARCH_Exynos5422_LITTLE;
-    else if (core <= 7) return COREARCH_Exynos5422_BIG;
-    else{
-        BUG_ON("Invalid core idx");
-        return SIZE_COREARCH;
-    }
-}
+#else
+#error "PLAT_DEF macro not defined"
+#endif
 
-//we used this to index both sensors and freq domains
-static inline int arch_cluster_pow_sensor(core_arch_t arch){
-    if      (arch == COREARCH_Exynos5422_BIG) return 0;
-    else if (arch == COREARCH_Exynos5422_LITTLE) return 1;
-    else{
-        BUG_ON("Invalid arch");
-        return -1;
-    }
-}
 
 #endif

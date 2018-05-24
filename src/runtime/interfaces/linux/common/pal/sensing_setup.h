@@ -15,30 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __exynos5422_common_h
-#define __exynos5422_common_h
+#ifndef __arm_rt_lin_sensing_setup_h
+#define __arm_rt_lin_sensing_setup_h
 
-#include "../defs.h"
 
-static inline bool core_is_big(int core) {return core >= 4;}
+/*
+ * Setup of platform-specific sensors for linux platforms
+ */
 
-static inline core_arch_t core_to_arch_cluster(int core){
-    if      (core <= 3) return COREARCH_Exynos5422_LITTLE;
-    else if (core <= 7) return COREARCH_Exynos5422_BIG;
-    else{
-        BUG_ON("Invalid core idx");
-        return SIZE_COREARCH;
-    }
-}
 
-//we used this to index both sensors and freq domains
-static inline int arch_cluster_pow_sensor(core_arch_t arch){
-    if      (arch == COREARCH_Exynos5422_BIG) return 0;
-    else if (arch == COREARCH_Exynos5422_LITTLE) return 1;
-    else{
-        BUG_ON("Invalid arch");
-        return -1;
-    }
-}
+template<typename SensingModule>
+void pal_sensing_setup(SensingModule *m);
+
+
+template<typename SensingModule>
+void pal_sensing_teardown(SensingModule *m);
 
 #endif

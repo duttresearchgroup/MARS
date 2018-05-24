@@ -18,8 +18,8 @@
 #ifndef OFFLINE_SENSING_MODULE_H_
 #define OFFLINE_SENSING_MODULE_H_
 
-#include <runtime/interfaces/performance_data.h>
-#include <runtime/interfaces/sensor.h>
+#include <runtime/interfaces/common/performance_data.h>
+#include <runtime/interfaces/common/sensor.h>
 
 class TraceSimulator;
 

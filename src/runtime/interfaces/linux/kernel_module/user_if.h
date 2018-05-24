@@ -15,30 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __exynos5422_common_h
-#define __exynos5422_common_h
+#ifndef __arm_rt_user_if
+#define __arm_rt_user_if
 
-#include "../defs.h"
+//Sets up a debugfs file so user processes can interact with this guy
 
-static inline bool core_is_big(int core) {return core >= 4;}
+#include "../common/user_if_shared.h"
+#include "core.h"
 
-static inline core_arch_t core_to_arch_cluster(int core){
-    if      (core <= 3) return COREARCH_Exynos5422_LITTLE;
-    else if (core <= 7) return COREARCH_Exynos5422_BIG;
-    else{
-        BUG_ON("Invalid core idx");
-        return SIZE_COREARCH;
-    }
-}
+bool create_user_if(void);
+void destroy_user_if(void);
 
-//we used this to index both sensors and freq domains
-static inline int arch_cluster_pow_sensor(core_arch_t arch){
-    if      (arch == COREARCH_Exynos5422_BIG) return 0;
-    else if (arch == COREARCH_Exynos5422_LITTLE) return 1;
-    else{
-        BUG_ON("Invalid arch");
-        return -1;
-    }
-}
+//called by the sensing part to notify users that a sensing window is done
+void sensing_window_ready(int wid);
 
 #endif
+

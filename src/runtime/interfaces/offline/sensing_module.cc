@@ -18,7 +18,7 @@
 #include "sensing_module.h"
 #include "trace_simulator.h"
 
-#include <runtime/interfaces/dummy.h>
+#include <runtime/interfaces/common/dummy.h>
 
 thread_local OfflineSensingModule* __localModule;
 

@@ -30,11 +30,13 @@
 #include <system_error>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
-#include <runtime/interfaces/common/sensing_window_defs.h>
-#include <runtime/interfaces/common/user_if_shared.h>
-#include <runtime/interfaces/common/pal/sensing_setup.h>
-#include <runtime/interfaces/dummy.h>
+#include <runtime/interfaces/common/performance_data.h>
+#include <runtime/interfaces/linux/common/user_if_shared.h>
+#include <runtime/interfaces/linux/common/pal/sensing_setup.h>
+#include <runtime/interfaces/common/dummy.h>
+
+#include "common/pal/pal_setup.h"
+#include "common/pal/sensing_setup.h"
 
 LinuxSensingModule* LinuxSensingModule::_attached = nullptr;
 

@@ -20,8 +20,7 @@
 
 #include <base/base.h>
 #include <runtime/common/time_aggregator.h>
-#include <runtime/interfaces/common/perfcnts.h>
-#include <runtime/interfaces/common/sense_defs.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // Actuation knob types

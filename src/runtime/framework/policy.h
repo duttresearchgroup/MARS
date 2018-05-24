@@ -22,7 +22,7 @@
 
 #include <runtime/framework/window_manager.h>
 #include <runtime/common/reports.h>
-#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 #include "actuation_interface.h"
 #include "sensing_interface.h"

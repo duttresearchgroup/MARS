@@ -23,7 +23,6 @@
 
 #include <base/base.h>
 #include <runtime/framework/policy.h>
-#include <runtime/interfaces/common/sensing_window_defs.h>
 
 #include <signal.h>
 

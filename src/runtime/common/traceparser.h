@@ -27,7 +27,6 @@
 
 #include <base/base.h>
 #include <runtime/common/semaphore.h>
-#include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/framework/types.h>
 
 class TraceParser {

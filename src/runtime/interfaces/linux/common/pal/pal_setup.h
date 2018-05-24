@@ -15,30 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __exynos5422_common_h
-#define __exynos5422_common_h
+#ifndef __arm_rt_linux_pal_setup_h
+#define __arm_rt_linux_pal_setup_h
 
-#include "../defs.h"
+// Is included in the linux module which does not have the include path
+#include "../../../common/pal/defs.h"
 
-static inline bool core_is_big(int core) {return core >= 4;}
+//implemented at common/pal/plat_name/lin_setup_info.c
+//for all platforms that used the linux interfaces
+//Header good for both kernel C and user C++
 
-static inline core_arch_t core_to_arch_cluster(int core){
-    if      (core <= 3) return COREARCH_Exynos5422_LITTLE;
-    else if (core <= 7) return COREARCH_Exynos5422_BIG;
-    else{
-        BUG_ON("Invalid core idx");
-        return SIZE_COREARCH;
-    }
-}
+CBEGIN
 
-//we used this to index both sensors and freq domains
-static inline int arch_cluster_pow_sensor(core_arch_t arch){
-    if      (arch == COREARCH_Exynos5422_BIG) return 0;
-    else if (arch == COREARCH_Exynos5422_LITTLE) return 1;
-    else{
-        BUG_ON("Invalid arch");
-        return -1;
-    }
-}
+// Returns a pointer to the sys_info object describing the current platform
+sys_info_t* pal_sys_info(int num_online_cpus);
+
+CEND
+
 
 #endif

@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include <runtime/interfaces/sensing_module.h>
+#include <runtime/framework/sensing_interface.h>
 #include "sharing_model_cfs.h"
 
 bool LinuxCFSModel::noSharing(const tracked_task_data_t *task, int wid)

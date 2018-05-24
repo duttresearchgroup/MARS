@@ -26,7 +26,7 @@
 
 #include <runtime/common/option_parser.h>
 #include <runtime/framework/sensing_interface.h>
-#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/common/performance_data.h>
 #include <runtime/interfaces/sensing_module.h>
 
 inline std::ostream& operator<< (std::ostream& os, const sys_info_t& obj){

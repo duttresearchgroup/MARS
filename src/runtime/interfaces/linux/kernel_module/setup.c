@@ -15,30 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __exynos5422_common_h
-#define __exynos5422_common_h
+#include "setup.h"
+#include "core.h"
+#include "helpers.h"
+#include "pal.h"
 
-#include "../defs.h"
+static sys_info_t *_vitamins_sys_info;
 
-static inline bool core_is_big(int core) {return core >= 4;}
-
-static inline core_arch_t core_to_arch_cluster(int core){
-    if      (core <= 3) return COREARCH_Exynos5422_LITTLE;
-    else if (core <= 7) return COREARCH_Exynos5422_BIG;
-    else{
-        BUG_ON("Invalid core idx");
-        return SIZE_COREARCH;
-    }
+sys_info_t* system_info() {
+	return _vitamins_sys_info;
 }
 
-//we used this to index both sensors and freq domains
-static inline int arch_cluster_pow_sensor(core_arch_t arch){
-    if      (arch == COREARCH_Exynos5422_BIG) return 0;
-    else if (arch == COREARCH_Exynos5422_LITTLE) return 1;
-    else{
-        BUG_ON("Invalid arch");
-        return -1;
-    }
+void init_system_info()
+{
+	_vitamins_sys_info = pal_sys_info(num_online_cpus());
 }
 
-#endif

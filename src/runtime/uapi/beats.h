@@ -29,9 +29,9 @@
 
 #include <sys/time.h>
 
-#include "../../core/base/portability.h"
-#include "../interfaces/common/task_beat_data.h"
-#include "../interfaces/common/user_if_shared.h"
+#include "../../base/portability.h"
+#include "../interfaces/common/c/task_beat_data.h"
+#include "../interfaces/linux/common/user_if_shared.h"
 
 typedef struct {
 	task_beat_t *_data;

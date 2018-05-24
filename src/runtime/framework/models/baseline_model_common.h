@@ -22,7 +22,6 @@
 #include <map>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/sense_defs.h>
 #include <runtime/framework/sensing_interface_impl.h>
 
 

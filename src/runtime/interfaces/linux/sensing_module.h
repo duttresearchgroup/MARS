@@ -20,8 +20,8 @@
 
 #include <unistd.h>
 
-#include <runtime/interfaces/performance_data.h>
-#include <runtime/interfaces/sensor.h>
+#include <runtime/interfaces/common/performance_data.h>
+#include <runtime/interfaces/common/sensor.h>
 
 class LinuxSensingModule
 {

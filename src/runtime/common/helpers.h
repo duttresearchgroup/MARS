@@ -22,7 +22,7 @@
 #include <linux/sched.h>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 bool actuate_change_cpu(tracked_task_data_t *kern_tsk, int next_cpu);
 bool actuate_change_cpu(uint32_t pid, int next_cpu);
