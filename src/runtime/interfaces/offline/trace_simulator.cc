@@ -161,7 +161,7 @@ void TraceSimulator::_init_task_perf_data()
                 task.this_task_name[TASK_NAME_SIZE-1] = '\0';
 
 
-                perf_data_reset_task(&_perf_data,taskID, cpu);
+                perf_data_reset_task(&_perf_data,taskID);
                 _task_execInfo.emplace_back(taskName.first,&task,cpu);
                 cpu = (cpu + 1) % _sys_info.core_list_size;
 

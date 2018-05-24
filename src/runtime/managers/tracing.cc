@@ -163,7 +163,6 @@ void TracingSystem::setup()
     }
 
     sensingModule()->enablePerTaskSensing();
-	sensingModule()->pinAllTasksToCPU(_traced_core);
 	sensingWindow = windowManager()->addSensingWindowHandler(WINDOW_LENGTH_MS,this,window_handler);
 }
 

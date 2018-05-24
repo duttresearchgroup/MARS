@@ -48,9 +48,6 @@ typedef enum {
 	//pass >0 to enable pertask sensed data
 	_IOCTLCMD_ENABLE_PERTASK_SENSING,
 
-	//pass a cpu number to force all newly created tasks into a specific cpu, pass -1 to disable it
-	_IOCTLCMD_ENABLE_PINTASK,
-
 	//enables/disable tracing of a specific perfcnt
 	//effective only before sensing
 	_IOCTLCMD_PERFCNT_ENABLE,
@@ -73,7 +70,6 @@ typedef enum {
 #define IOCTLCMD_SENSING_START			_IOR('v', _IOCTLCMD_SENSING_START, uint32_t)
 #define IOCTLCMD_SENSING_STOP			_IOR('v', _IOCTLCMD_SENSING_STOP, uint32_t)
 #define IOCTLCMD_ENABLE_PERTASK_SENSING	_IOR('v', _IOCTLCMD_ENABLE_PERTASK_SENSING, uint32_t)
-#define IOCTLCMD_ENABLE_PINTASK			_IOR('v', _IOCTLCMD_ENABLE_PINTASK, uint32_t)
 #define IOCTLCMD_PERFCNT_ENABLE			_IOR('v', _IOCTLCMD_PERFCNT_ENABLE, uint32_t)
 #define IOCTLCMD_PERFCNT_RESET			_IOR('v', _IOCTLCMD_PERFCNT_RESET, uint32_t)
 #define IOCTLCMD_TASKBEAT_UPDATED		_IOR('v', _IOCTLCMD_TASKBEAT_UPDATED, uint32_t)

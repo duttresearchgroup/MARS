@@ -193,15 +193,6 @@ void LinuxSensingModule::enablePerTaskSensing()
 		arm_throw(LinuxSensingModuleException,"IOCTLCMD_ENABLE_PERTASK_SENSING failed errno=%d",errno);
 }
 
-void LinuxSensingModule::pinAllTasksToCPU(int cpu)
-{
-	if(_sensingRunning)
-		arm_throw(LinuxSensingModuleException,"Cannot do pinAllTasksToCPU with sensing running errno=%d",errno);
-
-	if(ioctl(_module_file_if, IOCTLCMD_ENABLE_PINTASK,cpu) < 0)
-		arm_throw(LinuxSensingModuleException,"IOCTLCMD_ENABLE_PINTASK failed errno=%d",errno);
-}
-
 void LinuxSensingModule::tracePerfCounter(perfcnt_t perfcnt)
 {
 	if(_sensingRunning)

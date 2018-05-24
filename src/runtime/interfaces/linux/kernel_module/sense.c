@@ -39,7 +39,7 @@ static volatile bool vitamins_flush_tasks_stopping;
 
 static DEFINE_SPINLOCK(new_task_created_lock);
 static int tasks_being_created = 0;
-static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_struct *parent_tsk){
+static void new_task_created(struct task_struct *tsk,struct task_struct *parent_tsk){
     //allocates the hook data
     tracked_task_data_t *hooks;
     private_hook_data_t *priv_hooks;
@@ -73,17 +73,11 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     BUG_ON(TASK_NAME_SIZE > TASK_COMM_LEN);
     memcpy(hooks->this_task_name,tsk->comm,TASK_NAME_SIZE);
 
-    //if we want to pin this task
-    if(at_cpu >= 0){
-    	BUG_ON(at_cpu >= sys->core_list_size);
-    	cpus_clear(tsk->cpus_allowed);
-    	cpu_set(at_cpu, tsk->cpus_allowed);
-    }
 
     priv_hooks->sen_data_lock[0] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[0]);
     priv_hooks->sen_data_lock[1] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[1]);
 
-    perf_data_reset_task(vitsdata,task_idx, at_cpu);
+    perf_data_reset_task(vitsdata,task_idx);
 
     hooks->num_beat_domains = 0;
     //check if parent has beat domain
@@ -114,7 +108,7 @@ private_hook_data_t* add_created_task(struct task_struct *tsk)
 	private_hook_data_t *task = hook_hashmap_get(tsk);
 	if(task != nullptr) return task;
 	else{
-		new_task_created(-1,tsk,tsk->parent);
+		new_task_created(tsk,tsk->parent);
 		return hook_hashmap_get(tsk);
 	}
 }
@@ -305,13 +299,9 @@ static inline int is_userspace(struct task_struct *tsk){
 }
 
 static bool per_task_sensing = false;
-static int pin_task_to_cpu = -1;
 
 void set_per_task_sensing(bool val){
 	per_task_sensing = val;
-}
-void set_pin_task_to_cpu(int cpu){
-	pin_task_to_cpu = cpu;
 }
 
 static inline void vitamins_task_created_probe(struct task_struct *parent, struct task_struct *tsk)
@@ -321,7 +311,7 @@ static inline void vitamins_task_created_probe(struct task_struct *parent, struc
 	//  -it's a user-level task
 	if(per_task_sensing && is_userspace(tsk)){
 		//does not pin if pin_task_to_cpu==-1
-		new_task_created(pin_task_to_cpu,tsk,parent);
+		new_task_created(tsk,parent);
 	}
 }
 

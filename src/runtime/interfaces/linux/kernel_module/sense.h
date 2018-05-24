@@ -37,8 +37,6 @@ void sense_window(sys_info_t *sys, int wid);
 
 //sensing options
 void set_per_task_sensing(bool val);
-void set_pin_task_to_cpu(int cpu);
-
 
 bool trace_perf_counter(perfcnt_t pc);
 bool trace_perf_counter_reset(void);

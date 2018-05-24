@@ -62,6 +62,8 @@ sudo dmesg -c > $PREV_DMESG
 
 echo "RUNNING" > $STATUS_FILE
 
+TASKSET_MASK=0x$(echo "obase=16;$((1<<$TRACED_CORE))" | bc)
+
 #since we cannot get all counters at once, does multiple iterations collecting different counters each iteration
 cntRun=0
 while [ ! -z "$TRACE_PERFCNTS" ]
@@ -88,7 +90,7 @@ do
         do            
             echo "perfcnt run $cntRun (iter $iter out of $_TRACE_RUNITERS)"
             sudosh $SPARTA_SCRIPTDIR/runtime/start.sh tracing trace_core=$TRACED_CORE $ACTUAL_TRACE_PERFCNTS
-            $TRACED_PROGRAM $TRACED_PROGRAM_ARGS >$TRACED_PROGRAM_OUT 2>&1 
+            taskset $TASKSET_MASK $TRACED_PROGRAM $TRACED_PROGRAM_ARGS >$TRACED_PROGRAM_OUT 2>&1
             sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
             sudo dmesg -c > $CURR_DMESG
            

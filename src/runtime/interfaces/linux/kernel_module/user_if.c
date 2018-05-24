@@ -216,8 +216,6 @@ static long debugfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 			return ioctlcmd_sensing_stop();
 		case IOCTLCMD_ENABLE_PERTASK_SENSING:
 			return ioctlcmd_enable_pertask_sensing(arg);
-		case IOCTLCMD_ENABLE_PINTASK:
-			return ioctlcmd_enable_pintask(arg);
 		case IOCTLCMD_PERFCNT_ENABLE:
 			return ioctlcmd_perfcnt_enable(arg);
 		case IOCTLCMD_PERFCNT_RESET:
