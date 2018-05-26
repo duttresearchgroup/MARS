@@ -18,8 +18,10 @@
 #ifndef LINUX_SENSING_MODULE_H_
 #define LINUX_SENSING_MODULE_H_
 
-#include "../performance_data.h"
-#include "sensor.h"
+#include <unistd.h>
+
+#include <runtime/interfaces/common/performance_data.h>
+#include <runtime/interfaces/common/sensor.h>
 
 class LinuxSensingModule
 {
@@ -29,28 +31,18 @@ class LinuxSensingModule
 
 	static LinuxSensingModule* _attached;
 
+	sys_info_t *_sys_info;
+	PeriodicSensingManager<LinuxSensingModule> _psensingManager;
 	int _module_file_if;
 	void* _module_shared_mem_raw_ptr;
 	volatile bool _sensingRunning;
 	int _numCreatedWindows;
 	PerformanceData _sensed_data;
-	PeriodicSensingManager _psensingManager;
 
   public:
 	LinuxSensingModule();
 
 	~LinuxSensingModule();
-
-	//disconnects this object from the module without checks
-	//will make this object invalid
-	void forceDetach();
-
-	static LinuxSensingModule& get()
-	{
-		if(_attached == nullptr)
-			arm_throw(LinuxSensingModuleException,"Sensing module not attached");
-		return *_attached;
-	}
 
   public:
 
@@ -79,7 +71,14 @@ class LinuxSensingModule
 
 	void cleanUpCreatedTasks();
 
-	void attachSensor(PeriodicSensor *sensor);
+	void attachSensor(PeriodicSensor<LinuxSensingModule> *sensor);
+
+	void sleepMS(int timeMS)
+	{
+	    usleep(timeMS*1000);
+	}
+
+	sys_info_t* info() { return _sys_info;}
 
   private:
 

@@ -28,6 +28,10 @@
 
 #define MAX_PERFCNTS 64//maximum number of counters
 
+#define MINIMUM_WINDOW_LENGTH_MS 5
+
+#define MAX_WINDOW_CNT 4
+
 // Daemons won't dump logs to kmsg
 #define DAEMON_NO_KMSG
 

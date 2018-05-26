@@ -27,7 +27,6 @@
 #ifndef __arm_rt_models_tlc_h
 #define __arm_rt_models_tlc_h
 
-#include <runtime/interfaces/common/sense_defs.h>
 #include <runtime/framework/sensing_interface_impl.h>
 #include "baseline_model_common.h"
 

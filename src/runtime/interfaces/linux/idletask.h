@@ -26,10 +26,11 @@
 #include <limits>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/perfcnts.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 #include <runtime/framework/window_manager.h>
+
+#include <runtime/framework/sensing_interface.h>
 
 class IdleTask
 {

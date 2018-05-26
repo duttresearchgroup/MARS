@@ -49,7 +49,7 @@ void ExecutionSummaryWithTracedTask::dump()
     ExecutionSummary::dump();
 
     if(_traced_task != nullptr){
-        const PerformanceData &data = SensingModule::get().data();
+        const PerformanceData &data = PerformanceData::localData();
         //reappend the traced task to the output file
         std::string path = _pathNameTotal();
         std::ofstream of(path,std::ios::app);
@@ -81,7 +81,7 @@ void ExecutionSummaryWithTracedTask::wrapUp()
     const tracked_task_data_t *traced_task = nullptr;
     _traced_task = nullptr;
 
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
 
     for(int i = 0; i < data.numCreatedTasks(); ++i){
         const tracked_task_data_t &task = data.task(i);

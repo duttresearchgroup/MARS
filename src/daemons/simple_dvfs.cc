@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
+#include <daemons/common/deamonizer.h>
 #include <runtime/common/reports.h>
 #include <runtime/framework/actuation_interface.h>
 #include "../runtime/framework/models/baseline_model.h"
@@ -93,12 +93,14 @@ class SimpleDVFSManager : public PolicyManager {
 
         registerPolicy(new SimpleDVFSPolicy());
     }
+
+  public:
+    SimpleDVFSManager(SensingModule *sm) :PolicyManager(sm){}
 };
 
 
 
 int main(int argc, char * argv[]){
-    daemon_setup(argc,argv);
-    daemon_run_sys<SimpleDVFSManager>();
+    daemon_run<SimpleDVFSManager>(argc,argv);
     return 0;
 }

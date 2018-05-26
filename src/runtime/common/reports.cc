@@ -19,7 +19,6 @@
 #include <ostream>
 #include <fstream>
 
-#include <runtime/interfaces/common/sense_defs.h>
 #include <base/base.h>
 
 #include <runtime/common/reports.h>

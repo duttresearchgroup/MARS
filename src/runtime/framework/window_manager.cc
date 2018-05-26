@@ -26,11 +26,10 @@
 #include <pthread.h>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
-#include <runtime/interfaces/common/sensing_window_defs.h>
-#include <runtime/interfaces/common/user_if_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 #include "window_manager.h"
+#include "reflective.h"
 
 
 void* SensingWindowManager::sen_win_dispatcher(void*arg){
@@ -89,11 +88,11 @@ void* SensingWindowManager::sen_win_dispatcher(void*arg){
     return nullptr;
 }
 
-SensingWindowManager::SensingWindowManager()
-	:_sensingRunning(false),
+SensingWindowManager::SensingWindowManager(SensingModule *sm)
+	:_sm(sm),
+	 _sensingRunning(false),
 	 _sen_win_dispatcher_thread(0)
 {
-	_sm = new SensingModule();
 }
 
 SensingWindowManager::~SensingWindowManager()

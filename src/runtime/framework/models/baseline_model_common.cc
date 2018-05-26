@@ -81,7 +81,7 @@ BaselineModelCommon::PredBuffer& BaselineModelCommon::_predict(const tracked_tas
         buffIter =  _predBuffer[wid][task->task_idx][tgtCore->arch].find(tgtFreqMhz);
     }
     PredBuffer &buffer = buffIter->second;
-    uint64_t ts = SensingModule::get().data().currWindowTimeMS(wid);
+    uint64_t ts = PerformanceData::localData().currWindowTimeMS(wid);
     if(!buffer.valid || (buffer.lastTS != ts)){
         if((SensingInterfaceImpl::Impl::sense<SEN_BUSYTIME_S>(task,wid) == 0) ||
            (SensingInterfaceImpl::Impl::sense<SEN_PERFCNT>(PERFCNT_INSTR_EXE,task,wid) == 0)){

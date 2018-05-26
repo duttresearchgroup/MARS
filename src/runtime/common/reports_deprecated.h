@@ -26,7 +26,7 @@
 
 #include <runtime/common/option_parser.h>
 #include <runtime/framework/sensing_interface.h>
-#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/common/performance_data.h>
 #include <runtime/interfaces/sensing_module.h>
 
 inline std::ostream& operator<< (std::ostream& os, const sys_info_t& obj){
@@ -105,7 +105,7 @@ protected:
 		}
 		template<typename Resource>
 		inline double _perfcnt(const Resource &r, int pindex, int wid, bool isAgg){
-		    const PerformanceData &data = SensingModule::get().data();
+		    const PerformanceData &data = PerformanceData::localData();
 		    perfcnt_t cnt = data.perfcntFromIdx(pindex);
 		    return isAgg ? SensingInterface::senseAgg<SEN_PERFCNT>(cnt,&r,wid) : SensingInterface::sense<SEN_PERFCNT>(cnt,&r,wid);
 		}

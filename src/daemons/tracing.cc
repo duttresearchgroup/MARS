@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
+#include <daemons/common/deamonizer.h>
 #include <runtime/managers/tracing.h>
 
 int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	daemon_run_sys<TracingSystem>();
+	daemon_run<TracingSystem>(argc,argv);
 	return 0;
 }

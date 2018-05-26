@@ -57,7 +57,7 @@ void ReflectiveEngine::addToRscNeedingPredImpl(const core_info_t *rsc)
     rscNeedingPred.insert(rsc);
 
     //adds all tasks mapped to this core
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int i = 0; i < data.numCreatedTasks(ReflectiveEngine::currentWID()); ++i){
         const tracked_task_data_t *task = &(data.task(i));
         //See if we have a tryActuate for this task map. If not found use the current map

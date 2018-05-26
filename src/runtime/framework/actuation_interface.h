@@ -25,6 +25,7 @@
 #include "sensing_interface.h"
 #include "actuation_interface_impl.h"
 #include <base/base.h>
+#include <runtime/interfaces/sensing_module.h>
 
 
 class ActuationInterface : ActuationInterfaceImpl {
@@ -79,7 +80,7 @@ class ActuationInterface : ActuationInterfaceImpl {
      * and after we are done using it to contruct/destruct object that may
      * be necessary for implementing the interface.
      */
-    static void construct(const sys_info_t &info);
+    static void construct(SensingModule *sm);
     static void destruct();
 
 

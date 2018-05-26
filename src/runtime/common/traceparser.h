@@ -27,7 +27,6 @@
 
 #include <base/base.h>
 #include <runtime/common/semaphore.h>
-#include <runtime/interfaces/common/perfcnts.h>
 #include <runtime/framework/types.h>
 
 class TraceParser {
@@ -98,7 +97,7 @@ class TraceParser {
     TraceSamples;
 
     struct Traces {
-        TraceSamples samples;
+        TraceParser &parser;
 
         // Whether or not the sampling rate was fixed
         // If the sampling rate is fixed, the rate is
@@ -114,6 +113,19 @@ class TraceParser {
         // If the stddev of sampleRate div by sampleRate is
         // greater than TOLERANCE, then this is variable rate
         static constexpr double TOLERANCE = 0.1;
+
+        TraceSamples samples;
+
+        Traces(TraceParser &p)
+            :parser(p),
+             data_format(SAMPLE_VARIABLE_RATE),
+             sampleRate(0)
+        {}
+
+        bool havePerfcnt(perfcnt_t perfcnt) const
+        {
+            return parser._columnMap.find(perfcnt_str(perfcnt)) != parser._columnMap.end();
+        }
     };
 
     TraceParser(std::vector<std::string> dirs);

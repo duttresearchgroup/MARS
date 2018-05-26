@@ -111,13 +111,13 @@ $(ALLMODULES):
 
 .PHONY: lin_sensing_module
 lin_sensing_module:
-	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module all
+	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux/kernel_module all
 	mkdir -p bin_$(ARCH)_$(PLAT)/sensing_module
-	cp src/runtime/interfaces/linux-module/vitamins.ko bin_$(ARCH)_$(PLAT)/sensing_module/
+	cp src/runtime/interfaces/linux/kernel_module/vitamins.ko bin_$(ARCH)_$(PLAT)/sensing_module/
 
 .PHONY: lin_sensing_module_clean
 lin_sensing_module_clean:
-	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux-module clean
+	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_krn) EXTRAFLAGS=$(EXTRAFLAGS) KERNEL_DIR=$(KERNEL_SRC) -C src/runtime/interfaces/linux/kernel_module clean
 
 .PHONY: daemons
 daemons: src/vitamins.mk

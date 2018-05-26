@@ -23,7 +23,7 @@
 
 #include <map>
 #include <sstream>
-#include "../performance_data.h"
+#include <runtime/interfaces/common/performance_data.h>
 
 class IdleDomain
 {

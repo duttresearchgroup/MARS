@@ -21,7 +21,6 @@
 #include <base/base.h>
 #include <runtime/common/traceparser.h>
 #include <runtime/framework/sensing_interface_impl.h>
-#include <runtime/interfaces/common/sense_defs.h>
 
 namespace BinBasedPred {
 

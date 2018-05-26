@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/daemon/deamonizer.h>
+#include <daemons/common/deamonizer.h>
 #include <runtime/framework/actuation_interface.h>
 #include <unordered_map>
 
@@ -57,7 +57,7 @@ protected:
     }
 
 public:
-    IdlePowerChecker() :PolicyManager(),
+    IdlePowerChecker(SensingModule *sm) :PolicyManager(sm),
         sensingWindow(nullptr),
         _state(INCREASING),_iterations(0){};
 
@@ -142,7 +142,6 @@ void IdlePowerChecker::window_handler(int wid,PolicyManager *owner)
 
 
 int main(int argc, char * argv[]){
-	daemon_setup(argc,argv);
-	daemon_run_sys<IdlePowerChecker>();
+	daemon_run<IdlePowerChecker>(argc,argv);
 	return 0;
 }

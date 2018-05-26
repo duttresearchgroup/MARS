@@ -58,7 +58,7 @@ void SensingDataTracer::init_counters_names(std::initializer_list<std::string> a
 	data_names.push_back("util"); data_agg_att.push_back(traced_data::AGG_SUM);
 	data_names.push_back("power_w"); data_agg_att.push_back(traced_data::AGG_SUM);
 	data_names.push_back("freq_mhz"); data_agg_att.push_back(traced_data::AGG_NOPE);
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 	for(int i = 0; i < data.numMappedPerfcnts(); ++i) {
 		data_names.push_back(perfcnt_str(data.perfcntFromIdx(i)));
 		data_agg_att.push_back(traced_data::AGG_SUM);
@@ -82,7 +82,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(_util(sd,wid,isAgg));
 	data_vals.push_back(traced_data::NO_DATA);//power
 	data_vals.push_back(traced_data::NO_DATA);//freq
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
 	data_vals.push_back(_nivcsw(sd,wid,isAgg));
@@ -101,7 +101,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
     data_vals.push_back(_util(sd,wid,isAgg));
     data_vals.push_back(traced_data::NO_DATA);//power
     data_vals.push_back(traced_data::NO_DATA);//freq
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
     for(int j = 0; j < data.numMappedPerfcnts(); ++j)
         data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
     data_vals.push_back(_nivcsw(sd,wid,isAgg));
@@ -120,7 +120,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(traced_data::NO_DATA);//util
 	data_vals.push_back(_power_w(sd,wid,isAgg));//power
 	data_vals.push_back(traced_data::NO_DATA);//freq
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(traced_data::NO_DATA);
 	data_vals.push_back(traced_data::NO_DATA);//nivcsw
@@ -139,7 +139,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
 	data_vals.push_back(traced_data::NO_DATA);//util
 	data_vals.push_back(traced_data::NO_DATA);//power
 	data_vals.push_back(_freq_mhz(sd,wid,isAgg));//freq
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 		data_vals.push_back(traced_data::NO_DATA);
 	data_vals.push_back(traced_data::NO_DATA);//nivcsw
@@ -159,7 +159,7 @@ SensingDataTracer::traced_data::traced_data(const SensingDataTracer &tracer,cons
     data_vals.push_back(_util(sd,wid,isAgg));
 	data_vals.push_back(_power_w(sd_power,wid,isAgg));
 	data_vals.push_back(_freq_mhz(sd_freq,wid,isAgg));
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 	for(int j = 0; j < data.numMappedPerfcnts(); ++j)
 	    data_vals.push_back(_perfcnt(sd,j,wid,isAgg));
 	data_vals.push_back(_nivcsw(sd,wid,isAgg));
@@ -282,7 +282,7 @@ void ExecutionSummary::record(std::initializer_list<double> a_args)
 	if(data_names.size() == 0)
 		init_counters_names();
 
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 
 	assert_false(_wid < 0);
 	_timestamps.push_back((double)(data.sensingStopTimeMS() - data.sensingStartTimeMS())/1000.0);
@@ -336,7 +336,7 @@ void ExecutionSummary::dump()
 			}
 		}
 	}
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 
 	for(int p = 0; p < data.numCreatedTasks(); ++p)
 		_dumpTotalPrintLine(of,"",data.task(p),_d_task,p);
@@ -369,7 +369,7 @@ void TimeTracer::record(std::initializer_list<double> a_args)
 	if(data_names.size() == 0)
 		init_counters_names();
 
-	const PerformanceData &data = SensingModule::get().data();
+	const PerformanceData &data = PerformanceData::localData();
 
 	assert_false(_wid < 0);
 	_timestamps.push_back((double)(data.currWindowTimeMS(_wid) - data.sensingStartTimeMS())/1000.0);
@@ -421,7 +421,7 @@ void TimeTracer::dump()
 {
 	//one file per component
 
-    const PerformanceData &data = SensingModule::get().data();
+    const PerformanceData &data = PerformanceData::localData();
 
     assert_false(_timestamps.size() != _time_series_size);
 

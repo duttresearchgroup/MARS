@@ -28,8 +28,7 @@
 #include <runtime/interfaces/sensing_module.h>
 
 #include <base/base.h>
-#include <runtime/interfaces/common/perfcnts.h>
-#include <runtime/interfaces/common/sense_data_shared.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 //forward system declaration
 class PolicyManager;
@@ -95,6 +94,8 @@ class SensingWindowManager
 
   private:
 
+	SensingModule *_sm;
+
 	volatile bool _sensingRunning;
 
 	pthread_t _sen_win_dispatcher_thread;
@@ -102,8 +103,6 @@ class SensingWindowManager
 	std::vector<WindowInfo*>  _windowInfos;
 	std::map<int,WindowInfo*> _windowHandlers_idmap;
 	std::map<int,WindowInfo*> _windowHandlers_periodmap;
-
-	SensingModule *_sm;
 
 	static void* sen_win_dispatcher(void*arg);
 
@@ -114,7 +113,7 @@ class SensingWindowManager
 
   public:
 
-	SensingWindowManager();
+	SensingWindowManager(SensingModule *sm);
 
 	~SensingWindowManager();
 
