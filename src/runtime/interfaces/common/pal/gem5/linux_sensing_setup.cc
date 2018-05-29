@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include <runtime/interfaces/common/pal/sensing_setup.h>
+#include <runtime/interfaces/linux/common/pal/sensing_setup.h>
 #include <runtime/interfaces/sensing_module.h>
-
+#include <runtime/framework/sensing_interface.h>
 
 template<>
 void pal_sensing_setup<SensingModule>(SensingModule *m){
