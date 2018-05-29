@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "defs.h"
+#include "../defs.h"
 
 /* TODO: this needs to be implemented accurately
  * for now, just assume we have a single domain
