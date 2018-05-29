@@ -176,6 +176,9 @@ const std::string& TracingSystem::T_CORE = sen_str<SEN_LASTCPU>();
 const std::string& TracingSystem::T_BEATS(int domain){
     return sen_str<SEN_BEATS>(domain);
 }
+const std::string& TracingSystem::T_BEATS_TGT(int domain){
+    return sen_str<SEN_BEATS_TGT>(domain);
+}
 
 void TracingSystem::window_handler(int wid,PolicyManager *owner)
 {
@@ -206,6 +209,7 @@ void TracingSystem::window_handler(int wid,PolicyManager *owner)
 
 			for(int j = 0; j < MAX_BEAT_DOMAINS; ++j) {
 				trace(T_BEATS(j)) = sense<SEN_BEATS>(j,&task,wid);
+				trace(T_BEATS_TGT(j)) = sense<SEN_BEATS_TGT>(j,&task,wid);
 			}
 
 			trace(T_CORE) = last_cpu_used;

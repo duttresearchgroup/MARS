@@ -104,7 +104,7 @@ def findPower(freqVal):
     idlePowerClose = aux.iloc[0][tracePowerCol]
     idleFreqFar = aux.iloc[1][traceFreqCol]
     idlePowerFar = aux.iloc[1][tracePowerCol]
-    if int(freqVal) != idleFreqClose:
+    if (freqVal > (idleFreqClose+5)) or (freqVal < (idleFreqClose-5)):
         print('{}: idle power for frequency {} not found. Interpolating'.format(args.srcfile,freqVal))
         closeFactor = 1 - (abs(idleFreqClose-freqVal) / (abs(idleFreqClose-freqVal)+abs(idleFreqFar-freqVal)))
         farFactor = 1 - (abs(idleFreqFar-freqVal) / (abs(idleFreqClose-freqVal)+abs(idleFreqFar-freqVal)))

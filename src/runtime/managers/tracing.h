@@ -23,7 +23,7 @@
 
 class TracingSystem : public PolicyManager {
   protected:
-	static const int WINDOW_LENGTH_MS = 10;
+	static const int WINDOW_LENGTH_MS = MINIMUM_WINDOW_LENGTH_MS*4;
 	virtual void setup();
 	virtual void report();
 
@@ -70,6 +70,7 @@ public:
     static const std::string& T_NVCSW;
     static const std::string& T_CORE;
     static const std::string& T_BEATS(int domain);
+    static const std::string& T_BEATS_TGT(int domain);
 
 };
 

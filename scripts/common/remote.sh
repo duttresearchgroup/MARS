@@ -69,7 +69,7 @@ export -f R_PULL
 
 
 ######################################################
-# Synchs a local directory with a remote directory
+# Synchs a remote directory with a local directory
 # Data in the remote directory may be OVERWRITTEN
 ######################################################
 
@@ -84,4 +84,17 @@ function R_SYNCH(){
     fi
 }
 export -f R_SYNCH
+
+
+######################################################
+# Synchs a local directory with a remote directory
+# Data in the local directory may be OVERWRITTEN
+######################################################
+
+function R_SYNCH_LOCAL(){
+    __SRC=$1
+    __DEST=$2
+    sshpass $R_VERBOSE -p $R_PASS rsync --progress -avze "ssh -o StrictHostKeyChecking=no" $R_USER@$R_HOST:$__SRC/ $__DEST/
+}
+export -f R_SYNCH_LOCAL
 

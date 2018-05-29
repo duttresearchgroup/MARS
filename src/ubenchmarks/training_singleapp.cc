@@ -25,6 +25,9 @@
 
 #include "training.h"
 
+#include <runtime/uapi/beats.h>
+
+
 //__ISLITE should be passed using the -D flag
 #ifdef __ISLITE
     constexpr bool IS_LITE = true;
@@ -131,11 +134,32 @@ static inline void idle_wait_us(long int time){
     nanosleep(&req, NULL);
 }
 
+static task_beat_info_t *_beats_info;
+static task_beat_data_t *_beats_data;
+static unsigned int currCombination = 0;
+static inline void beats_setup(){
+    _beats_data = 0;
+    _beats_info = task_beat_register_task();
+    if(_beats_info){
+        _beats_data = task_beat_create_domain(_beats_info,BEAT_PERF,0);
+        if(!_beats_data){
+            printf("Cannot setup beats!\n");
+            exit(-1);
+        }
+    }
+    else {
+        printf("Cannot connect to beats sensing module!\n");
+        exit(-1);
+    }
+}
+
 static inline void run_combination(int r, int *data)
 {
     if((r > 1) && IS_LITE) exit(0);//runs only a few iterations for testing. exit now
 
     //auto time = vitamins_bm_time_us();
+    currCombination += 1;
+    task_beat_update_domain(_beats_info,_beats_data,BEAT_PERF,currCombination);
     for(int i = 0; i < r; ++i){
         int benchIdx = data[i];
         assert(benchIters[benchIdx]>=r);
@@ -148,7 +172,6 @@ static inline void run_combination(int r, int *data)
     //for (int j=0; j<r; j++)
     //    printf("%d ",data[j]);
     //printf("   in %ld ms\n",time);
-
 }
 
 static void combinationUtil(int r, int index, int data[], int i)
@@ -200,8 +223,13 @@ static void run_ubench(int argc, char* argv[]){
 
     init_iters(argc, argv);
 
+    beats_setup();
+
     for(unsigned i = 1; i <= benchIters.size(); ++i)
         runCombinations(i,data);
+
+    task_beat_update_domain(_beats_info,_beats_data,BEAT_PERF,0);
+    idle_wait_us(TARGET_UBENCH_RT_MS*1000);
 }
 
 int main(int argc, char* argv[])
