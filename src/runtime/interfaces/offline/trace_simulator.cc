@@ -243,13 +243,36 @@ void TraceSimulator::_commitTraces()
     }
 }
 
+// No locks necessary in offline
+static inline void perf_data_commit_acc_lock(int, int,unsigned long *)
+{  }
+static inline void perf_data_commit_acc_unlock(int, int,unsigned long *)
+{  }
 
 void TraceSimulator::_commitWindow(int wid)
 {
     pinfo("SIM %5d: _commitWindow() committing wid = %d \n",(int)_currentSimTimeMS,wid);
 
-    //TODO copy the data from the window _acc* to the proper places
-    //(similar to the sense_cpu/sense_tasks implemented in the module)
+    // impossible in offline sim
+    assert_false(_perf_data.sensing_windows[wid].___reading);
+
+    _perf_data.sensing_windows[wid].___updating = true;
+
+
+    perf_data_commit_cpu_window(&_sys_info,
+            &_perf_data,wid,_currentSimTimeMS,
+            &perf_data_commit_acc_lock,
+            &perf_data_commit_acc_unlock);
+
+
+    perf_data_commit_tasks_window(&_sys_info,
+            &_perf_data,wid,_currentSimTimeMS,
+            &perf_data_commit_acc_lock,
+            &perf_data_commit_acc_unlock);
+
+    _perf_data.sensing_windows[wid].num_of_samples += 1;
+
+    _perf_data.sensing_windows[wid].___updating = false;
 }
 
 void TraceSimulator::_currTraceInfoConsistencyCheck(task_exec_info &taskInfo)
@@ -422,6 +445,7 @@ void TraceSimulator::_simulate(uint64_t forMS)
         // TODO implement actuations
 
         _currentSimTimeMS += MINIMUM_WINDOW_LENGTH_MS;
+        _perf_data.num_of_minimum_periods += 1;
         _advanceTime(MINIMUM_WINDOW_LENGTH_MS);
     }
     pinfo("SIM %5d: _simulate - exiting\n",(int)_currentSimTimeMS);

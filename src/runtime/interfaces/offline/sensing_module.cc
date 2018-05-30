@@ -58,10 +58,14 @@ void OfflineSensingModule::sensingStart()
     _psensingManager.startSensing();
 
     _sensingRunning = true;
+
+    _sim->perf_data()->starttime_ms = _sim->simTimeMS();
 }
 
 void OfflineSensingModule::sensingStop()
 {
+    _sim->perf_data()->stoptime_ms = _sim->simTimeMS();
+
     if(_sensingRunning){
         _sim->finishSimulationStop();
         _psensingManager.stopSensing();
