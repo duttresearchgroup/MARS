@@ -268,12 +268,16 @@ void minimum_sensing_window(sys_info_t *sys)
     vitsdata->num_of_minimum_periods += 1;
 }
 
+static int sensing_window_reading_errs[MAX_WINDOW_CNT];
+
 void sense_window(sys_info_t *sys, int wid)
 {
 	int cpu;
 
-	if(vitsdata->sensing_windows[wid].___reading)
-	    pinfo("WARNING: updating window %d, but daemon might still be reading it.!!!\n",wid);
+	if(vitsdata->sensing_windows[wid].___reading){
+	    if(++sensing_window_reading_errs[wid] < 5)
+	        pinfo("WARNING: updating window %d, but daemon might still be reading it.!!!\n",wid);
+	}
 
 	vitsdata->sensing_windows[wid].___updating = true;
 
@@ -517,7 +521,12 @@ bool trace_perf_counter_reset(void){
 
 void sense_begin(sys_info_t *sys)
 {
+    int i;
+
     vitamins_sense_cleanup_counters(sys);
+
+    for(i = 0; i < MAX_WINDOW_CNT; ++i)
+        sensing_window_reading_errs[i] = 0;
 
     vitsdata->starttime_ms = ktime_to_ms(ktime_get());
     vitsdata->stoptime_ms = vitsdata->starttime_ms;
@@ -531,11 +540,17 @@ void sense_begin(sys_info_t *sys)
 
 void sense_stop(sys_info_t *sys)
 {
+    int i;
+
     vitsdata->stoptime_ms = ktime_to_ms(ktime_get());
 
     unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
     unregister_trace_sched_switch(vitamins_context_switch_probe,0);
 	tracepoint_synchronize_unregister();
+
+	for(i = 0; i < MAX_WINDOW_CNT; ++i)
+	    if(sensing_window_reading_errs[i] > 0)
+	        pinfo("WARNING: window %d might've been updated %d times with daemon still reading it !!!\n",i, sensing_window_reading_errs[i]);
 }
 
 void sense_destroy_mechanisms(sys_info_t *sys){
