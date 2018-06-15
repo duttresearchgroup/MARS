@@ -182,9 +182,12 @@ void PolicyManager::stop()
 
 void PolicyManager::quit() const
 {
-    kill(_pm_pid,SIGQUIT);
-    for (;;) pause();
-
+    //TODO make this work with offline mode as well
+#ifdef IS_LINUX_PLAT
+    kill(_pm_pid,SIGQUIT); //captured by the daemonizer
+#else
+    arm_throw(PolicyManagerException, "PolicyManager::quit() not supported");
+#endif
 }
 
 void PolicyManager::enableReflection() const
