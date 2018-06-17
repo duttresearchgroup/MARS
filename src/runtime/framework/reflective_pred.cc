@@ -31,6 +31,7 @@
 
 template<> typename SensingTypeInfo<SEN_PERFCNT>::ValType ReflectiveEngine::predict<SEN_PERFCNT,tracked_task_data_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS>::ValType ReflectiveEngine::predict<SEN_BEATS,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc);
+template<> typename SensingTypeInfo<SEN_BEATS_TGT>::ValType ReflectiveEngine::predict<SEN_BEATS_TGT,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS_TGT>::ParamType p, const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType ReflectiveEngine::predict<SEN_TOTALTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_BUSYTIME_S>::ValType ReflectiveEngine::predict<SEN_BUSYTIME_S,tracked_task_data_t>(const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_NIVCSW>::ValType ReflectiveEngine::predict<SEN_NIVCSW,tracked_task_data_t>(const tracked_task_data_t *rsc);
@@ -106,6 +107,13 @@ ReflectiveEngine::predict<SEN_PERFCNT,tracked_task_data_t>(typename SensingTypeI
 template<>
 typename SensingTypeInfo<SEN_BEATS>::ValType
 ReflectiveEngine::predict<SEN_BEATS,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
+
+template<>
+typename SensingTypeInfo<SEN_BEATS_TGT>::ValType
+ReflectiveEngine::predict<SEN_BEATS_TGT,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS_TGT>::ParamType p, const tracked_task_data_t *rsc)
 {
     arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
 }

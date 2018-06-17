@@ -30,6 +30,12 @@ const std::string SensingTypeInfo<SEN_BEATS>::str1         = "beats1";
 const std::string SensingTypeInfo<SEN_BEATS>::str2         = "beats2";
 const std::string SensingTypeInfo<SEN_BEATS>::str3         = "beats3";
 const std::string SensingTypeInfo<SEN_BEATS>::str4         = "beats_there_shouldnt_be_this_many_domains";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str          = "beatsTgt";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str0         = "beatsTgt0";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str1         = "beatsTgt1";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str2         = "beatsTgt2";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str3         = "beatsTgt3";
+const std::string SensingTypeInfo<SEN_BEATS_TGT>::str4         = "beatsTgt_there_shouldnt_be_this_many_domains";
 
 const std::string SensingTypeInfo<SEN_NIVCSW>::str         = "nivcsw";
 
