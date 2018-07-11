@@ -214,10 +214,19 @@ static inline void perf_data_commit_task_window_acc_unlock(int task, int acc_idx
 
 static inline void sense_tasks(sys_info_t *sys,int wid)
 {
+    int p;
+
     perf_data_commit_tasks_window(sys,
             vitsdata,wid,ktime_to_ms(ktime_get()),
             &perf_data_commit_task_window_acc_lock,
             &perf_data_commit_task_window_acc_unlock);
+
+    //TODO the task_finished flag should be set by a hook called when a task ends
+    for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
+        private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
+        if(!(task_priv_hook->hook_data->task_finished) && !find_get_pid(task_priv_hook->hook_data->this_task_pid))
+            task_priv_hook->hook_data->task_finished = true;
+    }
 }
 
 bool update_task_beat_info(pid_t pid)

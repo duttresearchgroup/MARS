@@ -45,8 +45,8 @@ done
 
 #aggregates the files from multiples runs
 FILES=$(ls interface_test-fine_trace*.csv | xargs)
-python3 $SPARTA_SCRIPTDIR/tracing/trace_agg-periodic.py --srcfiles $FILES --destfile interface_test-fine_trace.agg.csv
+python3 $SPARTA_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-fine_trace.agg.csv
 FILES=$(ls interface_test-coarse_trace*.csv | xargs)
-python3 $SPARTA_SCRIPTDIR/tracing/trace_agg-periodic.py --srcfiles $FILES --destfile interface_test-coarse_trace.agg.csv
+python3 $SPARTA_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-coarse_trace.agg.csv
 
 
