@@ -50,6 +50,10 @@ RTS_DAEMON_PID=$RTS_DAEMON_BIN_DIR/.current_active_daemon.pid
 # (when the RTS_VALGRIND var is set 1)
 RTS_VALGRIND_CMD="valgrind --track-origins=yes --leak-check=full --show-reachable=yes --suppressions=$SPARTA_SCRIPTDIR/runtime/valgrind.supp --trace-children=yes --log-file=$RTS_DAEMON_OUTDIR/valgrind.log"
 
+# Extensions used by files produced by trace parsing scripts
+TP_SANITIZE_EXT="sanitizedcsv"
+TP_POWAJUST_EXT="powerajustedcsv"
+
 ######################################################
 # Helper functions
 ######################################################

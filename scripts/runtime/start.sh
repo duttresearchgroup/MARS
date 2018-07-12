@@ -52,6 +52,9 @@ mkdir $RTS_DAEMON_OUTDIR
 rm -rf $RTS_DAEMON_READY
 rm -rf $RTS_DAEMON_PID
 
+# makes sure debugfs is available to non sudo apps
+sudo chmod a+rx /sys/kernel/debug
+
 # inserts kernel sensing module
 insmod $RTS_MODULE_PATH
 

@@ -149,11 +149,11 @@ static inline void _perf_data_reset_perf_counters(perf_data_perf_counters_t *sen
     sen_data->time_total_ms = 0;
 }
 
-static inline void _perf_data_reset_task_counters(int cpu,perf_data_task_t *sen_data){
+static inline void _perf_data_reset_task_counters(perf_data_task_t *sen_data){
     int cnt;
     _perf_data_reset_perf_counters(&(sen_data->perfcnt));
     for(cnt = 0; cnt < MAX_BEAT_DOMAINS; ++cnt) sen_data->beats[cnt] = 0;
-    sen_data->last_cpu_used = cpu;
+    sen_data->last_cpu_used = -1;
 }
 
 static inline void _perf_data_reset_cpu_counters(perf_data_cpu_t *sen_data){
@@ -167,15 +167,15 @@ static inline void _perf_data_reset_freq_counters(perf_data_freq_domain_t *sen_d
     sen_data->last_update_time_ms = last_update_time;
 }
 
-static inline void perf_data_reset_task(perf_data_t *data, int task_idx, int initial_cpu)
+static inline void perf_data_reset_task(perf_data_t *data, int task_idx)
 {
     int i;
     _perf_data_reset_cpu_counters(&(data->__acc_tasks[task_idx][0]));
     _perf_data_reset_cpu_counters(&(data->__acc_tasks[task_idx][1]));
-    data->__acc_tasks_last_cpu[task_idx] = initial_cpu;
+    data->__acc_tasks_last_cpu[task_idx] = -1;
     for(i=0;i<data->sensing_window_cnt;++i){
-        _perf_data_reset_task_counters(initial_cpu,&(data->sensing_windows[i].curr.tasks[task_idx]));
-        _perf_data_reset_task_counters(initial_cpu,&(data->sensing_windows[i].aggr.tasks[task_idx]));
+        _perf_data_reset_task_counters(&(data->sensing_windows[i].curr.tasks[task_idx]));
+        _perf_data_reset_task_counters(&(data->sensing_windows[i].aggr.tasks[task_idx]));
     }
 }
 

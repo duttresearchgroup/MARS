@@ -56,29 +56,9 @@ else
 fi
 echo "Calibration args $CALIBRATION_ARGS"
 
-
-# do the trace_one-run.sh + trace_one-parse.sh but sanitize the periodic traces in between
-
 echo "Training on core $TRAINING_CORE @ $TRAINING_FREQUENCY kHz"
-sh $SPARTA_SCRIPTDIR/tracing/trace_one-run.sh $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
-
-echo "Sanitizing periodic traces"
-PERIDIC_TRACES=$(ls $TRACE_OUTPUT_DIR/periodic_trace_result*.csv | xargs)
-
-for trace in $PERIDIC_TRACES
-do
-    #creates a backup for db
-    cp $trace $trace.presanitizedcsv
-    #overwrite current file with sanitized one
-    python3 $SPARTA_SCRIPTDIR/training/sanitize.py --srcfile $trace --destfile $trace
-done
-
-echo "Parsing periodic traces"
-
-sh $SPARTA_SCRIPTDIR/tracing/trace_one-parse.sh $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
-
-
-
+TRACE_NAME=$(basename $PRED_BIN)
+sh $SPARTA_SCRIPTDIR/tracing/trace_one.sh $TRACE_NAME $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
 
 
 

@@ -95,10 +95,10 @@ $(BINDIR)/training_test: $(OBJDIR)/training.o $(KERN_OBJS)
 	$(CC) $(CFLAGS) -static -DITER_high_ilp_cache_good_int=500 -DITER_high_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_int=500 -DITER_low_ilp_cache_bad_int=500 -DITER_low_ilp_cache_good_float=500 -DITER_low_ilp_cache_bad_float=500 -DITER_high_ilp_cache_good_float=500 -DITER_high_ilp_cache_bad_float=500 -DITER_low_ilp_icache_bad=500 -DITER_low_ilp_branches_deep=500 -DITER_matrix_mult=50 $(SRCDIR)/training_multiapp.cc $^ -o $(BINDIR)/training_test_noprint
 
 $(BINDIR)/training_singleapp: $(OBJDIR)/training.o $(KERN_OBJS) $(SRCDIR)/training_singleapp.cc
-	$(CC) $(CFLAGS) -static $^ -o $@
+	$(CC) $(OBJFLAGS) -I../mash/src $^ -o $@
 
 $(BINDIR)/training_singleapp_test: $(OBJDIR)/training.o $(KERN_OBJS) $(SRCDIR)/training_singleapp.cc
-	$(CC) $(CFLAGS) -D__ISLITE -static $^ -o $@
+	$(CC) $(OBJFLAGS) -I../mash/src -D__ISLITE $^ -o $@
 
 training_multiapp: $(OBJDIR)/training.o $(KERN_OBJS) $(OBJDIR)/makefile.training_multiapp
 	@$(MAKE) CC=$(CC) BINDIR=$(BINDIR_TRAIN) OBJDIR=$(OBJDIR) SRCDIR=$(SRCDIR) -C . -f $(OBJDIR)/makefile.training_multiapp training_apps

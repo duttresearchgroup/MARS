@@ -23,7 +23,7 @@ import sys
 import argparse
 import pandas as pd
 from pathlib import Path
-import numpy
+import numpy as np
 from functools import reduce
 
 parser = argparse.ArgumentParser(description='Compares two csv files')             
@@ -49,7 +49,9 @@ if rowsDiff:
     csv1 = csv1.sum()
 
 csvDiff = ((csv1 - csv0) / csv0)*100
+csvDiff = csvDiff.replace([np.inf, -np.inf], np.nan).dropna(how="all")
 
+pd.options.display.float_format = '{:.2f}'.format
 if rowsDiff:
     print(csvDiff)
 else:

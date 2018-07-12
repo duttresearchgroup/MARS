@@ -64,7 +64,6 @@ class LinuxSensingModule
 	bool isPerfCntAvailable(perfcnt_t cnt);
 
 	void enablePerTaskSensing();
-	void pinAllTasksToCPU(int cpu);
 
 	void tracePerfCounter(perfcnt_t perfcnt);
 	void tracePerfCounterResetAll();

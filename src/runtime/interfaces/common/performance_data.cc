@@ -282,6 +282,21 @@ SensingInterfaceImpl::Impl::senseAgg<SEN_BEATS,tracked_task_data_t>(SensingTypeI
     return data.swAggrData(wid).tasks[rsc->task_idx].beats[p];
 }
 
+/*
+ * SEN_BEATS_TGT for tasks
+ *
+ * Always returns the latest value set by the application regardless of wid.
+ * No senseAgg provided.
+ *
+ */
+//tasks
+template<>
+typename SensingTypeInfo<SEN_BEATS_TGT>::ValType
+SensingInterfaceImpl::Impl::sense<SEN_BEATS_TGT,tracked_task_data_t>(SensingTypeInfo<SEN_BEATS_TGT>::ParamType p, const tracked_task_data_t *rsc, int wid)
+{
+    static_assert(std::is_same<decltype(p), unsigned int>::value, "p must be unsigned int");
+    return rsc->beats[p].tgt_rate;
+}
 
 /*
  * SEN_FREQ_MHZ for frequency domains

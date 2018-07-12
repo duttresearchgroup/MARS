@@ -67,11 +67,6 @@ int ioctlcmd_enable_pertask_sensing(int enable){
 	return 0;
 }
 
-int ioctlcmd_enable_pintask(int cpu){
-	set_pin_task_to_cpu(cpu);
-	return 0;
-}
-
 int ioctlcmd_perfcnt_enable(int perfcnt){
 	if(trace_perf_counter(perfcnt)) return 0;
 	else return -1;

@@ -39,7 +39,7 @@ static volatile bool vitamins_flush_tasks_stopping;
 
 static DEFINE_SPINLOCK(new_task_created_lock);
 static int tasks_being_created = 0;
-static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_struct *parent_tsk){
+static void new_task_created(struct task_struct *tsk,struct task_struct *parent_tsk){
     //allocates the hook data
     tracked_task_data_t *hooks;
     private_hook_data_t *priv_hooks;
@@ -73,17 +73,11 @@ static void new_task_created(int at_cpu, struct task_struct *tsk,struct task_str
     BUG_ON(TASK_NAME_SIZE > TASK_COMM_LEN);
     memcpy(hooks->this_task_name,tsk->comm,TASK_NAME_SIZE);
 
-    //if we want to pin this task
-    if(at_cpu >= 0){
-    	BUG_ON(at_cpu >= sys->core_list_size);
-    	cpus_clear(tsk->cpus_allowed);
-    	cpu_set(at_cpu, tsk->cpus_allowed);
-    }
 
     priv_hooks->sen_data_lock[0] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[0]);
     priv_hooks->sen_data_lock[1] = __SPIN_LOCK_UNLOCKED(priv_hooks->sen_data_lock[1]);
 
-    perf_data_reset_task(vitsdata,task_idx, at_cpu);
+    perf_data_reset_task(vitsdata,task_idx);
 
     hooks->num_beat_domains = 0;
     //check if parent has beat domain
@@ -114,7 +108,7 @@ private_hook_data_t* add_created_task(struct task_struct *tsk)
 	private_hook_data_t *task = hook_hashmap_get(tsk);
 	if(task != nullptr) return task;
 	else{
-		new_task_created(-1,tsk,tsk->parent);
+		new_task_created(tsk,tsk->parent);
 		return hook_hashmap_get(tsk);
 	}
 }
@@ -220,10 +214,19 @@ static inline void perf_data_commit_task_window_acc_unlock(int task, int acc_idx
 
 static inline void sense_tasks(sys_info_t *sys,int wid)
 {
+    int p;
+
     perf_data_commit_tasks_window(sys,
             vitsdata,wid,ktime_to_ms(ktime_get()),
             &perf_data_commit_task_window_acc_lock,
             &perf_data_commit_task_window_acc_unlock);
+
+    //TODO the task_finished flag should be set by a hook called when a task ends
+    for(p = 0; p < vitsdata->created_tasks_cnt; ++p){
+        private_hook_data_t *task_priv_hook = &(priv_hook_created_tasks[p]);
+        if(!(task_priv_hook->hook_data->task_finished) && !find_get_pid(task_priv_hook->hook_data->this_task_pid))
+            task_priv_hook->hook_data->task_finished = true;
+    }
 }
 
 bool update_task_beat_info(pid_t pid)
@@ -274,12 +277,16 @@ void minimum_sensing_window(sys_info_t *sys)
     vitsdata->num_of_minimum_periods += 1;
 }
 
+static int sensing_window_reading_errs[MAX_WINDOW_CNT];
+
 void sense_window(sys_info_t *sys, int wid)
 {
 	int cpu;
 
-	if(vitsdata->sensing_windows[wid].___reading)
-	    pinfo("WARNING: updating window %d, but daemon might still be reading it.!!!\n",wid);
+	if(vitsdata->sensing_windows[wid].___reading){
+	    if(++sensing_window_reading_errs[wid] < 5)
+	        pinfo("WARNING: updating window %d, but daemon might still be reading it.!!!\n",wid);
+	}
 
 	vitsdata->sensing_windows[wid].___updating = true;
 
@@ -305,13 +312,9 @@ static inline int is_userspace(struct task_struct *tsk){
 }
 
 static bool per_task_sensing = false;
-static int pin_task_to_cpu = -1;
 
 void set_per_task_sensing(bool val){
 	per_task_sensing = val;
-}
-void set_pin_task_to_cpu(int cpu){
-	pin_task_to_cpu = cpu;
 }
 
 static inline void vitamins_task_created_probe(struct task_struct *parent, struct task_struct *tsk)
@@ -321,7 +324,7 @@ static inline void vitamins_task_created_probe(struct task_struct *parent, struc
 	//  -it's a user-level task
 	if(per_task_sensing && is_userspace(tsk)){
 		//does not pin if pin_task_to_cpu==-1
-		new_task_created(pin_task_to_cpu,tsk,parent);
+		new_task_created(tsk,parent);
 	}
 }
 
@@ -527,7 +530,12 @@ bool trace_perf_counter_reset(void){
 
 void sense_begin(sys_info_t *sys)
 {
+    int i;
+
     vitamins_sense_cleanup_counters(sys);
+
+    for(i = 0; i < MAX_WINDOW_CNT; ++i)
+        sensing_window_reading_errs[i] = 0;
 
     vitsdata->starttime_ms = ktime_to_ms(ktime_get());
     vitsdata->stoptime_ms = vitsdata->starttime_ms;
@@ -541,11 +549,17 @@ void sense_begin(sys_info_t *sys)
 
 void sense_stop(sys_info_t *sys)
 {
+    int i;
+
     vitsdata->stoptime_ms = ktime_to_ms(ktime_get());
 
     unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
     unregister_trace_sched_switch(vitamins_context_switch_probe,0);
 	tracepoint_synchronize_unregister();
+
+	for(i = 0; i < MAX_WINDOW_CNT; ++i)
+	    if(sensing_window_reading_errs[i] > 0)
+	        pinfo("WARNING: window %d might've been updated %d times with daemon still reading it !!!\n",i, sensing_window_reading_errs[i]);
 }
 
 void sense_destroy_mechanisms(sys_info_t *sys){

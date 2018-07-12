@@ -80,7 +80,7 @@ void ExecutionTrace::_dump()
 		//sample_id;timestamp
 		of << i << ";" << _timestampsMS[i] / 1000.0;
 		for(const auto &col : _data){
-			const std::map<int,double> &entryData = col.second;
+			const std::unordered_map<int,double> &entryData = col.second;
 			of << ";";
 			auto iter = entryData.find(i);
 			if(iter != entryData.end())
@@ -93,15 +93,15 @@ void ExecutionTrace::_dump()
 
 double& ExecutionTrace::ExecutionTraceHandle::operator()(const std::string &entry)
 {
-	//TODO this functions does the same search multiple times
-	//OPTIMIZE!
-	if(_trace._data.find(entry)==_trace._data.end()){
-		_trace._data[entry] = std::map<int,double>();
-		_trace._headerModified = true;
-	}
-	std::map<int,double> &entryData = _trace._data[entry];
-	entryData[_sampleIdx] = 0;
-	return entryData[_sampleIdx];
+    auto iter = _trace._data.find(entry);
+    if(iter == _trace._data.end()){
+        auto result = _trace._data.insert(std::pair<std::string,std::unordered_map<int,double>>(entry,std::unordered_map<int,double>()));
+        assert_true(result.second);
+        iter = result.first;
+        _trace._headerModified = true;
+    }
+    auto data = iter->second.insert(std::make_pair(_sampleIdx,0.0)).first;
+    return data->second;
 }
 
 void SysInfoPrinter::_print(std::ostream &os)

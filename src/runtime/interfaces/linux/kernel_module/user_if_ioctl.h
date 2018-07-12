@@ -23,7 +23,6 @@ int ioctlcmd_sense_window_create(int period_ms);
 int ioctlcmd_sensing_start(void);
 int ioctlcmd_sensing_stop(void);
 int ioctlcmd_enable_pertask_sensing(int enable);
-int ioctlcmd_enable_pintask(int cpu);
 int ioctlcmd_perfcnt_enable(int perfcnt);
 int ioctlcmd_perfcnt_reset(void);
 int ioctlcmd_task_beat_updated(pid_t task_pid);

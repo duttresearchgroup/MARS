@@ -23,21 +23,18 @@ import numpy as np
 from functools import reduce
 
 parser = argparse.ArgumentParser(description='Aggregates and parses traces')                   
-parser.add_argument('--noresampling', action='store_true', help='Drop mismatched files instead of resampling')
 parser.add_argument('--srcfiles', nargs='+',help='Source files to average and aggregate')
 parser.add_argument('--destfile', help='Dest file')                  
 args = parser.parse_args()
 
 
-tracePowerCol = 'power_w'
-traceFreqCol = 'freq_mhz'
-traceCoreCol = 'core'
+tracePowerCol = 'total_power_w'
 traceSampleIdCol = 'sample_id'
 traceTimestampCol = 'timestamp'
 # When down/up sampling traces, samples for these columns will be the
 # weighted average of neighboring samples. Remaining columns will be the
 # weighted sum
-avgCols = [tracePowerCol,traceFreqCol,traceCoreCol]
+avgCols = [tracePowerCol]
 # traces must have these columns
 mustHaveCols = [traceSampleIdCol,traceTimestampCol] + avgCols
 
@@ -181,10 +178,6 @@ upDownSampledDfs = []
 for key in inputfiles:
     for f in inputfiles[key]:
         if key is baselineRows: continue
-
-        if args.noresampling:
-            print('Droping file {} which has {} samples(noresampling flag set)'.format(f,key))
-            continue
 
         diff = float('%.3f'%(abs(1-(key / baselineRows))))
         if diff > 0.05:

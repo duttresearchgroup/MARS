@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <ostream>
 #include <fstream>
 #include <sstream>
@@ -64,7 +65,7 @@ private:
 
 	ExecutionTraceHandle _traceHandle;
 
-	std::map<std::string,std::map<int,double>> _data;
+	std::unordered_map<std::string,std::unordered_map<int,double>> _data;
 	std::vector<uint64_t> _timestampsMS;
 
 	void __dumpNew();

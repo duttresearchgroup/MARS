@@ -152,6 +152,7 @@ enum SensingType {
 	SEN_NIVCSW,
 	SEN_NVCSW,
 	SEN_BEATS,
+	SEN_BEATS_TGT,
 	SEN_FREQ_MHZ,
 	SEN_LASTCPU,
 
@@ -237,6 +238,14 @@ template <> struct SensingTypeInfo<SEN_BEATS>{
     static const std::string str,str0,str1,str2,str3,str4;
 };
 
+template <> struct SensingTypeInfo<SEN_BEATS_TGT>{
+    using ValType = unsigned int; // avg target heartbeat
+    using ParamType = unsigned int; //beat domain
+    static constexpr SensingAggType agg = SEN_AGG_MEAN;
+    //nasty workaround to get a const str for diff beats domains
+    static const std::string str,str0,str1,str2,str3,str4;
+};
+
 template <> struct SensingTypeInfo<SEN_NIVCSW>{
     using ValType = unsigned int; // number of involuntary ctx switches
     using ParamType = void;
@@ -306,6 +315,17 @@ inline const std::string& sen_str<SEN_BEATS>(int domain){
     default: return SensingTypeInfo<SEN_BEATS>::str4;
     }
 }
+template<>
+inline const std::string& sen_str<SEN_BEATS_TGT>(int domain){
+    switch (domain) {
+    case 0: return SensingTypeInfo<SEN_BEATS_TGT>::str0;
+    case 1: return SensingTypeInfo<SEN_BEATS_TGT>::str1;
+    case 2: return SensingTypeInfo<SEN_BEATS_TGT>::str2;
+    case 3: return SensingTypeInfo<SEN_BEATS_TGT>::str3;
+    default: return SensingTypeInfo<SEN_BEATS_TGT>::str4;
+    }
+}
+
 // Same as sen_str() but takes SensingType as function param instead
 // of template param. Notice this one has a higher runtime cost.
 const std::string& sen_str(SensingType t);

@@ -41,37 +41,30 @@ args = parser.parse_args()
 # Column used to search for boundaries between samples of different ubench combinations.
 # There is an idle period between each combination, identified by samples with 0 instructions
 # executed. We generate the aggregated sample for each combination by combining all samples
-# between these idle periods
-# This column must be present in the trace
-checkerCol = 'totalInstr'
+# between these idle periods. The value of the beatsTgt0 is used to identify which ubench 
+# combination was executing.
+# These columns must be present in the trace
+checkerColId = 'beatsTgt0'
+checkerColIntr = 'totalInstr'
 
 # When aggregating we sumup the values of samples for most columns,
-# except the ones listed here, which the mean value is taken
+# except the ones listed here, which the mean value is taken.
+# The average is a wighted mean of the value and the busy time
 colsToAvg = ['freq_mhz','power_w',]
 
 # These columns are handled separately and must all be present in the trace
 # 'sample_id' is set by a separate counter
 # 'timestamp' is set to the current sum of 'total_time_s'
 # 'core' must be the same across all samples
-specialCols = ['sample_id','timestamp','total_time_s','core']
+specialCols = ['sample_id','timestamp','total_time_s','busy_time_s','core']
 
-# If any detected combination has <= 'ignoreSampleCnt' number of samples,
-# ignore it.
-# Setting this too low may cause noisy samples to be include.
-# Setting this too high may cause us to ignore real samples.
-# So we set it as a function of TARGET_UBENCH_RT_MS (src/ubenchmarks/training_singleapp.cc)
-# and TracingSystem::WINDOW_LENGTH_MS (src/runtime/systems/tracing.h),
-# such that we ignore the sample if it has than half the minumum number of expected samples
-# (assuming calibration is done in the fasted core in the fastest freq)
-# (TODO fetch these from somewhere ele instead of hardcoding here)
-TARGET_UBENCH_RT_MS=100.0
-WINDOW_LENGTH_MS=10.0
-ignoreSampleCnt = int(round((TARGET_UBENCH_RT_MS/WINDOW_LENGTH_MS)/2))+1
+# Combined list of columns that should appear in the trace
+reqCols = [checkerColId,checkerColIntr] + colsToAvg + specialCols
 
 
 df = pd.read_csv(args.srcfile,sep=',',encoding='utf-8')
 dfcols = list(df)
-if len(dfcols) < (len(specialCols)+1):
+if len(dfcols) < len(reqCols):
     df = pd.read_csv(args.srcfile,sep=';',encoding='utf-8')
     dfcols = list(df)
 
@@ -84,15 +77,12 @@ for column in dfcols:
         df = df.drop(column, 1)
 
 # These conditions are mandatory
-assert(checkerCol in dfcols)
-for s in specialCols:
-    assert(s in dfcols)
+assert(set(reqCols).issubset(dfcols))
 
 currentId = 0
 currentTimestamp = 0
-currentSampleCnt = 0
 currData = dict()
-
+currentSampleCnt = 0
 currCoreVal = -1
 
 def checkDomains(row):
@@ -103,29 +93,47 @@ def checkDomains(row):
     else:
         if currCoreVal != row['core']:
             print('{}: task execution on core {} detected, previously detected core  {}.'.format(args.srcfile,row['core'],currCoreVal))
-            print('Tasks should be pinned to the same core while tracing !!!!!')
             currCoreVal = row['core']
+
+# Immediately Drop rows that have either beatsTgt or instr == 0
+# Or have invalid data
+def notNull(row):
+    for col in dfcols:
+        if pd.isnull(row[col]):
+            return False
+    if row[checkerColIntr] == 0:
+        return False
+    return True
 
 def addRow(row):
     global currentSampleCnt
     global currentTimestamp
     global dfcols
     global currData
+    global currentId
 
-    if row[checkerCol] == 0:
-        return
-
+    if (currentId != 0) and (row[checkerColId] != 0) and (row[checkerColId] != currentId):
+        commitRows()
+        currentSampleCnt = 0
+        currData = dict()
+    
+    if row[checkerColId] != 0:
+        currentId = row[checkerColId]
     currentSampleCnt += 1
     for col in dfcols:
+        val = row[col]
+        if col in colsToAvg:
+            val *= row['busy_time_s']
         if col not in currData:
-            currData[col] = row[col]
+            currData[col] = val
         else:
-            currData[col] += row[col]
+            currData[col] += val
 
-    checkDomains(row)
+    if currentSampleCnt > 1:
+        checkDomains(row)
         
-
-def commitRow(row):
+    
+def commitRows():
     global currentSampleCnt
     global currentTimestamp
     global dfcols
@@ -133,36 +141,35 @@ def commitRow(row):
     global currentId
     global sanitized_df
 
-    if (row[checkerCol] != 0) or (currentSampleCnt == 0):
-        return
+    assert(currData['busy_time_s'] > 0)
 
     for col in dfcols:
         assert(col in currData)
         if col in colsToAvg:
-            currData[col] /= currentSampleCnt
+            currData[col] /= currData['busy_time_s']
 
-    if currentSampleCnt > ignoreSampleCnt:
-        currentTimestamp += currData['total_time_s']
+    assert(currentId > 0)
+    assert(currCoreVal >= 0)
+    assert(currentTimestamp >= 0)
 
-        currData['timestamp'] = currentTimestamp
-        currData['sample_id'] = currentId
-        currData['core'] = currCoreVal
+    currentTimestamp += currData['total_time_s']
+
+    currData['timestamp'] = currentTimestamp
+    currData['sample_id'] = currentId
+    currData['core'] = currCoreVal
     
-        sanitized_df = sanitized_df.append(currData, ignore_index=True)
-    
-        currentId += 1
-    else:
-        print('{}: sample id {} has {} subsamples so will be ignored.'.format(args.srcfile,currentId,currentSampleCnt))
-    
-    currentSampleCnt = 0
-    currData = dict()
+    sanitized_df = sanitized_df.append(currData, ignore_index=True)
     
 
 sanitized_df = pd.DataFrame(columns=dfcols)
 
+
 for index, row in df.iterrows():
-    addRow(row)
-    commitRow(row)
+    if notNull(row):
+        addRow(row)
+        
+if currentSampleCnt > 0:
+    commitRows()
 
 sanitized_df.to_csv(args.destfile, sep=';', encoding='utf-8',index=False)
 
