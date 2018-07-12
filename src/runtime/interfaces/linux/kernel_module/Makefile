@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 
 obj-m := vitamins.o
-vitamins-objs := main.o helpers.o setup.o sense.o sense_data.o user_if.o user_if_ioctl.o sensing_window.o
+vitamins-objs := main.o helpers.o setup.o sense.o sense_data.o user_if.o user_if_ioctl.o sensing_window.o sense_tracepoint.o
 vitamins-objs += ../../common/pal/$(PLAT)/linux_module/perf_sense.o ../../common/pal/$(PLAT)/linux_setup_info.o
 vitamins-objs += ../../../../base/info_init.o
  

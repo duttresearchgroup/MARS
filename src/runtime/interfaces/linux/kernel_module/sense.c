@@ -20,6 +20,7 @@
 #include <linux/kthread.h>
 #include <linux/sched/rt.h>
 #include <linux/math64.h>
+#include <linux/version.h>
 #include <trace/events/sched.h>
 
 #include "sense.h"
@@ -29,6 +30,9 @@
 #include "sensing_window.h"
 #include "setup.h"
 #include "user_if.h"
+
+// Required for kernel 3.15 and above
+#include "sense_tracepoint.h"
 
 //per cpu flush kthreads to ensure tasks are sensed at the end of the epoch
 DEFINE_PER_CPU(struct task_struct*,vitamins_flush_tasks);
@@ -359,7 +363,7 @@ static inline void vitamins_sensing_begin_probe(int cpu, struct task_struct *tsk
 	smp_mb();
 }
 
-static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
+static inline void vitamins_sensing_end_probe(bool preempt, int cpu, struct task_struct *tsk)
 {
 	private_hook_data_t *p;
 	uint64_t perfcnts[MAX_PERFCNTS];
@@ -369,9 +373,6 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
 	perf_data_cpu_t *data_cnt;
 	unsigned long flags;
 	int acc_buffer;
-
-	//true if the task is leaving the cpu voluntarly
-	bool vcsw = tsk->state && !(preempt_count() & PREEMPT_ACTIVE);
 
     perf_data_cpu_t *data_begin = &(cpu_counters_begin[cpu]);
 
@@ -411,7 +412,7 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
     data_cnt = &(vitsdata->__acc_cpus[cpu][acc_buffer]);
     for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data_cnt->perfcnt.perfcnts[i] += perfcnts[i];
     data_cnt->perfcnt.time_busy_ms += time_busy_ms;
-    if(vcsw) data_cnt->perfcnt.nvcsw += 1;
+    if(preempt) data_cnt->perfcnt.nvcsw += 1;
     else	 data_cnt->perfcnt.nivcsw += 1;
     for(i = 0; i < MAX_BEAT_DOMAINS; ++i) data_cnt->beats[i] += beat_cnt[i];
 
@@ -436,7 +437,7 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
         data_cnt = &(vitsdata->__acc_tasks[p->hook_data->task_idx][acc_buffer]);
     	for(i = 0; i < vitsdata->perfcnt_mapped_cnt; ++i) data_cnt->perfcnt.perfcnts[i] += perfcnts[i];
     	data_cnt->perfcnt.time_busy_ms += time_busy_ms;
-    	if(vcsw) data_cnt->perfcnt.nvcsw += 1;
+    	if(preempt) data_cnt->perfcnt.nvcsw += 1;
     	else	 data_cnt->perfcnt.nivcsw += 1;
     	for(i = 0; i < MAX_BEAT_DOMAINS; ++i) data_cnt->beats[i] += beat_cnt[i];
 
@@ -446,11 +447,23 @@ static inline void vitamins_sensing_end_probe(int cpu, struct task_struct *tsk)
     smp_mb();
 }
 
-static void vitamins_context_switch_probe(void *nope, struct task_struct *prev,struct task_struct *next){
-	int cpu = task_thread_info(next)->cpu;
-	vitamins_sensing_end_probe(cpu,prev);
-	vitamins_sensing_begin_probe(cpu,next);
-}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+    static void vitamins_context_switch_probe(void *nope, bool preempt, struct task_struct *prev, struct task_struct *next)
+    {
+        int cpu = task_thread_info(next)->cpu;
+        vitamins_sensing_end_probe(preempt, cpu, prev);
+        vitamins_sensing_begin_probe(cpu, next);
+    } 
+#else
+static void vitamins_context_switch_probe(void *nope, struct task_struct *prev, struct task_struct *next)
+    {
+        int cpu = task_thread_info(next)->cpu;
+        //true if the task is leaving the cpu voluntarly	
+        bool vcsw = prev->state && !(preempt_count() & PREEMPT_ACTIVE);
+        vitamins_sensing_end_probe(vcsw, cpu, prev);
+        vitamins_sensing_begin_probe(cpu, next);
+    }
+#endif
 
 static void vitamins_sched_process_fork_probe(void *nope, struct task_struct *parent, struct task_struct *p){
 	vitamins_task_created_probe(parent,p);
@@ -492,6 +505,11 @@ void sense_init(sys_info_t *sys)
 
     res = trace_perf_counter_reset();
     BUG_ON(res==false);
+
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+        res = sense_tracepoint_init();
+        BUG_ON(res);        
+    #endif
 }
 
 static void vitamins_sense_cleanup_counters(sys_info_t *sys)
@@ -543,8 +561,13 @@ void sense_begin(sys_info_t *sys)
     //carefull that vit_plat_enabled_perfcnts may show fixed enabled counter event before any is made available (e.g. PERFCNT_BUSY_CY on armv7)
     BUG_ON(vitsdata->perfcnt_mapped_cnt != plat_enabled_perfcnts());
 
-    register_trace_sched_switch(vitamins_context_switch_probe,0);
-    register_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+        sense_tracepoint_probe_register("sched_switch", vitamins_context_switch_probe, 0);
+        sense_tracepoint_probe_register("sched_process_fork", vitamins_sched_process_fork_probe, 0);
+    #else
+        register_trace_sched_switch(vitamins_context_switch_probe,0);
+        register_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
+    #endif
 }
 
 void sense_stop(sys_info_t *sys)
@@ -553,9 +576,15 @@ void sense_stop(sys_info_t *sys)
 
     vitsdata->stoptime_ms = ktime_to_ms(ktime_get());
 
-    unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
-    unregister_trace_sched_switch(vitamins_context_switch_probe,0);
-	tracepoint_synchronize_unregister();
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+        sense_tracepoint_probe_unregister("sched_process_fork", vitamins_sched_process_fork_probe, 0);
+        sense_tracepoint_probe_unregister("sched_switch", vitamins_context_switch_probe, 0);
+    #else
+        unregister_trace_sched_process_fork(vitamins_sched_process_fork_probe,0);
+        unregister_trace_sched_switch(vitamins_context_switch_probe,0);
+	
+    #endif
+    tracepoint_synchronize_unregister();
 
 	for(i = 0; i < MAX_WINDOW_CNT; ++i)
 	    if(sensing_window_reading_errs[i] > 0)
@@ -579,6 +608,10 @@ void sense_destroy_mechanisms(sys_info_t *sys){
 void sense_cleanup(sys_info_t *sys)
 {
 	int i;
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)
+        sense_tracepoint_exit();    
+    #endif
+    
 	for(i = 0; i < hook_data_hashmap_struct_size; ++i) clear_list(hook_hashmap[i]);
 
     for(i = 0; i < MAX_CREATED_TASKS; ++i) {
