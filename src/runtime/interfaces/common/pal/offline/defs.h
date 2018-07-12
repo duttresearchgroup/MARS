@@ -23,7 +23,8 @@
 #define MAX_NR_CPUS 8
 #define MAX_CREATED_TASKS 64
 
-#define MAX_PERFCNTS 16//maximum number of counters
+// Maximum number of perf counters that can be sampled concurrently
+#define MAX_PERFCNTS 16
 
 #define MINIMUM_WINDOW_LENGTH_MS 5
 

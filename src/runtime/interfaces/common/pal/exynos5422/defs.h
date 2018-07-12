@@ -20,12 +20,15 @@
 
 #define IS_LINUX_PLAT
 
+// If the platform does not have a DVFS governor, this flag should be commented
+// exynos has a DVFS gov
 #define LINUX_HAS_CPUFREQ
 
 #define MAX_NR_CPUS 8
 #define MAX_CREATED_TASKS 64
 
-#define MAX_PERFCNTS 5//maximum number of counters
+// Maximum number of perf counters that can be sampled concurrently
+#define MAX_PERFCNTS 5
 
 #define MINIMUM_WINDOW_LENGTH_MS 5
 

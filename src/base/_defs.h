@@ -30,7 +30,8 @@
 #define MAX_NUM_CORES 256
 #define MAX_NUM_TASKS 256//must be the same
 
-//Ordered by platform and then according to average performance (fastest first)
+// Ordered by platform and then according to average performance (fastest first)
+// This enum to used to map the training data to a core
 typedef enum {
    COREARCH_GEM5_HUGE_HUGE = 0,
    COREARCH_GEM5_HUGE_BIG,

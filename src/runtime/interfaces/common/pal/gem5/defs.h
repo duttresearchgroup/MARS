@@ -20,13 +20,15 @@
 
 #define IS_LINUX_PLAT
 
+// If the platform does not have a DVFS governor, this flag should be commented
 // Currently we are using a Linux-gem5 that does not have the DVFS gov
 //#define LINUX_HAS_CPUFREQ
 
 #define MAX_NR_CPUS 64
 #define MAX_CREATED_TASKS 64
 
-#define MAX_PERFCNTS 64//maximum number of counters
+// Maximum number of perf counters that can be sampled concurrently
+#define MAX_PERFCNTS 64
 
 #define MINIMUM_WINDOW_LENGTH_MS 5
 
