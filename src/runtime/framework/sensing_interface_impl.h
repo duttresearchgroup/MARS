@@ -34,7 +34,7 @@
  */
 struct SensingInterfaceImpl {
 
-  protected:
+  public:
 
     struct Impl {
         /*

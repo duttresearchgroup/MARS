@@ -52,6 +52,9 @@ typedef enum {
 
    COREARCH_GEM5_GENERIC_ARM,
 
+   COREARCH_JetsonTX2_Denver,
+   COREARCH_JetsonTX2_CortexA57,
+
    COREARCH_Exynos5422_BIG,
    COREARCH_Exynos5422_LITTLE,
 
