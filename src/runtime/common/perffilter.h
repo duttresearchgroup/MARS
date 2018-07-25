@@ -18,7 +18,7 @@
 #ifndef __arm_rt_perffilter_h
 #define __arm_rt_perffilter_h
 
-#include <runtime/interfaces/performance_data.h>
+#include <runtime/interfaces/common/performance_data.h>
 
 class PerfFilter
 {
@@ -65,12 +65,12 @@ public:
 
 	//sums-up the beats of all tasks and their respective ips
 	//updates a beats->ips mapping using an average filter
-	void sampleTasks(int wid)
+	void sampleTasks(int wid,PolicyManager *owner)
 	{
 		_currBeats = 0;
 		uint64_t instr = 0;
 		//pinfo("\n");
-		const PerformanceData& data = SensingModule::get().data();
+		const PerformanceData& data =  owner->sensedData();
 		for(int i = 0; i < data.numCreatedTasks(); ++i){
 			if(data.task(i).num_beat_domains > 0){
 				assert_true(data.task(i).num_beat_domains==1);

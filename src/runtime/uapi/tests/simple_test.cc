@@ -35,7 +35,7 @@ int main(int argc, char * argv[]){
 		if(time_total < period_ms) usleep((period_ms-time_total)*1000);
 	}
 
-	std::cout << "DOne with " << task_beat_read_total(beats) << " beats, rate = " << task_beat_read_total_rate(info,beats) << " beats/s, tgt = " << task_beat_read_tgt_rate(info,beats)  <<" beats/s\n";
+	std::cout << "Done with " << task_beat_read_total(beats) << " beats, rate = " << task_beat_read_total_rate(info,beats) << " beats/s, tgt = " << task_beat_read_tgt_rate(info,beats)  <<" beats/s\n";
 
 	return 0;
 }
