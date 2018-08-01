@@ -97,6 +97,8 @@ static inline const char* archToString(core_arch_t arch){
     arcToStringCase(GEM5_LITTLE_MEDIUM);
     arcToStringCase(GEM5_LITTLE_LITTLE);
     arcToStringCase(GEM5_GENERIC_ARM);
+    arcToStringCase(JetsonTX2_Denver);
+    arcToStringCase(JetsonTX2_CortexA57);
     arcToStringCase(Exynos5422_BIG);
     arcToStringCase(Exynos5422_LITTLE);
     arcToStringCase(Exynos5422_BIG_LITTLE);

@@ -25,6 +25,7 @@ ARCH_DEFAULT=x86
 PLAT_DEFAULT_x86=offline
 PLAT_DEFAULT_alpha=offline
 PLAT_DEFAULT_arm=exynos5422
+PLAT_DEFAULT_arm64=jetsontx2
 
 #defaults for CROSS_COMPILE
 #note that different defaults are used for arm when PLAT is defined
@@ -40,13 +41,17 @@ CROSS_COMPILE_krn_DEFAULT_arm_offline=arm-none-eabi-
 CROSS_COMPILE_usr_DEFAULT_arm_exynos5422=arm-linux-gnueabihf-
 CROSS_COMPILE_krn_DEFAULT_arm_exynos5422=arm-none-eabi-
 
+CROSS_COMPILE_usr_DEFAULT_arm64_jetsontx2=aarch64-unknown-linux-gnu-
+CROSS_COMPILE_krn_DEFAULT_arm64_jetsontx2=aarch64-unknown-linux-gnu-
+
 #defaults for EXTRAFLAGS
 EXTRAFLAGS_DEFAULT_x86=
 EXTRAFLAGS_DEFAULT_alpha="-mcpu=ev67 -mtune=ev67"
 EXTRAFLAGS_DEFAULT_arm=
+EXTRAFLAGS_DEFAULT_arm64="-Wno-unused-variable"
 
 #defaults for KERNEL_SRC
 KERNEL_SRC_DEFAULT_x86=/workspace/export/drg_repos/linux-3.13.0
 KERNEL_SRC_DEFAULT_alpha=
 KERNEL_SRC_DEFAULT_arm=/workspace/linux
-
+KERNEL_SRC_DEFAULT_arm64=/workspace/linux

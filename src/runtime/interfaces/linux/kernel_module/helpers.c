@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 #include <linux/cpufreq.h>
+#include <linux/version.h>
 
 #include "helpers.h"
 #include "core.h"
@@ -24,8 +25,13 @@
 bool vitamins_change_cpu(struct task_struct *kern_tsk, int next_cpu){
     cpumask_t mask;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0))
+    cpumask_clear(&mask);
+    cpumask_set_cpu(next_cpu, &mask);
+#else
     cpus_clear(mask);
     cpu_set(next_cpu, mask);
+#endif
 
     return set_cpus_allowed_ptr(kern_tsk,&mask);
 }
