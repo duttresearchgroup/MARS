@@ -21,7 +21,7 @@
 ##################################################################
 
 # Remote functions
-source $SPARTA_SCRIPTDIR/common/remote.sh
+source $MARS_SCRIPTDIR/common/remote.sh
 
 TGT_TRACES_DIR=$TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT
 R_TGT_TRACES_DIR=$R_TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT

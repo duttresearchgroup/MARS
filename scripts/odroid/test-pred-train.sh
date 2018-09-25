@@ -16,4 +16,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-sh $SPARTA_SCRIPTDIR/training/train_bin_based_pred.sh
+sh $MARS_SCRIPTDIR/training/train_bin_based_pred.sh

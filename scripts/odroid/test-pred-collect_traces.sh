@@ -15,13 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 200000
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 200000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 2 200000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 6 200000
 
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 800000
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 1100000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 2 800000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 6 1100000
 
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 2 1400000
-sh $SPARTA_SCRIPTDIR/training/run_training-test.sh 6 2000000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 2 1400000
+sh $MARS_SCRIPTDIR/training/run_training-test.sh 6 2000000
 
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 2000000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 2000000

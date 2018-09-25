@@ -24,7 +24,7 @@
 ######################################################
 
 # Common defs
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 # First command line argument is the daemon binary
 RTS_DAEMON_BIN=$1

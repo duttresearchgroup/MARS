@@ -16,12 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 MODELS=$(readlink -f $MODEL_DIR/arm_exynos5422)
 
-sudosh $SPARTA_SCRIPTDIR/runtime/start.sh policy_test model_path=$MODELS
+sudosh $MARS_SCRIPTDIR/runtime/start.sh policy_test model_path=$MODELS
 sleep 1
-sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+sudosh $MARS_SCRIPTDIR/runtime/stop.sh
 
 

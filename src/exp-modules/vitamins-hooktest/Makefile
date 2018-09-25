@@ -18,8 +18,8 @@
 obj-m := vitamins-hooktest.o
 vitamins-hooktest-objs := vitamins_main.o
 vitamins-hooktest-objs += \
-	../../core/vitamins_sparta.o \
-	../../core/vitamins_sparta_shared.o \
+	../../core/vitamins_mars.o \
+	../../core/vitamins_mars_shared.o \
 	../../core/vitamins_cfs.o \
 	../../core/vitamins_dvfs.o \
 	../../core/vitamins_mts.o \

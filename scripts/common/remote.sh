@@ -22,7 +22,7 @@
 ######################################################
 
 # Includes the confs
-source $SPARTA_SCRIPTDIR/confs.sh
+source $MARS_SCRIPTDIR/confs.sh
 
 
 ######################################################

@@ -18,7 +18,7 @@
 # Runs the bin-based predictor training app and saves predictor information 
 # in the models directory defined in confs.sh
 
-source $SPARTA_SCRIPTDIR/confs.sh
+source $MARS_SCRIPTDIR/confs.sh
 
 TGT_MODELS_DIR=models/"$RTS_ARCH"_"$RTS_PLAT"
 PARSED_TRACES_DIR=$TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT

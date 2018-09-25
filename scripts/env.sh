@@ -24,15 +24,15 @@ while [ -h "$__SOURCE" ]; do # resolve $SOURCE until the file is no longer a sym
   __SOURCE="$(readlink "$__SOURCE")"
   [[ $__SOURCE != /* ]] && __SOURCE="$__DIR/$__SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-export SPARTA_SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && pwd )"
+export MARS_SCRIPTDIR="$( cd -P "$( dirname "$__SOURCE" )" && pwd )"
 
 ########################################################
 # The root dir
-export SPARTA_ROOT=$(readlink -f $SPARTA_SCRIPTDIR/..)
+export MARS_ROOT=$(readlink -f $MARS_SCRIPTDIR/..)
 
 ######################################################
 # The new path
-export PATH=$SPARTA_SCRIPTDIR:$PATH
+export PATH=$MARS_SCRIPTDIR:$PATH
 
 ######################################################
 # Running stuff with valgrind (default=0 so no)
@@ -45,8 +45,8 @@ export RTS_VALGRIND=0
 # Edit the generated file with the correct values for
 # Your case
 
-__CONF=$SPARTA_SCRIPTDIR/confs.sh
-__CONFDEFAULT=$SPARTA_SCRIPTDIR/.confs.sh
+__CONF=$MARS_SCRIPTDIR/confs.sh
+__CONFDEFAULT=$MARS_SCRIPTDIR/.confs.sh
 if [ -e $__CONF ]
 then
     echo Found $(basename $__CONF)

@@ -21,7 +21,7 @@
 ######################################################
 
 # Includes the confs
-source $SPARTA_SCRIPTDIR/confs.sh
+source $MARS_SCRIPTDIR/confs.sh
 
 ######################################################
 # Common definitions
@@ -29,14 +29,14 @@ source $SPARTA_SCRIPTDIR/confs.sh
 
 # binaries path
 RTS_BIN_DIR_NAME="bin_"$RTS_ARCH"_"$RTS_PLAT
-RTS_BINS_PATH=$SPARTA_ROOT/$RTS_BIN_DIR_NAME
+RTS_BINS_PATH=$MARS_ROOT/$RTS_BIN_DIR_NAME
 
 # path and name of the kernel sensing module
 RTS_MODULE_NAME=vitamins
 RTS_MODULE_PATH=$RTS_BINS_PATH/sensing_module/$RTS_MODULE_NAME.ko
 
 # directory where the daemon will dump output
-RTS_DAEMON_OUTDIR=$SPARTA_ROOT/outdir
+RTS_DAEMON_OUTDIR=$MARS_ROOT/outdir
 
 # directory where the daemons binaries are
 RTS_DAEMON_BIN_DIR=$RTS_BINS_PATH/daemons
@@ -48,7 +48,7 @@ RTS_DAEMON_PID=$RTS_DAEMON_BIN_DIR/.current_active_daemon.pid
 
 # Valgrind command when running daemon with valgrind
 # (when the RTS_VALGRIND var is set 1)
-RTS_VALGRIND_CMD="valgrind --track-origins=yes --leak-check=full --show-reachable=yes --suppressions=$SPARTA_SCRIPTDIR/runtime/valgrind.supp --trace-children=yes --log-file=$RTS_DAEMON_OUTDIR/valgrind.log"
+RTS_VALGRIND_CMD="valgrind --track-origins=yes --leak-check=full --show-reachable=yes --suppressions=$MARS_SCRIPTDIR/runtime/valgrind.supp --trace-children=yes --log-file=$RTS_DAEMON_OUTDIR/valgrind.log"
 
 # Extensions used by files produced by trace parsing scripts
 TP_SANITIZE_EXT="sanitizedcsv"
