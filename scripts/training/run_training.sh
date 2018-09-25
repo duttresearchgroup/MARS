@@ -49,16 +49,16 @@ then
 else
     echo "Calibration file not found!"
     echo "Running calibration on core $CALIB_CORE @ $CALIB_FREQUENCY kHz"
-    sudosh $SPARTA_SCRIPTDIR/tracing/trace_set_freq.sh $CALIB_CORE $CALIB_FREQUENCY ondemand
+    sudosh $MARS_SCRIPTDIR/tracing/trace_set_freq.sh $CALIB_CORE $CALIB_FREQUENCY ondemand
     CALIBRATION_ARGS=$(taskset -c $CALIB_CORE $PRED_BIN | grep calibration_args | cut -f2- -d' ')    
-    sudosh $SPARTA_SCRIPTDIR/tracing/trace_setgov.sh ondemand
+    sudosh $MARS_SCRIPTDIR/tracing/trace_setgov.sh ondemand
     echo $CALIBRATION_ARGS > $CALIB_FILE
 fi
 echo "Calibration args $CALIBRATION_ARGS"
 
 echo "Training on core $TRAINING_CORE @ $TRAINING_FREQUENCY kHz"
 TRACE_NAME=$(basename $PRED_BIN)
-sh $SPARTA_SCRIPTDIR/tracing/trace_one.sh $TRACE_NAME $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
+sh $MARS_SCRIPTDIR/tracing/trace_one.sh $TRACE_NAME $TRAINING_CORE $TRAINING_FREQUENCY $PRED_BIN $CALIBRATION_ARGS
 
 
 

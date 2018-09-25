@@ -42,7 +42,7 @@ shift
 TRACED_PROGRAM_ARGS="$@"
 
 # Source the files we need
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 # Trace directory according for the target configuration
 TGT_TRACES_DIR=$TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT
@@ -56,7 +56,7 @@ if [ ! -d $IDLE_POWER_DIR ]
 then
     echo "Idle power directory $IDLE_POWER_DIR is needed for tracing"
     echo "Running get_idle_power.sh before tracing"
-    sh $SPARTA_SCRIPTDIR/tracing/get_idle_power.sh $IDLE_POWER_DIR
+    sh $MARS_SCRIPTDIR/tracing/get_idle_power.sh $IDLE_POWER_DIR
     if [ ! -d $IDLE_POWER_DIR ]
     then
         echo "Error geting idle power !"
@@ -70,7 +70,7 @@ fi
 #     - Uses a python script that uses the sys_info.json to replace the
 #       core num. by the core arch
 RAW_OUTPUT_DIR=$TGT_TRACES_DIR/$TRACE_NAME--$TRACED_CORE--$TRACE_FREQUENCY.raw
-RAW_OUTPUT_DIR=$(python3 $SPARTA_SCRIPTDIR/tracing/trace_name.py --input_file $RAW_OUTPUT_DIR --sysinfo $IDLE_POWER_DIR/sys_info.json)
+RAW_OUTPUT_DIR=$(python3 $MARS_SCRIPTDIR/tracing/trace_name.py --input_file $RAW_OUTPUT_DIR --sysinfo $IDLE_POWER_DIR/sys_info.json)
 rm -rf $RAW_OUTPUT_DIR
 mkdir $RAW_OUTPUT_DIR
 
@@ -81,7 +81,7 @@ sudo dmesg -c > $PREV_DMESG
 
 
 # Set the governor of all cores to ondemand and the governor of the core we need to the given frequency
-sudosh $SPARTA_SCRIPTDIR/tracing/trace_set_freq.sh $TRACED_CORE $TRACE_FREQUENCY ondemand
+sudosh $MARS_SCRIPTDIR/tracing/trace_set_freq.sh $TRACED_CORE $TRACE_FREQUENCY ondemand
 
 echo "Tracing " $TRACED_PROGRAM " at core " $TRACED_CORE " at freq " $(sudo cat /sys/devices/system/cpu/cpu$TRACED_CORE/cpufreq/cpuinfo_cur_freq)
 echo "  storing files at $RAW_OUTPUT_DIR"
@@ -114,9 +114,9 @@ do
             TASKSET_MASK=0x$(echo "obase=16;$((1<<$TRACED_CORE))" | bc)
 
             echo "perfcnt run $cntRun (iter $iter out of $_TRACE_RUNITERS)"
-            sudosh $SPARTA_SCRIPTDIR/runtime/start.sh tracing trace_core=$TRACED_CORE $ACTUAL_TRACE_PERFCNTS
+            sudosh $MARS_SCRIPTDIR/runtime/start.sh tracing trace_core=$TRACED_CORE $ACTUAL_TRACE_PERFCNTS
             taskset $TASKSET_MASK $TRACED_PROGRAM $TRACED_PROGRAM_ARGS >$TRACED_PROGRAM_OUT 2>&1
-            sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+            sudosh $MARS_SCRIPTDIR/runtime/stop.sh
 
             CURR_DMESG=$RAW_OUTPUT_DIR/trace_dmesg--cnt$cntRun--iter$iter.txt
             sudo dmesg -c > $CURR_DMESG
@@ -141,7 +141,7 @@ do
 done
 
 # Makes sure all cores are ondemand
-sudosh $SPARTA_SCRIPTDIR/tracing/trace_setgov.sh ondemand
+sudosh $MARS_SCRIPTDIR/tracing/trace_setgov.sh ondemand
 
 
 

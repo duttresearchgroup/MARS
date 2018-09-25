@@ -43,7 +43,7 @@ export R_PASS=odroid
 export R_HOST=128.195.55.158
 
 # Build dir in the remote host
-export R_SPARTA_ROOT=/workspace/sparta_dev
+export R_MARS_ROOT=/workspace/mars_dev
 
 # Uncomment for verbose remote commands
 #export R_VERBOSE=-v
@@ -77,8 +77,8 @@ export TRACE_RUNITERS=4
 # overwritten everytime trace_one-run.sh runs.
 # Post-processed traces are stored at $TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT
 # (see trace_one-parse.sh or trace_one.sh)
-export TRACE_OUTPUT_DIR=$SPARTA_ROOT/traces
-export R_TRACE_OUTPUT_DIR=$R_SPARTA_ROOT/traces
+export TRACE_OUTPUT_DIR=$MARS_ROOT/traces
+export R_TRACE_OUTPUT_DIR=$R_MARS_ROOT/traces
 
 
 ###########################################
@@ -90,6 +90,6 @@ export R_TRACE_OUTPUT_DIR=$R_SPARTA_ROOT/traces
 export CALIB_CORE=6
 export CALIB_FREQUENCY=2000000
 
-export MODEL_DIR=$SPARTA_ROOT/models
-export R_MODEL_DIR=$R_SPARTA_ROOT/models
+export MODEL_DIR=$MARS_ROOT/models
+export R_MODEL_DIR=$R_MARS_ROOT/models
 

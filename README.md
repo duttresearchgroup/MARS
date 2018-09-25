@@ -1,5 +1,5 @@
 # Overview
-Code base for SPARTA framework
+Code base for MARS framework: Middleware for Adaptive Reflective Systems, partially supported by the National Science Foundation (NSF) under grant CCF-1704859.
 
 This repository contains mostly the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included. 
 
@@ -65,7 +65,7 @@ The steps are as follows:
 
   * Remote user credentials: *R_USER*, *R_PASS*
   * Remote host ip address: *R_HOST*
-  * Build dir in the remote host: *R_SPARTA_ROOT*
+  * Build dir in the remote host: *R_MARS_ROOT*
   
 * *remote_synch.sh*: run `sh scripts/common/remote_synch.sh` to copy cross-compile binaries to the target
 * *env .sh*: Run `source scripts/env.sh` in the target platform

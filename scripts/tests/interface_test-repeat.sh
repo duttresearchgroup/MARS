@@ -21,16 +21,16 @@
 # time traces aggregated in a single file.
 #
 
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 function do_test() {
-    sudosh $SPARTA_SCRIPTDIR/runtime/start.sh interfacetest
-    taskset 0x10 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
-    taskset 0x40 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
-    taskset 0x02 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
-    taskset 0x04 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
+    sudosh $MARS_SCRIPTDIR/runtime/start.sh interfacetest
+    taskset 0x10 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
+    taskset 0x40 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
+    taskset 0x02 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
+    taskset 0x04 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
     wait
-    sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+    sudosh $MARS_SCRIPTDIR/runtime/stop.sh
 
     cp $RTS_DAEMON_OUTDIR/execTraceFine.csv interface_test-fine_trace$1.csv
     cp $RTS_DAEMON_OUTDIR/execTraceCoarse.csv interface_test-coarse_trace$1.csv
@@ -45,8 +45,8 @@ done
 
 #aggregates the files from multiples runs
 FILES=$(ls interface_test-fine_trace*.csv | xargs)
-python3 $SPARTA_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-fine_trace.agg.csv
+python3 $MARS_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-fine_trace.agg.csv
 FILES=$(ls interface_test-coarse_trace*.csv | xargs)
-python3 $SPARTA_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-coarse_trace.agg.csv
+python3 $MARS_SCRIPTDIR/tests/interface_test-agg.py --srcfiles $FILES --destfile interface_test-coarse_trace.agg.csv
 
 

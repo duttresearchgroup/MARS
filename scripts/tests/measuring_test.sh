@@ -18,12 +18,12 @@
 
 # Runs a couple of benchmarks using the measuring daemon
 
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
-sudosh $SPARTA_SCRIPTDIR/runtime/start.sh measuring
-taskset 0x10 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
-taskset 0x40 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
-taskset 0x02 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
-taskset 0x04 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
+sudosh $MARS_SCRIPTDIR/runtime/start.sh measuring
+taskset 0x10 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
+taskset 0x40 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null &
+taskset 0x02 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
+taskset 0x04 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null &
 wait
-sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+sudosh $MARS_SCRIPTDIR/runtime/stop.sh

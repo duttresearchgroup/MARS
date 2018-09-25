@@ -16,33 +16,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 MODELS=$(readlink -f $MODEL_DIR/arm_exynos5422)
 
 high_load(){
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_high_load.sh > /dev/null
 }
 low_load(){
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
-    taskset $1 sh $SPARTA_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
+    taskset $1 sh $MARS_SCRIPTDIR/ubenchmarks/high_ipc_low_load.sh > /dev/null
 }
 
-sudosh $SPARTA_SCRIPTDIR/runtime/start.sh simple_dvfs model_path=$MODELS
+sudosh $MARS_SCRIPTDIR/runtime/start.sh simple_dvfs model_path=$MODELS
 
 high_load 0x10 &
 high_load 0x40 &
 low_load 0x02 &
 low_load 0x04 &
 
-sudosh $SPARTA_SCRIPTDIR/runtime/wait_for_stop.sh
+sudosh $MARS_SCRIPTDIR/runtime/wait_for_stop.sh
 
 while [ 1 ]
 do

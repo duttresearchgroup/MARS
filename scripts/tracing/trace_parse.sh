@@ -43,7 +43,7 @@ then
 fi
 
 # Source the files we need
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 
 # The paths
@@ -63,7 +63,7 @@ if [ ! -f $IDLE_POWER_DIR.json ]
 then
     echo "Idle power file $IDLE_POWER_DIR.json does not exist"
     echo "Parsing idle powers..."
-    python3 $SPARTA_SCRIPTDIR/tracing/make_idle_power.py $IDLE_POWER_DIR
+    python3 $MARS_SCRIPTDIR/tracing/make_idle_power.py $IDLE_POWER_DIR
     if [ ! -f $IDLE_POWER_DIR.json ]
     then
         echo "Error parsing idle power !"
@@ -96,7 +96,7 @@ fi
 for file in $FILES 
 do
     destfile="${file/%.$FILES_EXT/.$TP_POWAJUST_EXT}"
-    python3 $SPARTA_SCRIPTDIR/tracing/remove_idle_power.py --srcfile $file --destfile $destfile --idlepowers $IDLE_POWER_DIR.json
+    python3 $MARS_SCRIPTDIR/tracing/remove_idle_power.py --srcfile $file --destfile $destfile --idlepowers $IDLE_POWER_DIR.json
 done
 
 #aggregates the files from multiples runs
@@ -108,5 +108,5 @@ then
     echo "Error! No power ajusted traces found at $RAW_OUTPUT_DIR"
     exit 1
 fi
-python3 $SPARTA_SCRIPTDIR/tracing/trace_agg-periodic.py $RESAMPLING --srcfiles $FILES --destfile $OUTPUT_TRACE_NAME
+python3 $MARS_SCRIPTDIR/tracing/trace_agg-periodic.py $RESAMPLING --srcfiles $FILES --destfile $OUTPUT_TRACE_NAME
 

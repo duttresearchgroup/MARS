@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-source $SPARTA_SCRIPTDIR/common/remote.sh
+source $MARS_SCRIPTDIR/common/remote.sh
 
 R_WAIT
 R_SHELL ls

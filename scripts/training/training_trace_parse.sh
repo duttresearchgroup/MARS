@@ -47,18 +47,18 @@ then
 fi
 
 # Source the files we need
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 echo "Sanitizing periodic traces"
 PERIDIC_TRACES=$(ls $RAW_OUTPUT_DIR/periodic_trace_result*.csv | xargs)
 for trace in $PERIDIC_TRACES
 do
     destfile="${trace/%.csv/.$TP_SANITIZE_EXT}"
-    python3 $SPARTA_SCRIPTDIR/training/sanitize.py --srcfile $trace --destfile $destfile
+    python3 $MARS_SCRIPTDIR/training/sanitize.py --srcfile $trace --destfile $destfile
 done
 
 # Now parses periodic traces
-sh $SPARTA_SCRIPTDIR/tracing/trace_parse.sh $RAW_OUTPUT_DIR
+sh $MARS_SCRIPTDIR/tracing/trace_parse.sh $RAW_OUTPUT_DIR
 
 
 

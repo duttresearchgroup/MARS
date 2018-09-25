@@ -16,28 +16,28 @@
 #-------------------------------------------------------------------------------
 
 # Min
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 2 200000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 200000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 2 200000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 200000
 
 # Max
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 2 1400000
-sudosh $SPARTA_SCRIPTDIR/odroid/fan_max.sh # Gonna get Hot!
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 2 1400000
+sudosh $MARS_SCRIPTDIR/odroid/fan_max.sh # Gonna get Hot!
 sleep 5 # cooldown time
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 2000000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 2000000
 sleep 5 # cooldown time
-sudosh $SPARTA_SCRIPTDIR/odroid/fan_auto.sh
+sudosh $MARS_SCRIPTDIR/odroid/fan_auto.sh
 
 # Middle
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 2 800000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 1100000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 2 800000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 1100000
 
 # Some other freqs for each
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 2 500000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 500000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 800000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 2 1100000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 1400000
-sh $SPARTA_SCRIPTDIR/training/run_training-all.sh 6 1700000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 2 500000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 500000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 800000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 2 1100000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 1400000
+sh $MARS_SCRIPTDIR/training/run_training-all.sh 6 1700000
 
 
 

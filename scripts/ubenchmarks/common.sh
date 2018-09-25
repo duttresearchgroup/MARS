@@ -1,5 +1,5 @@
 # Includes the confs
-source $SPARTA_SCRIPTDIR/confs.sh
+source $MARS_SCRIPTDIR/confs.sh
 
 #Defs for the uBenchmarks
 
@@ -24,4 +24,4 @@ P_LOWIPC_LOWLOAD1="1000     10000 1250 1"
 P_LOWIPC_LOWLOAD2="1000     10000 6000 2"
 
 # Path to binaries
-UBENCH_BIN_DIR=$SPARTA_ROOT/"bin_"$RTS_ARCH"_"$RTS_PLAT/ubenchmarks
+UBENCH_BIN_DIR=$MARS_ROOT/"bin_"$RTS_ARCH"_"$RTS_PLAT/ubenchmarks

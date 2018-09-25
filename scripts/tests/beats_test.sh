@@ -18,9 +18,9 @@
 
 # Runs a couple of benchmarks using the beatsmonitor daemon
 
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
-sudosh $SPARTA_SCRIPTDIR/runtime/start.sh beatsmonitor
-$SPARTA_ROOT/"bin_"$RTS_ARCH"_"$RTS_PLAT/uapitests/simple_test &
+sudosh $MARS_SCRIPTDIR/runtime/start.sh beatsmonitor
+$MARS_ROOT/"bin_"$RTS_ARCH"_"$RTS_PLAT/uapitests/simple_test &
 wait
-sudosh $SPARTA_SCRIPTDIR/runtime/stop.sh
+sudosh $MARS_SCRIPTDIR/runtime/stop.sh

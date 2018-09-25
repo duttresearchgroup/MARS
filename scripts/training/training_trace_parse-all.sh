@@ -25,7 +25,7 @@
 ##################################################################
 
 # Source the files we need
-source $SPARTA_SCRIPTDIR/runtime/common.sh
+source $MARS_SCRIPTDIR/runtime/common.sh
 
 TGT_TRACES_DIR=$TRACE_OUTPUT_DIR-$RTS_ARCH-$RTS_PLAT
 
@@ -44,14 +44,14 @@ do
     if [ ! -f $OUTPUT_TRACE_NAME ]
     then
         echo "$OUTPUT_TRACE_NAME does not exists. Parsing..."
-        sh $SPARTA_SCRIPTDIR/training/training_trace_parse.sh $raw
+        sh $MARS_SCRIPTDIR/training/training_trace_parse.sh $raw
         echo -e "\n"
     else
         NEWERFILES=$(find $raw -type f -newer $OUTPUT_TRACE_NAME -print0 | xargs -0)
         if [ ! -z "$NEWERFILES" ]
         then
             echo "$raw has files newer than $OUTPUT_TRACE_NAME. Parsing..."
-            sh $SPARTA_SCRIPTDIR/training/training_trace_parse.sh $raw
+            sh $MARS_SCRIPTDIR/training/training_trace_parse.sh $raw
             echo -e "\n"
         fi
     fi

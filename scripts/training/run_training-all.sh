@@ -26,9 +26,9 @@
 #   run_training-all.sh <training_core> <training_core_freq>
 #####################################################
 
-source $SPARTA_SCRIPTDIR/ubenchmarks/common.sh
+source $MARS_SCRIPTDIR/ubenchmarks/common.sh
 
-sh $SPARTA_SCRIPTDIR/training/run_training.sh $UBENCH_BIN_DIR/training_singleapp $@
+sh $MARS_SCRIPTDIR/training/run_training.sh $UBENCH_BIN_DIR/training_singleapp $@
 
 
 
