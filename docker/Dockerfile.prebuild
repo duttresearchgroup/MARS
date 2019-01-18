@@ -1,0 +1,37 @@
+FROM ubuntu:16.04
+LABEL maintainer = "biswadip.maity@gmail.com"
+
+# This file contains all the source codes for MARS and it's supported platforms
+# Do not run any build commands in this dockerfile
+
+# get dependencies
+RUN apt-get update && apt-get install -y build-essential git-core python-dev python vim wget\
+    g++-arm-linux-gnueabihf gcc-arm-none-eabi bc sshpass
+RUN apt-get clean
+
+RUN mkdir -p /workspace
+WORKDIR /workspace
+
+RUN git clone https://github.com/duttresearchgroup/mars.git
+RUN git clone --depth 1 https://github.com/hardkernel/linux -b odroidxu3-3.10.y
+
+#Add cross compiler for nVidia
+WORKDIR /workspace
+RUN wget https://developer.nvidia.com/embedded/dlc/l4t-gcc-toolchain-64-bit-28-2-ga
+RUN tar xvzf l4t-gcc-toolchain-64-bit-28-2-ga
+RUN rm -rf l4t-gcc-toolchain-64-bit-28-2-ga
+RUN mv install cross
+ENV PATH="/workspace/cross/bin:${PATH}"
+
+# nVidia Linux source
+COPY linux-tegra /workspace/linux-tegra
+
+WORKDIR /workspace/mars
+
+#To default the architecture to odroid uncomment the following
+RUN sed -i '0,/=x86/s//=arm/' .makefile.buildopts
+
+#To default the architecture to nvidia uncomment the following
+# RUN sed -i '0,/=x86/s//=arm64/' .makefile.buildopts
+
+RUN ln -sf /bin/bash /bin/sh

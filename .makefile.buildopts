@@ -54,4 +54,4 @@ EXTRAFLAGS_DEFAULT_arm64="-Wno-unused-variable"
 KERNEL_SRC_DEFAULT_x86=/workspace/export/drg_repos/linux-3.13.0
 KERNEL_SRC_DEFAULT_alpha=
 KERNEL_SRC_DEFAULT_arm=/workspace/linux
-KERNEL_SRC_DEFAULT_arm64=/workspace/linux
+KERNEL_SRC_DEFAULT_arm64=/workspace/linux-tegra
