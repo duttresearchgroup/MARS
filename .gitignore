@@ -45,3 +45,4 @@
 /src/external/hotspot/test
 
 /scripts/confs.sh
+/docker/linux-tegra
