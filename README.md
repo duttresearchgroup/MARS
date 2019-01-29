@@ -1,9 +1,17 @@
 # Overview
 Code base for MARS framework: Middleware for Adaptive Reflective Systems, partially supported by the National Science Foundation (NSF) under grant CCF-1704859.
 
-This repository contains mostly the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included. 
+MARS is a cross-layer and multi-platform framework supporting the creation of resource managers for emerging  heterogeneous manycore  processing  (HMP)  platforms by composing system  models  and  resource  management  policies  in  a  flexible and coordinated manner. The repo also houses the implementation of the prediction, task mapping, and DVFS algorithms used by the sense-predict-allocate approach described by the SmartBalance/RunDMC and related papers. A trace-based simulator for offline simulation of these algorithms and for platform design space exploration is also included. 
 
-# Background
+# Quick Start - Docker instructions
+If you want to play around with the MARS framework, the best way to get started is using our docker based container setup. The following steps should be performed on a machine on which the docker daemon is running:
+* `docker pull duttresearchgroup/mars`
+* `docker run -it duttresearchgroup/mars bash`
+* `make runtime`
+
+This will build all the user policies and necessary interfaces to run them on the arm platform. Once built, the binaries can be transferred from `bin_arm_exynos5422` to the target platform (default build is for Odroid XU3) in order to run the policy. 
+
+# Detailed instructions 
 ## Preparing your SD Card
  Install the Linux image on the target platform. You will also need the source code of the kernel currently installed to compile.
 
@@ -72,7 +80,8 @@ The steps are as follows:
 
 
 ## Compiling directly on board
-  Coming soon
+  If you are compiling the framework on board, there is no need for cross-compiler setup. 
+  Run `make` to see the available options. Next, inspect `makefile.buildopts` to ensure the target platform is correct. Finally `make runtime` to compile the framework and generate the binaries.
 
 # Running on target platform
 Test if the code is working properly in the target platform. 
