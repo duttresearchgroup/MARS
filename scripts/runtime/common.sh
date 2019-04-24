@@ -45,6 +45,7 @@ RTS_DAEMON_BIN_DIR=$RTS_BINS_PATH/daemons
 # a daemon is running. Stores the pid of the
 # daemon when running
 RTS_DAEMON_PID=$RTS_DAEMON_BIN_DIR/.current_active_daemon.pid
+RTS_DAEMON_DEBUG=0
 
 # Valgrind command when running daemon with valgrind
 # (when the RTS_VALGRIND var is set 1)
