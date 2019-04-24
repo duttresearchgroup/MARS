@@ -167,18 +167,22 @@ class SensorBase : public PeriodicSensor<SensingModule> {
 
 	void setSensingWindows(int numWindows) override
 	{
-		for(int i = 0; i < numWindows; ++i){
-			_currWindowAcc.push_back(0);
-			_currWindowSamples.push_back(0);
-			_lastWindowAcc.push_back(0);
-			_lastWindowSamples.push_back(0);
-			_aggWindowAcc.push_back(0);
-			_aggWindowSamples.push_back(0);
-			_lastAggWindowAcc.push_back(0);
-			_lastAggWindowSamples.push_back(0);
-		}
+	    typename SensingTypeInfo<TYPE>::ValType zero= 0;
+
+	    for(int i = 0; i < numWindows; ++i){
+
+		_currWindowAcc.push_back(zero);
+		_currWindowSamples.push_back(zero);
+		_lastWindowAcc.push_back(zero);
+		_lastWindowSamples.push_back(zero);
+		_aggWindowAcc.push_back(zero);
+		_aggWindowSamples.push_back(zero);
+		_lastAggWindowAcc.push_back(zero);
+		_lastAggWindowSamples.push_back(zero);
+	    }
 	}
 
+	// sen_win_dispatcher -> nextSensingWindow -> windowReady
 	void windowReady(int wid) override
 	{
 		assert_true((unsigned)wid < _lastWindowAcc.size());

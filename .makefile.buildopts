@@ -18,6 +18,9 @@
 ###################################
 #Makefile options default values. #
 ###################################
+#default for HOST
+HOST_DEFAULT=x86
+
 #default for ARCH
 ARCH_DEFAULT=x86
 
@@ -41,8 +44,13 @@ CROSS_COMPILE_krn_DEFAULT_arm_offline=arm-none-eabi-
 CROSS_COMPILE_usr_DEFAULT_arm_exynos5422=arm-linux-gnueabihf-
 CROSS_COMPILE_krn_DEFAULT_arm_exynos5422=arm-none-eabi-
 
+ifeq($(HOST_DEFAULT), $(ARCH_DEFAULT))
+CROSS_COMPILE_usr_DEFAULT_arm64_jetsontx2=
+CROSS_COMPILE_krn_DEFAULT_arm64_jetsontx2=
+else
 CROSS_COMPILE_usr_DEFAULT_arm64_jetsontx2=aarch64-unknown-linux-gnu-
 CROSS_COMPILE_krn_DEFAULT_arm64_jetsontx2=aarch64-unknown-linux-gnu-
+endif
 
 #defaults for EXTRAFLAGS
 EXTRAFLAGS_DEFAULT_x86=
@@ -54,4 +62,12 @@ EXTRAFLAGS_DEFAULT_arm64="-Wno-unused-variable"
 KERNEL_SRC_DEFAULT_x86=/workspace/export/drg_repos/linux-3.13.0
 KERNEL_SRC_DEFAULT_alpha=
 KERNEL_SRC_DEFAULT_arm=/workspace/linux
-KERNEL_SRC_DEFAULT_arm64=/workspace/linux-tegra
+KERNEL_SRC_DEFAULT_arm64=/Workspace/linux-tegra
+
+#defaults for TARGET_CUDA_HOME
+ifeq($(HOST_DEFAULT), $(ARCH_DEFAULT))
+TARGET_CUDA_HOME_DEFAULT_arm64=
+else
+TARGET_CUDA_HOME_DEFAULT_arm64=${HOME}/Workspace/MARS_dev/docker/4.4.38-tegra/cuda_jetson
+endif
+USE_CUDA_DEFAULT=FALSE

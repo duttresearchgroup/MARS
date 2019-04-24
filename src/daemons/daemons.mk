@@ -32,6 +32,8 @@ OBJS_DEPS += $(OBJS_DAEMONS_COMMON:%.o=%.d)
 
 BINS_DAEMONS = $(patsubst src/daemons/%.cc,bin_$(ARCH)_$(PLAT)/daemons/%,$(SRCS_DAEMONS))
 
+LDFLAGS_DAEMONS = -lrt
+
 ifeq ($(DAEMONS),)
 BINS_DAEMONS_FILTERED = $(BINS_DAEMONS)
 else
@@ -45,8 +47,8 @@ $(info No daemons to build. Is the filter correct ?)
 endif
      
 bin_$(ARCH)_$(PLAT)/daemons/%: src/daemons/%.cc $(OBJS_DAEMONS_COMMON) lib_$(ARCH)_$(PLAT)/libruntime.a lib_$(ARCH)_$(PLAT)/libbase.a lib_$(ARCH)_$(PLAT)/libcpulimit.a
-	$(CXX) -static $(CXXFLAGS) $^ -o $@
-	
+	$(CXX) -static $(CXXFLAGS) $^ -o $@ $(LDFLAGS_DAEMONS)
+
 bin_$(ARCH)_$(PLAT)/daemons:
 	mkdir -p bin_$(ARCH)_$(PLAT)/daemons
 

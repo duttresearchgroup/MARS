@@ -18,9 +18,12 @@
 #ifndef __arm_rt_actutation_types_h
 #define __arm_rt_actutation_types_h
 
+#include <vector>
 #include <base/base.h>
 #include <runtime/common/time_aggregator.h>
 #include <runtime/interfaces/common/performance_data.h>
+#include <external/hookcuda/nvidia_counters.h>
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // Actuation knob types
@@ -141,6 +144,111 @@ template <> struct ActuationTypeInfo<ACT_DUMMY2>{
 
 //////////////////////////////////////////////////////////////////////////////
 
+class GpuPerfCtrRes {
+public:
+    int num_kernels;
+    kernel_data_t kernels[MAX_KERNEL_PER_POLICY_MANAGER];
+
+    GpuPerfCtrRes() {
+	num_kernels = 0;
+	memset(kernels, 0, sizeof(kernel_data_t) * MAX_KERNEL_PER_POLICY_MANAGER);
+    }
+
+    GpuPerfCtrRes(int x) {
+	if (x != 0)
+	    printf("WARNING: Possible wrong assignment, GpuPerfCtrRes=%d\n", x);
+	num_kernels = 0;
+	memset(kernels, 0, sizeof(kernel_data_t) * MAX_KERNEL_PER_POLICY_MANAGER);
+    }
+
+    // below operators are mostly used in sensor.h
+    GpuPerfCtrRes operator + (GpuPerfCtrRes const &rhs)  {
+	GpuPerfCtrRes res;
+
+	//TODO: detect & remove empty holes in the array(should not happen anyway) 
+	for (int i = 0 ;  i < MAX_KERNEL_PER_POLICY_MANAGER ; ++i)
+	{
+	    if (kernels[i].ptr == rhs.kernels[i].ptr)
+	    {
+		res.kernels[i].num_launched = kernels[i].num_launched + rhs.kernels[i].num_launched;
+		res.kernels[i].pure_kernel_duration = kernels[i].pure_kernel_duration + rhs.kernels[i].pure_kernel_duration;
+		res.kernels[i].kernel_duration = kernels[i].kernel_duration + rhs.kernels[i].kernel_duration;
+		for (int j = 0 ; j < MAX_METRICS ; ++j)
+		    res.kernels[i].mres[j] = kernels[i].mres[j] + rhs.kernels[i].mres[j];
+	    }
+	    else if (rhs.kernels[i].ptr != NULL)
+	    {
+		if (kernels[i].ptr == NULL)
+		    res.kernels[i] = rhs.kernels[i];
+		else
+		{
+		    printf("WARNING: Conflict occurred during GpuPerfCtrRes + operation iter#%d\n", i);
+		    fflush(stdout);
+		}
+	    }
+	    else if (kernels[i].ptr != NULL)
+	    {
+		res.kernels[i] = kernels[i];
+	    }
+	    else
+		break;
+	}
+
+	for (int i = 0 ;  i < MAX_KERNEL_PER_POLICY_MANAGER ; ++i)
+	{
+	    if (res.kernels[i].ptr != NULL)
+		res.num_kernels++;
+	    else
+		break;
+	}
+	return res;
+    }
+
+    // ignore += int. doesn't quite fit
+    GpuPerfCtrRes & operator += (int val)  
+    {
+	return *this;
+    }
+
+    //TODO: detect & remove empty holes in the array(should not happen anyway) 
+    GpuPerfCtrRes & operator += (GpuPerfCtrRes const &rhs)  
+    {
+	for (int i = 0 ;  i < MAX_KERNEL_PER_POLICY_MANAGER ; ++i)
+	{
+	    if (kernels[i].ptr == rhs.kernels[i].ptr)
+	    {
+		kernels[i].num_launched += rhs.kernels[i].num_launched;
+		kernels[i].pure_kernel_duration += rhs.kernels[i].pure_kernel_duration;
+		kernels[i].kernel_duration += rhs.kernels[i].kernel_duration;
+		for (int j = 0 ; j < MAX_METRICS ; ++j)
+		    kernels[i].mres[j] += rhs.kernels[i].mres[j];
+	    }
+	    else if (rhs.kernels[i].ptr != NULL)
+	    {
+		if (kernels[i].ptr == NULL)
+		    kernels[i] = rhs.kernels[i];
+		else
+		{
+		    printf("WARNING: Conflict occurred during GpuPerfCtrRes += operation iter#%d\n", i);
+		    fflush(stdout);
+		}
+	    }
+	    else
+		break;	
+	}
+
+	num_kernels = 0;
+	for (int i = 0 ;  i < MAX_KERNEL_PER_POLICY_MANAGER ; ++i)
+	{
+	    if (kernels[i].ptr != NULL)
+		num_kernels++;
+	    else
+		break;
+	}
+
+	return *this;
+    }
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Sensing data types
@@ -156,9 +264,12 @@ enum SensingType {
 	SEN_FREQ_MHZ,
 	SEN_LASTCPU,
 
-	//Other sensing data
+	// Other sensing data
 	SEN_POWER_W,
 	SEN_TEMP_C,
+
+	// NVIDIA GPU counters
+	SEN_NV_GPU_PERFCNT,
 
 	//Dummy sensed type for testing.
 	//It's value is the avg. value of ACT_DUMMY1+ACT_DUMMY2 in the sensing window
@@ -294,6 +405,12 @@ template <> struct SensingTypeInfo<SEN_DUMMY>{
     static const std::string str;
 };
 
+template <> struct SensingTypeInfo<SEN_NV_GPU_PERFCNT>{
+    using ValType = GpuPerfCtrRes; //last cpu used by some task
+    using ParamType = nvidia_counters_t;
+    static constexpr SensingAggType agg = SEN_AGG_INT_COUNT;
+    static const std::string str;
+};
 
 // Helper function to get the name of sen_types
 template<SensingType T>

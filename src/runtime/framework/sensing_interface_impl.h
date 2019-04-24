@@ -46,7 +46,6 @@ struct SensingInterfaceImpl {
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType sense(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
 
-
         /*
          * Returns aggregated sensed value for the
          * current and previous instances of the given window
@@ -56,6 +55,12 @@ struct SensingInterfaceImpl {
 
         template<SensingType SEN_T,typename ResourceT>
         static typename SensingTypeInfo<SEN_T>::ValType senseAgg(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, int wid);
+
+        /*
+         * Enables speicific sensors
+         */
+        template<SensingType SEN_T,typename ResourceT>
+        static int enableSensor(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, bool enable);
 
     };
 };

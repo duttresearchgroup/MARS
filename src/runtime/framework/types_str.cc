@@ -49,7 +49,9 @@ const std::string SensingTypeInfo<SEN_FREQ_MHZ>::str       = "freq_mhz";
 
 const std::string SensingTypeInfo<SEN_LASTCPU>::str        = "core";
 
-const std::string SensingTypeInfo<SEN_DUMMY>::str        = "dummy";
+const std::string SensingTypeInfo<SEN_NV_GPU_PERFCNT>::str = "nvidia_gpu_perf_counters";
+
+const std::string SensingTypeInfo<SEN_DUMMY>::str	   = "dummy";
 
 
 

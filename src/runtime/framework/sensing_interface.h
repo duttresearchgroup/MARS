@@ -73,6 +73,11 @@ struct SensingInterface : SensingInterfaceImpl {
 	        return Impl::sense<SEN_T,ResourceT>(p,rsc,ReflectiveEngine::currentWID());
 	}
 
+	template<SensingType SEN_T,typename ResourceT>
+	static int enableSensor(typename SensingTypeInfo<SEN_T>::ParamType p, const ResourceT *rsc, bool enable)
+	{
+	    return Impl::enableSensor<SEN_T,ResourceT>(p,rsc,enable);
+	}
 
     /*
      * Returns aggregated sensed value for the
@@ -115,8 +120,6 @@ struct SensingInterface : SensingInterfaceImpl {
         else
             return Impl::senseAgg<SEN_T,ResourceT>(p,rsc,ReflectiveEngine::currentWID());
     }
-
-
 
     /*
      * Returns the predicted sensed data for the current window.
