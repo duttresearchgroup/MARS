@@ -1,16 +1,17 @@
 /*******************************************************************************
  * Copyright (C) 2018 Tiago R. Muck <tmuck@uci.edu>
- * 
+ * Copyright (C) 2018 Bryan Donyanavard <bdonyana@uci.edu>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -19,6 +20,7 @@
 #include <runtime/common/reports.h>
 #include <runtime/framework/actuation_interface.h>
 #include "../runtime/framework/models/baseline_model.h"
+#include <runtime/managers/siso_dvfs.h>
 #include <unistd.h>
 
 class SimpleDVFSPolicy : public Policy {
@@ -57,7 +59,9 @@ class SimpleDVFSPolicy : public Policy {
             int best_freq = actuationRanges<ACT_FREQ_MHZ>(fd).min;
             double best_eff = 0;
             int step = actuationRanges<ACT_FREQ_MHZ>(fd).steps;
-            for(int freq = best_freq; freq <= actuationRanges<ACT_FREQ_MHZ>(fd).max; freq += step){
+            for(int freq = best_freq;
+                    freq <= actuationRanges<ACT_FREQ_MHZ>(fd).max;
+                    freq += step){
                 double freq_eff = try_frequency(fd,freq);
                 if(freq_eff > best_eff){
                     best_freq = freq;
@@ -77,8 +81,18 @@ class SimpleDVFSManager : public PolicyManager {
 
   protected:
 
+    static const std::string OPT_POLICY;
+    using OPT_POLICY_TYPE = std::string;
+
     void setup()
     {
+        /**
+         * Two policies:
+         * 1. "simple": SimpleDVFSPolicy
+         * 2. "siso": SISODVFSPolicy
+         */
+        std::string policy = OptionParser::get<OPT_POLICY_TYPE>(OPT_POLICY);
+
         //pinfo("Waiting 10s for GDB to attach\n");
         //sleep(10);
         sensingModule()->enablePerTaskSensing();
@@ -91,14 +105,23 @@ class SimpleDVFSManager : public PolicyManager {
 
         enableReflection();
 
-        registerPolicy(new SimpleDVFSPolicy());
+        if (policy.compare("simple") == 0) {
+            registerPolicy(new SimpleDVFSPolicy());
+        }
+        else if (policy.compare("siso") == 0) {
+            for(int i = 0; i < info()->freq_domain_list_size; ++i){
+                registerPolicy(new SISODVFSPolicy(i));
+            }
+        } else {
+            arm_throw(OptionsException,"Invalid policy: %s",policy.c_str());
+        }
     }
 
   public:
     SimpleDVFSManager(SensingModule *sm) :PolicyManager(sm){}
 };
 
-
+const std::string SimpleDVFSManager::OPT_POLICY = "policy";
 
 int main(int argc, char * argv[]){
     daemon_run<SimpleDVFSManager>(argc,argv);

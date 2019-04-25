@@ -15,154 +15,369 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#ifndef __arm_rt_controllers_h
-#define __arm_rt_controllers_h
+#ifndef __arm_rt_controllers_new_h
+#define __arm_rt_controllers_new_h
+
+#include <base/base.h>
 
 #include <cmath>
 #include <limits>
 
-template<typename T>
-class SISOController
-{
+namespace Filters {
+
+template<typename T, int WIDTH, typename Derived>
+class FilterBase{
+protected:
+	T _filteredVal[WIDTH];
+public:
+
+	FilterBase(){
+		for(int i = 0; i < WIDTH; ++i){
+			_filteredVal[i] = 0;
+		}
+	}
+
+	void sampleInput(std::initializer_list<T> inputs){
+		assert_true(WIDTH==inputs.size());
+		int i = 0;
+		for(auto in : inputs){
+			_filteredVal[i] = static_cast<Derived*>(this)->_filterFunc(i,in);
+			++i;
+		}
+	}
+	void sampleInput(T *inputs){
+		for(int i = 0; i < WIDTH; ++i)
+			_filteredVal[i] = static_cast<Derived*>(this)->_filterFunc(i,inputs[i]);
+	}
+	void sampleInput(T input){
+		assert_true(WIDTH==1);
+		_filteredVal[0] = static_cast<Derived*>(this)->_filterFunc(0,input);
+	}
+
+	T output(int idx) {
+		return _filteredVal[idx];
+	}
+	T output() {
+		assert_true(WIDTH==1);
+		return _filteredVal[0];
+	}
+	T* outputs() {
+		return _filteredVal;
+	}
+};
+
+template<typename T, typename FirstFilter, typename SecondFilter>
+class CompositeFilter{
+public:
+
+	FirstFilter first;
+	SecondFilter second;
+
+	template<typename InputT>
+	void sampleInput(InputT inputs){
+		first.sampleInput(inputs);
+		second.sampleInput(first.outputs());
+	}
+
+	T output(int idx) {
+		return second.output(idx);
+	}
+	T output() {
+		return second.output();
+	}
+	T* outputs() {
+		return second.outputs();
+	}
+};
+
+template<typename T, int WIDTH>
+class NoFilter: public FilterBase<T,WIDTH,NoFilter<T,WIDTH>>{
+public:
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return inputVal;
+	}
+};
+
+template<typename T, int WIDTH>
+class Average: public FilterBase<T,WIDTH,Average<T,WIDTH>>{
+	T _weight[WIDTH];
+	using FilterBase<T,WIDTH,Average<T,WIDTH>>::_filteredVal;
+
+public:
+
+	Average(){
+		for(int i = 0; i < WIDTH; ++i){
+			_weight[i] = 0;
+		}
+	}
+
+	/*
+	 * Filter params
+	 */
+	//set weight for a sampling window to always store the average in the last sec.
+	void weight(double windowLengthSec) {
+		for(int i = 0; i < WIDTH; ++i)
+			_weight[i] = (windowLengthSec) > 1 ? 0 : 1-windowLengthSec;
+	}
+	void weight(std::initializer_list<T> weights) {
+		assert_true(WIDTH==weights.size());
+		for(int i = 0; i < WIDTH; ++i) 	_weight[i] = weights[i];
+	}
+	void weight(T* weights) {
+		for(int i = 0; i < WIDTH; ++i) 	_weight[i] = weights[i];
+	}
+	void weight(T weightVal) {
+		assert_true(WIDTH==1);
+		_weight[0] = weightVal;
+	}
+
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return (_weight[idx]*_filteredVal[idx]) + ((1-_weight[idx])*inputVal);
+	}
+};
+
+template<typename T, int WIDTH>
+class Error: public FilterBase<T,WIDTH,Error<T,WIDTH>>{
+	T _ref[WIDTH];
+
+public:
+	Error(){
+		for(int i = 0; i < WIDTH; ++i){
+			_ref[i] = 0;
+		}
+	}
+
+	/*
+	 * Filter params
+	 */
+	void ref(std::initializer_list<T> refs) {
+		assert_true(WIDTH==refs.size());
+		int i = 0;
+		for(auto ref : refs){
+			_ref[i] = ref;
+			++i;
+		}
+	}
+	void ref(T* refs) {
+		for(int i = 0; i < WIDTH; ++i) 	_ref[i] = refs[i];
+	}
+	void ref(T refVal) {
+		assert_true(WIDTH==1);
+		_ref[0] = refVal;
+	}
+
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return _ref[idx] - inputVal;
+	}
+};
+
+
+template<typename T, int WIDTH>
+class NormalizeBase{
+protected:
+	T _gainS[WIDTH];
+	T _gainO[WIDTH];
+
+public:
+	NormalizeBase(){
+		for(int i = 0; i < WIDTH; ++i){
+			_gainS[i] = 0;
+			_gainO[i] = 0;
+		}
+	}
+
+	/*
+	 * Filter params
+	 */
+	void range(std::initializer_list<T> minVals,std::initializer_list<T> maxVals) {
+		assert_true(WIDTH==minVals.size());
+		assert_true(WIDTH==maxVals.size());
+		for(int i = 0; i < WIDTH; ++i) {
+			_gainS[i] = (maxVals[i]-minVals[i])/2;
+			_gainO[i] = -1*((maxVals[i]+minVals[i])/(maxVals[i]-minVals[i]));
+		}
+	}
+	void range(const T* minVals,const T* maxVals) {
+		for(int i = 0; i < WIDTH; ++i) {
+			_gainS[i] = (maxVals[i]-minVals[i])/2;
+			_gainO[i] = -1*((maxVals[i]+minVals[i])/(maxVals[i]-minVals[i]));
+		}
+	}
+	void range(T minVal,T maxVal) {
+		assert_true(WIDTH==1);
+		_gainS[0] = (maxVal-minVal)/2;
+		_gainO[0] = -1*((maxVal+minVal)/(maxVal-minVal));
+	}
+};
+
+template<typename T, int WIDTH>
+class Normalize: public NormalizeBase<T,WIDTH>, public FilterBase<T,WIDTH,Normalize<T,WIDTH>> {
+	using NormalizeBase<T,WIDTH>::_gainS;
+	using NormalizeBase<T,WIDTH>::_gainO;
+public:
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return (inputVal / _gainS[idx]) + _gainO[idx];
+	}
+};
+
+template<typename T, int WIDTH>
+class DeNormalize: public NormalizeBase<T,WIDTH>, public FilterBase<T,WIDTH,DeNormalize<T,WIDTH>> {
+	using NormalizeBase<T,WIDTH>::_gainS;
+	using NormalizeBase<T,WIDTH>::_gainO;
+public:
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return (inputVal - _gainO[idx]) * _gainS[idx];
+	}
+};
+
+template<typename T, int WIDTH>
+class Offset: public FilterBase<T,WIDTH,Offset<T,WIDTH>>{
+	T _offset[WIDTH];
+	using FilterBase<T,WIDTH,Offset<T,WIDTH>>::_filteredVal;
+
+public:
+
+	Offset(){
+		for(int i = 0; i < WIDTH; ++i){
+			_offset[i] = 0;
+		}
+	}
+
+	/*
+	 * Filter params
+	 */
+	void offset(std::initializer_list<T> offsets) {
+		assert_true(WIDTH==offsets.size());
+		for(int i = 0; i < WIDTH; ++i) 	_offset[i] = offsets[i];
+	}
+	void offset(T* offsets) {
+		for(int i = 0; i < WIDTH; ++i) 	_offset[i] = offsets[i];
+	}
+	void offset(T offsetVal) {
+		assert_true(WIDTH==1);
+		_offset[0] = offsetVal;
+	}
+
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return inputVal + _offset[idx];
+	}
+};
+
+
+template<typename T, int WIDTH>
+class LinearInterp: public FilterBase<T,WIDTH,LinearInterp<T,WIDTH>>{
+	T _xmin[WIDTH];
+	T _xmax[WIDTH];
+	T _ymin[WIDTH];
+	T _ymax[WIDTH];
+
+	using FilterBase<T,WIDTH,LinearInterp<T,WIDTH>>::_filteredVal;
+
+public:
+
+	LinearInterp(){
+		for(int i = 0; i < WIDTH; ++i){
+			_xmin[i] = 0;
+			_xmax[i] = 0;
+			_ymin[i] = 0;
+			_ymax[i] = 0;
+		}
+	}
+
+	/*
+	 * Filter params
+	 */
+	void range(std::initializer_list<T> minValsX,std::initializer_list<T> maxValsX,
+			   std::initializer_list<T> minValsY,std::initializer_list<T> maxValsY) {
+		assert_true(WIDTH==minValsX.size());
+		assert_true(WIDTH==maxValsX.size());
+		assert_true(WIDTH==minValsY.size());
+		assert_true(WIDTH==maxValsY.size());
+		assert_false("Not implemented");
+	}
+	void range(const T* minValsX,const T* maxValsX,const T* minValsY,const T* maxValsY) {
+		assert_false("Not implemented");
+	}
+	void range(T minValX,T maxValX,T minValY,T maxValY) {
+		assert_true(WIDTH==1);
+		_xmin[0] = minValX;
+		_xmax[0] = maxValX;
+		_ymin[0] = minValY;
+		_ymax[0] = maxValY;
+	}
+
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T inputVal){
+		return _ymin[idx] + ((_ymax[idx]-_ymin[idx])*(inputVal-_xmin[idx]))/(_xmax[idx]-_xmin[idx]);
+	}
+};
+
+//only implementation for WIDTH=1 is valid for PID
+template<typename T, int WIDTH=1>
+class PID: public FilterBase<T,1,PID<T,1>>{
 	T kP;
 	T kI;
 	T kD;
-	T yNorm;
-	T uNorm;
-	T yOffset;
-	T uOffset;
-	T ref;
-	T prevInput;
     T integral;
     T derivative;
     T dt;
-	T prevError;
-	T prevAvgOutput;
-	T avgWeight;
-	T et_norm;
-	T et_abs;
 
+	using FilterBase<T,1,PID<T,1>>::_filteredVal;
 
-    /*T compute(T currErr)
+public:
+
+	PID(T KP, T KI, T KD)
+		:kP(KP),kI(KI),kD(KD),
+		 integral(0),derivative(0),dt(0)
 	{
-		return prevInput + (kP+kI)*currErr - kP*prevError;
-	}*/
+	}
+	PID():PID(0,0,0){};
 
-	/*T compute(T currErr)
-	{
-		T proportional = kP*currErr;
-		integral += currErr*dt;
-		derivative = (currErr - prevError)/dt;
-		return proportional + integral + derivative;
-	}*/
+	/*
+	 * Filter params
+	 */
+	void gains(T KP, T KI, T KD) {
+		kP=KP;kI=KI;kD=KD;
+	}
+	void period(T _dt) {dt = _dt;}
 
-	T compute(T currErr)
-	{
+	/*
+	 * filter processing func
+	 */
+	T _filterFunc(int idx, T currErr){
 		T currDerivative = (dt * currErr - derivative) * kD;//TODO is that right ?
 		T nextInput = (kP * currErr + integral) + currDerivative;
 		integral += kI * currErr;
 		derivative += currDerivative;
 		return nextInput;
 	}
-
-	void set_error_tolerance()
-	{
-		et_abs = std::fabs(ref * et_norm);
-	}
-
-public:
-
-	SISOController(T KP, T KI, T KD)
-		:kP(KP),kI(KI),kD(KD),yNorm(1),uNorm(1),yOffset(0),uOffset(0),ref(0),
-		 prevInput(0),integral(0),derivative(0),dt(0),
-		 prevError(0),prevAvgOutput(0),avgWeight(0),et_norm(0),et_abs(0)
-	{
-	}
-
-	SISOController():SISOController(0,0,0){};
-
-	SISOController<T>& operator=(const SISOController<T> &o)
-	{
-		kP=o.kP;
-		kI=o.kI;
-		kD=o.kD;
-		yNorm=o.yNorm;
-		uNorm=o.uNorm;
-		yOffset=o.yOffset;
-		uOffset=o.uOffset;
-		ref=o.ref;
-		integral=o.integral;
-		derivative=o.derivative;
-        prevError = o.prevError;
-		prevInput=o.prevInput;
-		prevAvgOutput=o.prevAvgOutput;
-		avgWeight=o.avgWeight;
-		et_norm=o.et_norm;
-		et_abs=o.et_abs;
-		return *this;
-	}
-
-	T referenceOutput() { return (ref*yNorm)+yOffset;}
-	void referenceOutput(T _ref)
-	{
-		ref = (_ref-yOffset)/yNorm;
-		set_error_tolerance();
-	}
-
-	T nextInputVal(T _currOutput)
-	{
-		//filter
-		T currOutput = (avgWeight*prevAvgOutput) + ((1-avgWeight)*_currOutput);
-
-		//get error
-		T currErr = ref - ((currOutput-yOffset)/yNorm);
-		if(std::fabs(currErr) <= et_abs) currErr = 0;
-
-		//compute next
-		T nextInput = compute(currErr);
-
-		//keep perevious values and return corrected input
-		prevInput = nextInput;
-		prevError = currErr;
-		prevAvgOutput = currOutput;
-		return (nextInput*uNorm)+uOffset;
-	}
-
-	T lastError() { return prevError;}
-
-	void state(T currInput, T currOutput)
-	{
-	    prevInput = (currInput-uOffset)/uNorm;
-		prevError = ref - ((currOutput-yOffset)/yNorm);
-	}
-
-	void offsets(T _yOffset, T _uOffset)
-	{
-	    yOffset = _yOffset;
-	    uOffset = _uOffset;
-	}
-
-	void normalize(T _yNorm, T _uNorm)
-	{
-	    yNorm = _yNorm;
-	    uNorm = _uNorm;
-	}
-
-	void period(T _dt) {dt = _dt;}
-
-	void filterOutput(T c) { avgWeight = c;}
-
-	void errorTolerance(T error){
-		et_norm = error;
-		set_error_tolerance();
-	}
-
-
-
 };
 
 
-template<int NUM_INPUTS, int NUM_OUTPUTS, int ORDER, typename T=double>
+/*
+ * State space filter does not use FIlterBase and has it's own interface
+ */
+template<typename T, int NUM_INPUTS, int NUM_OUTPUTS,int ORDER>
 class StateSpaceSystem
 {
 	T A[ORDER][ORDER];
@@ -173,13 +388,7 @@ class StateSpaceSystem
 	int x_curr;
 	int x_next;
 
-	T yNorm[NUM_OUTPUTS];
-	T uNorm[NUM_INPUTS];
-	T yOffset[NUM_OUTPUTS];
-	T uOffset[NUM_INPUTS];
-
 	T nextOutput[NUM_OUTPUTS][1];
-	T nextOutputCorrected[NUM_OUTPUTS];
 
 	//multiply and also accumulates
 	template<int A_ROWS, int A_COLS, int B_COLS>
@@ -198,34 +407,11 @@ class StateSpaceSystem
 		matrix_mult_acc<A_ROWS,A_COLS,B_COLS>(c,a,b);
 	}
 
-	void compute(T currInput[NUM_INPUTS][1], T newOutput[NUM_OUTPUTS][1])
-	{
-		//compute next state
-		matrix_mult<ORDER,ORDER,1>(X[x_next],A,X[x_curr]);
-		matrix_mult_acc<ORDER,NUM_INPUTS,1>(X[x_next],B,currInput);
-
-		//compute inputs
-		matrix_mult<NUM_OUTPUTS,ORDER,1>(newOutput,C,X[x_curr]);
-		matrix_mult_acc<NUM_OUTPUTS,NUM_INPUTS,1>(newOutput,D,currInput);
-
-		int aux = x_curr;
-		x_curr=x_next;
-		x_next = aux;
-	}
-
 
 public:
 
 	StateSpaceSystem()
 	{
-		for(int i = 0; i < NUM_OUTPUTS; ++i){
-			yNorm[i] = 1;
-			yOffset[i] = 0;
-		}
-		for(int i = 0; i < NUM_INPUTS; ++i){
-			uNorm[i] = 1;
-			uOffset[i] = 0;
-		}
 		x_curr = 0;
 		x_next = 1;
 	}
@@ -240,133 +426,73 @@ public:
 	}
 
 
-	T* nextOutputs(T _currInputs[NUM_INPUTS])
+	T* nextOutputs(T currInput[NUM_INPUTS][1])
 	{
-		//normalize/offset
-		T currInput[NUM_INPUTS][1];//matrix format
-		for(int i = 0; i < NUM_INPUTS; ++i)	currInput[i][0] = (_currInputs[i]-uOffset[i])/uNorm[i];
+		//compute next state
+		matrix_mult<ORDER,ORDER,1>(X[x_next],A,X[x_curr]);
+		matrix_mult_acc<ORDER,NUM_INPUTS,1>(X[x_next],B,currInput);
 
-		//compute next
-		compute(currInput,nextOutput);
+		//compute inputs
+		matrix_mult<NUM_OUTPUTS,ORDER,1>(nextOutput,C,X[x_curr]);
+		matrix_mult_acc<NUM_OUTPUTS,NUM_INPUTS,1>(nextOutput,D,currInput);
 
-		//normalize/offset and return
-		for(int i = 0; i < NUM_OUTPUTS; ++i) nextOutputCorrected[i] = (nextOutput[i][0]*yNorm[i])+yOffset[i];
-		return nextOutputCorrected;
+		int aux = x_curr;
+		x_curr=x_next;
+		x_next = aux;
+
+		return &(nextOutput[0][0]);
 	}
 
-	void offsetY(const T _yOffset[NUM_OUTPUTS]){ for(int i = 0; i < NUM_OUTPUTS; ++i) yOffset[i] = _yOffset[i];}
-	T* offsetY(){ return yOffset;}
-	void normalizeY(T _yNorm[NUM_OUTPUTS]){ for(int i = 0; i < NUM_OUTPUTS; ++i) yNorm[i] = _yNorm[i];}
-	T* normalizeY(){return yNorm;}
-	void offsetU(const T _uOffset[NUM_INPUTS]) { for(int i = 0; i < NUM_INPUTS; ++i) uOffset[i] = _uOffset[i];}
-	T* offsetU(){ return uOffset;}
-	void normalizeU(const T _uNorm[NUM_INPUTS]) { for(int i = 0; i < NUM_INPUTS; ++i) uNorm[i] = _uNorm[i];}
-	T* normalizeU(){return uNorm;}
+	T* nextOutputs(T *currInput){
+		return nextOutputs(*reinterpret_cast<T (*)[NUM_INPUTS][1]>(currInput));
+	}
 
-	T* currState() { return &(X[x_curr][0][0]);}
+	T* outputs() { return &(nextOutput[0][0]);}
 };
 
-template<int NUM_INPUTS, int NUM_OUTPUTS, int SYS_ORDER, typename T=double>
-class MIMOController
-{
+
+};
+
+
+namespace Controllers {
+
+template<typename T, typename ErrorFilter, typename InputFilter>
+class SISO {
 public:
+	//access fields directly to set params
+	Filters::PID<T,1> pid;
+	ErrorFilter errorFilter;
+	InputFilter inputFilter;
 
-	typedef T (*errorFuncType)(T);
-	static T errorFunc_default(T val) { return val;}
-
-	/*template<T abs_val>
-	static T errorFunc_abs(T val)
-	{
-		if(std::fabs(val) <= abs_val) return 0;
-		else return val;
+	T nextInput(T sysOutput){
+		errorFilter.sampleInput(sysOutput);
+		pid.sampleInput(errorFilter.output());
+		inputFilter.sampleInput(pid.output());
+		return inputFilter.output();
 	}
-	template<T byVal>
-	static T errorFunc_scale(T val) { return val*byVal; }
-	template<T base>
-	static T errorFunc_exp(T val)
-	{
-		if(val < 0 ) return std::pow(std::fabs(val),base)*-1;
-		else return std::pow(val,base);
-	}
-	template<T byVal, T base>
-	static T errorFunc_scale_exp(T val) { return errorFunc_exp<base>(errorFunc_scale<byVal>(val)); }*/
+};
 
-
-private:
+template<typename T, int NUM_OUTPUTS, typename ErrorFilter, int NUM_INPUTS, typename InputFilter, int SYS_ORDER>
+class MIMO {
+public:
 
 	static const int ORDER = SYS_ORDER+NUM_OUTPUTS;
 
-	StateSpaceSystem<NUM_OUTPUTS,NUM_INPUTS,ORDER,T> sss;
+	//access fields directly to set params
+	Filters::StateSpaceSystem<T,NUM_OUTPUTS,NUM_INPUTS,ORDER> sss;
+	ErrorFilter errorFilter;
+	InputFilter inputFilter;
 
-	T ref[NUM_OUTPUTS];
-	T prevAvgOutput[NUM_OUTPUTS];
-	T avgWeight[NUM_OUTPUTS];
-	errorFuncType errorFunc[NUM_OUTPUTS];
-	T prevError[NUM_OUTPUTS];
-
-public:
-
-	MIMOController()
-	{
-		for(int i = 0; i < NUM_OUTPUTS; ++i){
-			ref[i] = 0;
-			prevAvgOutput[i] = std::numeric_limits<double>::quiet_NaN();
-			avgWeight[i] = 0;
-			errorFunc[i] = errorFunc_default;
-			prevError[i] = 0;
-		}
+	T* nextInputs(std::initializer_list<T> sysOutputs){
+		errorFilter.sampleInput(sysOutputs);
+		T *aux = sss.nextOutputs(errorFilter.outputs());
+		inputFilter.sampleInput(aux);
+		return inputFilter.outputs();
 	}
 
-	T* referenceOutputs() { return ref;	}
-	void referenceOutputs(T _ref[NUM_OUTPUTS])
-	{
-		for(int i = 0; i < NUM_OUTPUTS; ++i) ref[i] = _ref[i];
-	}
+	T* unfilteredInputs() { return sss.outputs();}
 
-	T* nextInputVal(T _currOutput[NUM_OUTPUTS])
-	{
-		//filter output
-		T currOutputErr[NUM_OUTPUTS];
-		if(std::isnan(prevAvgOutput[0])) for(int i = 0; i < NUM_OUTPUTS; ++i) prevAvgOutput[i] =  _currOutput[i];
-		for(int i = 0; i < NUM_OUTPUTS; ++i)
-			currOutputErr[i] = (avgWeight[i]*prevAvgOutput[i]) + ((1-avgWeight[i])*_currOutput[i]);
-		//save this one to be the next prev output
-		for(int i = 0; i < NUM_OUTPUTS; ++i) prevAvgOutput[i] = currOutputErr[i];
-
-		//get error
-		for(int i = 0; i < NUM_OUTPUTS; ++i){
-			currOutputErr[i] = ref[i] - currOutputErr[i];
-			currOutputErr[i] = (errorFunc[i])(currOutputErr[i]);
-		}
-		//save this one to be the next prev error
-		for(int i = 0; i < NUM_OUTPUTS; ++i) prevError[i] = currOutputErr[i];
-
-		//compute next
-		return sss.nextOutputs(currOutputErr);
-	}
-
-	T* lastError() { return prevError;}
-
-	void offsetInputs(const T inOffset[NUM_INPUTS]) { sss.offsetY(inOffset);}
-
-	void normalizeInputs(const T inNorm[NUM_INPUTS]){ sss.normalizeY(inNorm);}
-
-	void filterOutput(const T c[NUM_OUTPUTS]) { for(int i = 0; i < NUM_OUTPUTS; ++i) avgWeight[i] = c[i];}
-
-	T* lastFilteredOutput() { return prevAvgOutput;}
-
-	void setErrorFunc(const errorFuncType _errorFunc[NUM_OUTPUTS]){
-		for(int i = 0; i < NUM_OUTPUTS; ++i) errorFunc[i] = _errorFunc[i];
-	}
-
-	void setMatrices(const T _A[ORDER][ORDER], const T _B[ORDER][NUM_OUTPUTS], const T _C[NUM_INPUTS][ORDER], const T _D[NUM_INPUTS][NUM_OUTPUTS])
-	{
-		sss.setMatrices(_A,_B,_C,_D);
-	}
-
-	T* currState() { return sss.currState();}
-
-	void inputSaturation(const T _max[NUM_INPUTS], const T _min[NUM_INPUTS]) { sss.outputSaturation(_max, _min); }
+};
 
 };
 
