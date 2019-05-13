@@ -75,3 +75,28 @@ SensingInterfaceImpl::Impl::senseAgg<SEN_POWER_W,freq_domain_info_t>(const freq_
     arm_throw(SensingException,"This function should never be called");
     return 0;
 }
+
+template <>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+SensingInterfaceImpl::Impl::sense<SEN_NV_GPU_PERFCNT, NullResource>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const NullResource *rsc, int wid)
+{
+        arm_throw(SensingException,"sense<SEN_NV_GPU_PERFCNT, NullResource>: This function should never be called");
+	    return 0;
+}
+
+
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+SensingInterfaceImpl::Impl::senseAgg<SEN_NV_GPU_PERFCNT, NullResource>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const NullResource *rsc, int wid)
+{
+        arm_throw(SensingException,"senseAgg<SEN_NV_GPU_PERFCNT, NullResource>: This function should never be called");
+	    return 0;
+}
+
+template <>
+int
+SensingInterfaceImpl::Impl::enableSensor<SEN_NV_GPU_PERFCNT, NullResource>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const NullResource *rsc, bool enable)
+{
+        arm_throw(SensingException,"enableSensor<SEN_NV_GPU_PERFCNT, NullResource>: This function should never be called");
+	    return 0;
+}

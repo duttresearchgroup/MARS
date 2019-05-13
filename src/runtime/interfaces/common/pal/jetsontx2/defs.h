@@ -26,7 +26,7 @@
 #define LINUX_HAS_CPUFREQ
 
 #define MAX_NR_CPUS 6
-#define MAX_CREATED_TASKS 64
+#define MAX_CREATED_TASKS 512
 
 // Maximum number of perf counters that can be sampled concurrently
 #define MAX_PERFCNTS 6

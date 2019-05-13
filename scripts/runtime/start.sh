@@ -58,7 +58,13 @@ sudo chmod a+rx /sys/kernel/debug
 # inserts kernel sensing module
 insmod $RTS_MODULE_PATH
 
-_DAEMON_CMD="$RTS_DAEMON_BIN_DIR/$RTS_DAEMON_BIN outdir=$RTS_DAEMON_OUTDIR mode=$RTS_DAEMON_BIN $RTS_PARAMS"
+if [ "$RTS_DAEMON_DEBUG" -eq "1" ]; then
+    # To load MARS_dev/scripts/.gdbinit, add the below line to your ~/.gdbinit
+    # add-auto-load-safe-path /home/user/my-project/.gdbinit
+    _DAEMON_CMD="gdb --args $RTS_DAEMON_BIN_DIR/$RTS_DAEMON_BIN outdir=$RTS_DAEMON_OUTDIR mode=$RTS_DAEMON_BIN $RTS_PARAMS" 
+else
+    _DAEMON_CMD="$RTS_DAEMON_BIN_DIR/$RTS_DAEMON_BIN outdir=$RTS_DAEMON_OUTDIR mode=$RTS_DAEMON_BIN $RTS_PARAMS" 
+fi
 
 # starts daemon proc and waits until ready
 if [ "$RTS_VALGRIND" -eq "1" ]; then

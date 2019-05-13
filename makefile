@@ -38,6 +38,10 @@ include makefile.buildopts
 #####################################
 #####################################
 
+ifndef HOST
+HOST=$(HOST_DEFAULT)
+endif
+
 ifndef ARCH
 ARCH=$(ARCH_DEFAULT)
 endif
@@ -62,7 +66,15 @@ ifndef KERNEL_SRC
 KERNEL_SRC=$(KERNEL_SRC_DEFAULT_$(ARCH))
 endif
 
+ifndef TARGET_CUDA_HOME
+TARGET_CUDA_HOME=$(TARGET_CUDA_HOME_DEFAULT_$(ARCH))
+endif
 
+ifndef USE_CUDA
+USE_CUDA=$(USE_CUDA_DEFAULT)
+endif
+
+$(info HOST = ${HOST})
 $(info ARCH = ${ARCH})
 $(info PLAT = ${PLAT})
 $(info CROSS_COMPILE_usr = ${CROSS_COMPILE_usr})
@@ -72,6 +84,8 @@ $(info KERNEL_SRC = ${KERNEL_SRC})
 $(info MODULE = ${MODULE})
 $(info UBENCH = ${UBENCH})
 $(info DAEMONS = ${DAEMONS})
+$(info TARGET_CUDA_HOME = ${TARGET_CUDA_HOME})
+$(info USE_CUDA = ${USE_CUDA})
 
 #####################################
 #####################################
@@ -131,8 +145,15 @@ uapi_tests: src/vitamins.mk
 uapi_tests_clean: src/vitamins.mk
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/vitamins.mk clean_uapi_tests
 
-.PHONY: runtime
-runtime: daemons lin_sensing_module
+ifeq ($(PLAT)$(USE_CUDA),jetsontx2TRUE)
+runtime: daemons lin_sensing_module external
+else
+runtime: daemons lin_sensing_module 
+endif
+
+.PHONY: send
+send:
+	cd scripts && ls && source ./env.sh && common/remote_synch.sh
 
 .PHONY: clean
 clean:
@@ -142,12 +163,16 @@ clean:
 external_clean:
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) -C . -f src/vitamins.mk external_clean
 
+.PHONY: external
+external:
+	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) TARGET_CUDA_HOME=$(TARGET_CUDA_HOME) -C . -f src/vitamins.mk external
+
 .PHONY: ubench
 ubench:
 	@$(MAKE) ARCH=$(ARCH) PLAT=$(PLAT) CROSS_COMPILE=$(CROSS_COMPILE_usr) EXTRAFLAGS=$(EXTRAFLAGS) -C . -f src/ubenchmarks/makefile $(UBENCH)
 
-.PHONY: veryclean
-veryclean: clean lin_sensing_module_clean exp_module_clean external_clean
+.PHONY: very_clean
+very_clean: clean lin_sensing_module_clean exp_module_clean external_clean
 	rm -rf obj_*
 	rm -rf lib_*
 	rm -rf bin_*

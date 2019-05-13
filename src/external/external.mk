@@ -15,14 +15,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+.PHONY: external
+external: lib_$(ARCH)_$(PLAT)/libhookcuda.so 
+
 .PHONY: external_libs
 external_libs: lib_$(ARCH)_$(PLAT)/libcpulimit.a lib_$(ARCH)_$(PLAT)/libmcpat.a lib_$(ARCH)_$(PLAT)/liblinsched.a
 
 .PHONY: external_clean
-external_clean: ext_cpulimit_clean ext_mcpat_clean ext_linsched_clean
+external_clean: ext_cpulimit_clean ext_mcpat_clean ext_linsched_clean ext_hookcuda_clean
 	rm -f lib_$(ARCH)_$(PLAT)/libcpulimit.a
 	rm -f lib_$(ARCH)_$(PLAT)/liblinsched.a
 	rm -f lib_$(ARCH)_$(PLAT)/libmcpat.a
+	rm -f lib_$(ARCH)_$(PLAT)/libhookcuda.so
 
 ## External with not per arch lib/objs support,
 ## so we always make sure to clean before building
@@ -85,3 +89,23 @@ ext_mcpat_clean:
 	$(MAKE) clean -C src/external/mcpat
 
 	
+## libhookcuda ##
+#SRCS_HOOKCUDA = $(wildcard src/external/hookcuda/*.cc)    
+#OBJS_HOOKCUDA = $(patsubst %.cc,obj_$(ARCH)_$(PLAT)/%.o,$(SRCS_HOOKCUDA))
+#OBJS_DEPS += $(OBJS_HOOKCUDA:%.o=%.d)
+#lib_$(ARCH)_$(PLAT)/libhookcuda.so: $(SRCS_HOOKCUDA) $(OBJS_HOOKCUDA)
+.INTERMEDIATE: src/external/hookcuda/lib/libhookcuda.a
+lib_$(ARCH)_$(PLAT)/libhookcuda.so: src/external/hookcuda/lib/libhookcuda.so
+	mkdir -p lib_$(ARCH)_$(PLAT)
+	#$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C src/external/hookcuda
+	cp src/external/hookcuda/libhookcuda.so $@
+	rm src/external/hookcuda/libhookcuda.so
+
+
+src/external/hookcuda/lib/libhookcuda.so:
+	$(MAKE) clean -C src/external/hookcuda
+	$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C src/external/hookcuda
+
+PHONY: ext_hookcuda_clean
+ext_hookcuda_clean:
+	$(MAKE) clean -C src/external/hookcuda

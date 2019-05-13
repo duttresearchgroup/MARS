@@ -29,6 +29,7 @@
 // Specialization declarations.
 // Needed so we dont care about the order implementations appear
 
+// with tracked_task_data_t
 template<> typename SensingTypeInfo<SEN_PERFCNT>::ValType ReflectiveEngine::predict<SEN_PERFCNT,tracked_task_data_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS>::ValType ReflectiveEngine::predict<SEN_BEATS,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS_TGT>::ValType ReflectiveEngine::predict<SEN_BEATS_TGT,tracked_task_data_t>(typename SensingTypeInfo<SEN_BEATS_TGT>::ParamType p, const tracked_task_data_t *rsc);
@@ -40,6 +41,9 @@ template<> typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType ReflectiveEngine::pre
 template<> typename SensingTypeInfo<SEN_LASTCPU>::ValType ReflectiveEngine::predict<SEN_LASTCPU,tracked_task_data_t>(const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_POWER_W>::ValType ReflectiveEngine::predict<SEN_POWER_W,tracked_task_data_t>(const tracked_task_data_t *rsc);
 template<> typename SensingTypeInfo<SEN_TEMP_C>::ValType ReflectiveEngine::predict<SEN_TEMP_C,tracked_task_data_t>(const tracked_task_data_t *rsc);
+template<> typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,tracked_task_data_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const tracked_task_data_t *rsc);
+
+// with core_info_t
 template<> typename SensingTypeInfo<SEN_PERFCNT>::ValType ReflectiveEngine::predict<SEN_PERFCNT,core_info_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const core_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS>::ValType ReflectiveEngine::predict<SEN_BEATS,core_info_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const core_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType ReflectiveEngine::predict<SEN_TOTALTIME_S,core_info_t>(const core_info_t *rsc);
@@ -50,6 +54,9 @@ template<> typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType ReflectiveEngine::pre
 template<> typename SensingTypeInfo<SEN_LASTCPU>::ValType ReflectiveEngine::predict<SEN_LASTCPU,core_info_t>(const core_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_POWER_W>::ValType ReflectiveEngine::predict<SEN_POWER_W,core_info_t>(const core_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TEMP_C>::ValType ReflectiveEngine::predict<SEN_TEMP_C,core_info_t>(const core_info_t *rsc);
+template<> typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,core_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const core_info_t *rsc);
+
+// with freq_domain_info_t
 template<> typename SensingTypeInfo<SEN_PERFCNT>::ValType ReflectiveEngine::predict<SEN_PERFCNT,freq_domain_info_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const freq_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS>::ValType ReflectiveEngine::predict<SEN_BEATS,freq_domain_info_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const freq_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType ReflectiveEngine::predict<SEN_TOTALTIME_S,freq_domain_info_t>(const freq_domain_info_t *rsc);
@@ -60,6 +67,9 @@ template<> typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType ReflectiveEngine::pre
 template<> typename SensingTypeInfo<SEN_LASTCPU>::ValType ReflectiveEngine::predict<SEN_LASTCPU,freq_domain_info_t>(const freq_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_POWER_W>::ValType ReflectiveEngine::predict<SEN_POWER_W,freq_domain_info_t>(const freq_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TEMP_C>::ValType ReflectiveEngine::predict<SEN_TEMP_C,freq_domain_info_t>(const freq_domain_info_t *rsc);
+template<> typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,freq_domain_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const freq_domain_info_t *rsc);
+
+// with power_domain_info_t
 template<> typename SensingTypeInfo<SEN_PERFCNT>::ValType ReflectiveEngine::predict<SEN_PERFCNT,power_domain_info_t>(typename SensingTypeInfo<SEN_PERFCNT>::ParamType p, const power_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_BEATS>::ValType ReflectiveEngine::predict<SEN_BEATS,power_domain_info_t>(typename SensingTypeInfo<SEN_BEATS>::ParamType p, const power_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TOTALTIME_S>::ValType ReflectiveEngine::predict<SEN_TOTALTIME_S,power_domain_info_t>(const power_domain_info_t *rsc);
@@ -70,6 +80,7 @@ template<> typename SensingTypeInfo<SEN_FREQ_MHZ>::ValType ReflectiveEngine::pre
 template<> typename SensingTypeInfo<SEN_LASTCPU>::ValType ReflectiveEngine::predict<SEN_LASTCPU,power_domain_info_t>(const power_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_POWER_W>::ValType ReflectiveEngine::predict<SEN_POWER_W,power_domain_info_t>(const power_domain_info_t *rsc);
 template<> typename SensingTypeInfo<SEN_TEMP_C>::ValType ReflectiveEngine::predict<SEN_TEMP_C,power_domain_info_t>(const power_domain_info_t *rsc);
+template<> typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,power_domain_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const power_domain_info_t *rsc);
 
 ///////////////////////////////////////////////////////////////////
 
@@ -185,6 +196,12 @@ ReflectiveEngine::predict<SEN_TEMP_C,tracked_task_data_t>(const tracked_task_dat
     arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
 }
 
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,tracked_task_data_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const tracked_task_data_t *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
 
 /////////////////////////////////////////////////
 // For resource type 'core_info_t'
@@ -291,6 +308,12 @@ ReflectiveEngine::predict<SEN_TEMP_C,core_info_t>(const core_info_t *rsc)
     arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
 }
 
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,core_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const core_info_t *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
 
 /////////////////////////////////////////////////
 // For resource type 'freq_domain_info_t'
@@ -385,6 +408,12 @@ ReflectiveEngine::predict<SEN_TEMP_C,freq_domain_info_t>(const freq_domain_info_
     arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
 }
 
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,freq_domain_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const freq_domain_info_t *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
 
 /////////////////////////////////////////////////
 // For resource type 'power_domain_info_t'
@@ -466,6 +495,13 @@ ReflectiveEngine::predict<SEN_TEMP_C,power_domain_info_t>(const power_domain_inf
     arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
 }
 
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,power_domain_info_t>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const power_domain_info_t *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
+
 
 /////////////////////////////////////////////////
 // For resource type 'NullResource'
@@ -493,3 +529,11 @@ ReflectiveEngine::predict<SEN_DUMMY,NullResource>(const NullResource *rsc)
 
     return dummy1+dummy2;
 }
+
+template<>
+typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ValType
+ReflectiveEngine::predict<SEN_NV_GPU_PERFCNT,NullResource>(typename SensingTypeInfo<SEN_NV_GPU_PERFCNT>::ParamType p, const NullResource *rsc)
+{
+    arm_throw(SensingInterfaceException,"%s not implemented",__PRETTY_FUNCTION__);
+}
+
