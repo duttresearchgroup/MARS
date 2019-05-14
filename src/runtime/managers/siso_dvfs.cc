@@ -59,7 +59,7 @@ void SISODVFSPolicy::execute(int wid)
     unsigned int next_freq_closest = freqToMHz(next_freq_mhz);
     pinfo("last freq = %u\tctrl_out = %f (mips = %f, ref = %f)\t"
           "next_freq_mhz = %u\tnext freq closest = %u\n",
-        last_freq, ctrl_out, avg_ips/1000000, _p_ref[_ref_phase]/1000000,
+        last_freq, ctrl_out, avg_ips/1000000, _p_ref[_ref_phase],
         next_freq_mhz, next_freq_closest);
 
     /*******************************************
@@ -119,7 +119,7 @@ void SISODVFSPolicy::parse_refs()
 
     for(int i = 0; i < _ref_phase_cnt; i++){
         //ref is MIPS
-        //divide by #cores is a shortcut where we distribute IPS ref evenly to each core
+        //divide by #cores is a shortcut where we distribute MIPS ref evenly to each core
         _p_ref.push_back(std::stod(refs[i])/info()->core_list_size);
     }
 
