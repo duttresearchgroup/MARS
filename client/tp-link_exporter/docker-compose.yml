@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  hs110:
+    image: sdelrio/hs110-exporter
+    container_name: hs110-exporter
+    restart: unless-stopped
+    environment:
+      - HS110IP=${HS110_IP}
+      - FREQUENCY=1
+      - LISTENPORT=8110
+      - LABEL=location=DRG
+    ports:
+     - 8110:8110
+    
+    networks:
+      monitoring:
+
+networks:
+  monitoring:
+    external:
+      name: monitoring
+
+  default:
+    driver: bridge

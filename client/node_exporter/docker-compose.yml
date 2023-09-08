@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(host|etc)($$|/)'
+      - '--no-collector.nvme'
+      # - '--log.level=debug'
+    pid: host
+    restart: unless-stopped
+    ports:
+      - '9100:9100'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro
+    networks:
+      monitoring:
+
+networks:
+  monitoring:
+    external:
+      name: monitoring
+
+  default:
+    driver: bridge

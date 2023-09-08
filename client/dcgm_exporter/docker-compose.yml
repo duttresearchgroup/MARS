@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+    dcgm_exporter:
+        image: nvidia/dcgm-exporter:latest
+        container_name: dcgm-exporter
+        restart: unless-stopped
+        volumes:
+            - ./data:/etc/dcgm-exporter:ro
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - capabilities:
+                            - gpu
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+        cap_add:
+            - SYS_ADMIN
+        ports:
+            - "9400:9400"
+            
+        networks:
+            monitoring:
+
